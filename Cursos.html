@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+      #formulario input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+  </style>
+</head>
+<body>
+  <div class="d-flex align-items-center mt-3">
+  <div class="bg-indigo rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #6f42c1;">
+    <i class="fas fa-chalkboard-teacher text-white"></i>
+  </div>
+  <div>
+    <h5 class="mb-0" style="color: #6f42c1;">Cursos</h5>
+    <small class="text-muted">Temas, horarios, capacitadores</small>
+  </div>
+</div>
+
+  <div class="container-fluid my-1 px-0">
+  <!-- ✅ Botones y buscador en una sola fila -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+
+  <!-- 🔹 Grupo izquierdo: Botones -->
+  <div class="d-flex align-items-center gap-1">
+    <button onclick="abrirFormulario()" class="btn btn-secondary btn-sm">Nuevo curso</button>
+    <button class="btn btn-warning btn-sm" id="btn3" onclick="window.print()" style="font-size:15px;">
+      <i class="fa-solid fa-print"></i>
+    </button>
+  </div>
+
+  <!-- 🔹 Grupo derecho: Buscador -->
+  <div>
+    <input type="text" id="buscador" class="form-control" placeholder="Buscar..." style="max-width: 250px; height:30px;">
+  </div>
+
+</div>
+
+  <div id="loadingCursosG" class="text-center my-4" style="display: none;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+  <p class="mt-2">Cargando Cursos...</p>
+</div>
+  <div class="table-responsive">
+  <table class="table print-container">
+    <thead><tr id="encabezados"></tr></thead>
+    <tbody id="cuerpo"></tbody>
+  </table>
+</div>
+</div>
+
+<dialog id="modal" class="border-0 rounded-3 shadow p-2" style="width: 90%; max-width: 500px;">
+  <div class="modal-content border-0">
+    <div class="modal-header py-2">
+      <h5 class="modal-title w-100 text-center" id="modal-titulo">Editar curso</h5>
+      <button type="button" class="btn-close" aria-label="Cerrar" onclick="cerrarModal()"></button>
+    </div>
+    <div class="modal-body">
+      <form id="formulario" method="dialog">
+        <!-- Inputs se generan dinámicamente -->
+      </form>
+      <div id="mensaje-error" class="text-danger mt-2" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-guardar1" type="button" onclick="guardarCambios1()" class="btn btn-primary">Guardar</button>
+      <button type="button" onclick="cerrarModal()" class="btn btn-secondary">Cancelar</button>
+    </div>
+  </div>
+</dialog>
+
+ <script>
+    let datosGlobales = [];
+    let headers = [];
+    let listasGlobales = null;
+    let cursosPorTipo = {}; // mapa: tipoPrograma → [cursoNombre, ...]
+
+    cargarDatos();
+
+function abrirFormulario(index = null) {
+  const modal   = document.getElementById("modal");
+  const form    = document.getElementById("formulario");
+  const isNuevo = index === null;
+  document.getElementById("modal-titulo").textContent = isNuevo ? "Nuevo curso" : "Editar curso";
+
+  const valores = isNuevo ? Array(headers.length).fill("") : datosGlobales[index];
+  form.innerHTML = "";
+
+  const opcionesTipoPrograma  = listasGlobales?.tipoPrograma          || [];
+  const opcionesTiposCap      = listasGlobales?.tipoCapacitacionCurso || [];
+  const opcionesGerencias     = listasGlobales?.gerencias             || [];
+  const opcionesAreas         = listasGlobales?.areasCapacitacion     || [];
+  const opcionesResponsables  = listasGlobales?.responsablesCurso     || [];
+  const opcionesCapacitadores = listasGlobales?.capacitadoresCurso    || [];
+
+  // Helpers internos
+  function sel(lista, val) {
+    return lista.map(t => `<option value="${t}" ${val === t ? "selected" : ""}>${t}</option>`).join("");
+  }
+  function toDT(v) {
+    if (!v) return '';
+    const s = String(v);
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}:\d{2}))?/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}T${m[4]||'00:00'}`;
+    const dt = new Date(s);
+    if (!isNaN(dt)) return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}T${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    return '';
+  }
+  function chk(v) { return (v === true || String(v).toUpperCase() === 'TRUE' || String(v).toUpperCase() === 'VERDADERO') ? 'checked' : ''; }
+
+  const certifIdx = headers.findIndex(h => h.toLowerCase().includes('certif'));
+  const hCertif   = certifIdx >= 0 ? headers[certifIdx] : null;
+  const vCertif   = certifIdx >= 0 ? (valores[certifIdx] ?? '') : '';
+
+  let f = '';
+
+  // ── SECCIÓN 1: CONFIGURACIÓN DEL CURSO ─────────────────────────────────
+  f += `<div class="border rounded-3 p-3 mb-3" style="background:#f8f9fa;">
+    <p class="text-muted fw-semibold mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">📋 Configuración del curso</p>`;
+
+  // 1a. Tipo de Programa PRIMERO
+  f += `<div class="mb-3">
+    <label class="form-label fw-semibold">${headers[1]}</label>
+    <select name="${headers[1]}" class="form-select" ${isNuevo ? `onchange="filtrarCursosPorTipo(this.value)"` : ''}>
+      <option value="">Seleccione tipo de programa...</option>
+      ${sel(opcionesTipoPrograma, valores[1] ?? '')}
+    </select>
+  </div>`;
+
+  // 1b. Curso DESPUÉS de Tipo de Programa
+  if (isNuevo) {
+    f += `<div class="mb-3" id="campo-curso-contenedor">
+      <label class="form-label fw-semibold">${headers[0]}</label>
+      <select id="select-curso-display" class="form-select" data-helper="true" onchange="verificarNuevoCurso(this.value)">
+        <option value="">— Seleccione tipo de programa primero —</option>
+      </select>
+      <div id="nuevo-curso-bloque" style="display:none; margin-top:6px;">
+        <input id="nuevo-curso-texto" type="text" class="form-control" data-helper="true"
+               placeholder="Escriba el nombre del nuevo curso..."
+               oninput="document.getElementById('hidden-curso').value=this.value.trim()">
+      </div>
+      <input type="hidden" id="hidden-curso" value="">
+    </div>`;
+  } else {
+    f += `<div class="mb-3">
+      <label class="form-label fw-semibold">${headers[0]}</label>
+      <input name="${headers[0]}" value="${valores[0] ?? ''}" type="text" class="form-control" readonly>
+    </div>`;
+  }
+
+  // 1c. Tipo de Capacitación (grid de checkboxes en dos columnas con drag-and-drop)
+  const valAct = valores[2] ? String(valores[2]).split(',').map(v => v.trim()).filter(Boolean) : [];
+  const mitad  = Math.ceil(opcionesTiposCap.length / 2);
+  const tcLeft  = opcionesTiposCap.slice(0, mitad);
+  const tcRight = opcionesTiposCap.slice(mitad);
+
+  function tcItem(opt) {
+    const chk = valAct.includes(opt) ? 'checked' : '';
+    const esc = opt.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return `<div class="tc-item" draggable="true" data-value="${esc}"
+      style="display:flex;align-items:center;justify-content:space-between;
+             padding:5px 10px;background:#fff;border:1px solid #dee2e6;border-radius:6px;
+             margin-bottom:4px;cursor:default;user-select:none;transition:opacity .15s,box-shadow .15s;">
+      <span style="font-size:13px;">${opt}</span>
+      <input type="checkbox" ${chk} style="margin:0;cursor:pointer;accent-color:#6f42c1;width:16px;height:16px;"
+             onchange="actualizarHiddenTipoCap()">
+    </div>`;
+  }
+
+  f += `<div class="mb-0">
+    <label class="form-label fw-semibold">${headers[2]}</label>
+    <small class="text-muted d-block mb-1">Selecciona uno o más tipos que aplican al curso</small>
+    <input type="hidden" name="${headers[2]}" id="hidden-tipo-cap" value="${valAct.join(',')}">
+    <div style="display:flex;gap:8px;">
+      <div id="tc-col-left" class="tc-col"
+        style="flex:1;border:1px solid #dee2e6;border-radius:8px;
+               padding:6px;background:#f8f9fa;">
+        ${tcLeft.map(tcItem).join('')}
+      </div>
+      <div id="tc-col-right" class="tc-col"
+        style="flex:1;border:1px solid #dee2e6;border-radius:8px;
+               padding:6px;background:#f8f9fa;">
+        ${tcRight.map(tcItem).join('')}
+      </div>
+    </div>
+  </div>`;
+  f += `</div>`;
+
+  // ── SECCIÓN 2: ORGANIZACIÓN ─────────────────────────────────────────────
+  f += `<div class="border rounded-3 p-3 mb-3" style="background:#f8f9fa;">
+    <p class="text-muted fw-semibold mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">🏢 Organización</p>
+    <div class="row g-2 mb-2">
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[3]}</label>
+        <select name="${headers[3]}" class="form-select">
+          <option value="">Gerencia...</option>
+          ${sel(opcionesGerencias, valores[3] ?? '')}
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[4]}</label>
+        <select name="${headers[4]}" class="form-select">
+          <option value="">Área...</option>
+          ${sel(opcionesAreas, valores[4] ?? '')}
+        </select>
+      </div>
+    </div>
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[5]}</label>
+        <select name="${headers[5]}" class="form-select">
+          <option value="">Responsable...</option>
+          ${sel(opcionesResponsables, valores[5] ?? '')}
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[6]}</label>
+        <input name="${headers[6]}" value="${valores[6] ?? ''}" list="datalist-capacitador" class="form-control" placeholder="Capacitador...">
+        <datalist id="datalist-capacitador">${opcionesCapacitadores.map(o => `<option value="${o}">`).join("")}</datalist>
+      </div>
+    </div>
+  </div>`;
+
+  // ── SECCIÓN 3: CURSO PROGRAMADO ──────────────────────────────────────────
+  // Calcular hora fin para edición
+  let valorFin = '';
+  if (!isNuevo && valores[10]) {
+    const s7 = String(valores[7] || '');
+    const mS7 = s7.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}:\d{2}))?/);
+    const startDate = mS7
+      ? new Date(`${mS7[3]}-${mS7[2].padStart(2,'0')}-${mS7[1].padStart(2,'0')}T${mS7[4]||'00:00'}`)
+      : new Date(s7);
+    if (startDate && !isNaN(startDate) && Number(valores[10]) > 0) {
+      const endDate = new Date(startDate.getTime() + Number(valores[10]) * 60000);
+      valorFin = `${endDate.getFullYear()}-${String(endDate.getMonth()+1).padStart(2,'0')}-${String(endDate.getDate()).padStart(2,'0')}T${String(endDate.getHours()).padStart(2,'0')}:${String(endDate.getMinutes()).padStart(2,'0')}`;
+    }
+  }
+  f += `<div class="border rounded-3 p-3 mb-3" style="background:#fff8e1;">
+    <p class="fw-semibold mb-3" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#856404;">📅 Curso programado</p>
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[7]}</label>
+        <input name="${headers[7]}" value="${toDT(valores[7])}" type="datetime-local" class="form-control" data-saveas="dd/MM/yyyy HH:mm">
+        <small class="text-muted">Inicio de la sesión</small>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">${headers[10]} (hora fin)</label>
+        <input name="${headers[10]}" value="${valorFin}" type="datetime-local" class="form-control" data-saveas="minutes-from-prog">
+        <small class="text-muted">Se guarda en minutos</small>
+      </div>
+    </div>
+  </div>`;
+
+ // ── SECCIÓN 4: CICLO Y EVALUACIÓN ─────────────────────────────────────
+const optsVig = [
+  {label:"1 mes",value:1},
+  {label:"2 meses",value:2},
+  {label:"3 meses",value:3},
+  {label:"6 meses",value:6},
+  {label:"1 año",value:12}
+].map(m => `<option value="${m.value}" ${
+  String(valores[8])===String(m.value)||String(valores[8])===String(m.value*30)?"selected":""
+}>${m.label}</option>`).join("");
+
+const optsHoras = [1,2,3,4,5,6,7,8].map(h => {
+  const mins = h * 60;
+  return `<option value="${mins}" ${String(valores[11])===String(mins)?"selected":""}>${h}h</option>`;
+}).join("");
+
+f += `
+<div class="border rounded-3 p-3 mb-3" style="background:#f8f9fa;">
+
+  <!-- Encabezado de sección -->
+  <p class="text-muted fw-semibold mb-3" 
+     style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">
+    🔄 Ciclo y evaluación
+  </p>
+
+  <!-- Fila principal: 3 campos numéricos/select -->
+  <div class="row g-2 mb-3">
+
+    <!-- Vigencia -->
+    <div class="col-4">
+      <label class="form-label fw-semibold mb-1" style="font-size:11px;color:#555;">
+        ${headers[8]}
+      </label>
+      <select name="${headers[8]}" class="form-select form-select-sm">
+        <option value="">¿Cada cuánto?</option>
+        ${optsVig}
+      </select>
+    </div>
+
+    <!-- Horas lectivas -->
+    <div class="col-4">
+      <label class="form-label fw-semibold mb-1" style="font-size:11px;color:#555;">
+        ${headers[11]}
+      </label>
+      <select name="${headers[11]}" class="form-select form-select-sm">
+        <option value="">Horas...</option>
+        ${optsHoras}
+      </select>
+    </div>
+
+    <!-- Puntaje mínimo -->
+    <div class="col-4">
+      <label class="form-label fw-semibold mb-1" style="font-size:11px;color:#555;">
+        ${headers[12]}
+      </label>
+      <div class="input-group input-group-sm">
+        <input name="${headers[12]}" 
+               value="${valores[12] ?? ''}" 
+               type="number" min="0" max="100" 
+               class="form-control form-control-sm" 
+               placeholder="0–100">
+        <span class="input-group-text" style="font-size:11px;">/ 100</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Fila de switches: Recurrente + Certificación -->
+  <div class="d-flex gap-3 pt-2" 
+       style="border-top:1px solid #dee2e6;">
+
+    <!-- Switch Recurrente -->
+    <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 flex-fill"
+         style="background:#fff;border:1px solid #dee2e6;">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" 
+               id="chk-rec" name="${headers[9]}" 
+               ${chk(valores[9])} role="switch"
+               style="width:2.2em;height:1.2em;cursor:pointer;">
+      </div>
+      <div>
+        <div class="fw-semibold" style="font-size:12px;line-height:1.2;">
+          ${headers[9]}
+        </div>
+        <div class="text-muted" style="font-size:10px;">
+          Se repite periódicamente
+        </div>
+      </div>
+    </div>
+
+    <!-- Switch Certificación (solo si existe la columna) -->
+    ${hCertif ? `
+    <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3 flex-fill"
+         style="background:#fff;border:1px solid #dee2e6;">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" 
+               id="chk-certif" name="${hCertif}" 
+               ${chk(vCertif)} role="switch"
+               style="width:2.2em;height:1.2em;cursor:pointer;">
+      </div>
+      <div>
+        <div class="fw-semibold" style="font-size:12px;line-height:1.2;">
+          ${hCertif}
+        </div>
+        <div class="text-muted" style="font-size:10px;">
+          Emite certificado al aprobar
+        </div>
+      </div>
+    </div>
+    ` : ''}
+      </div>
+    </div>
+  </div>`;
+
+  // ── Campos adicionales (Imagen, Link, etc.) ────────────────────────────
+  headers.forEach((h, i) => {
+    if (i <= 12 || i === certifIdx) return; // ya renderizados
+    f += `<div class="mb-3">
+      <label class="form-label fw-semibold">${h}</label>
+      <input name="${h}" value="${valores[i] ?? ''}" type="text" class="form-control">
+    </div>`;
+  });
+
+  form.innerHTML = f;
+  form.dataset.index = index;
+  modal.showModal();
+  setupTipoCapDragDrop();
+}
+
+
+// ── Tipo de Capacitación: actualiza el input hidden con los valores marcados ──
+function actualizarHiddenTipoCap() {
+  var hidden = document.getElementById('hidden-tipo-cap');
+  if (!hidden) return;
+  var checked = [];
+  document.querySelectorAll('.tc-item').forEach(function(item) {
+    var cb = item.querySelector('input[type="checkbox"]');
+    if (cb && cb.checked) checked.push(item.dataset.value);
+  });
+  hidden.value = checked.join(',');
+}
+
+// ── Tipo de Capacitación: drag-and-drop entre y dentro de las dos columnas ──
+function setupTipoCapDragDrop() {
+  var dragging = null;
+
+  function setupItem(item) {
+    item.addEventListener('dragstart', function(e) {
+      dragging = item;
+      setTimeout(function() { item.style.opacity = '0.4'; }, 0);
+      item.style.boxShadow = '0 0 0 2px #6f42c1';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', function() {
+      item.style.opacity = '';
+      item.style.boxShadow = '';
+      dragging = null;
+      document.querySelectorAll('.tc-col').forEach(function(col) {
+        col.style.background = '#f8f9fa';
+      });
+      actualizarHiddenTipoCap();
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!dragging || dragging === item) return;
+      var rect = item.getBoundingClientRect();
+      var after = e.clientY > rect.top + rect.height / 2;
+      item.parentNode.insertBefore(dragging, after ? item.nextSibling : item);
+    });
+  }
+
+  document.querySelectorAll('.tc-item').forEach(setupItem);
+
+  document.querySelectorAll('.tc-col').forEach(function(col) {
+    col.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      col.style.background = '#e8f0fe';
+      e.dataTransfer.dropEffect = 'move';
+    });
+    col.addEventListener('dragleave', function() {
+      col.style.background = '#f8f9fa';
+    });
+    col.addEventListener('drop', function(e) {
+      e.preventDefault();
+      col.style.background = '#f8f9fa';
+      if (dragging && !col.contains(dragging)) {
+        col.appendChild(dragging);
+      }
+    });
+  });
+}
+
+    function cerrarModal() {
+      document.getElementById("modal").close();
+    }
+
+// Filtra el select de cursos según el tipo de programa elegido
+function filtrarCursosPorTipo(tipo) {
+  const sel = document.getElementById('select-curso-display');
+  const hidden = document.getElementById('hidden-curso');
+  const bloque = document.getElementById('nuevo-curso-bloque');
+  if (!sel) return;
+  const cursos = cursosPorTipo[tipo] || [];
+  sel.innerHTML =
+    `<option value="">— Seleccione curso —</option>` +
+    cursos.map(c => `<option value="${c}">${c}</option>`).join('') +
+    `<option value="__NUEVO__">+ Crear nuevo curso...</option>`;
+  if (hidden) hidden.value = '';
+  if (bloque) bloque.style.display = 'none';
+}
+
+// Maneja la opción "Crear nuevo curso"
+function verificarNuevoCurso(val) {
+  const bloque = document.getElementById('nuevo-curso-bloque');
+  const hidden = document.getElementById('hidden-curso');
+  if (val === '__NUEVO__') {
+    if (bloque) bloque.style.display = 'block';
+    if (hidden) hidden.value = document.getElementById('nuevo-curso-texto')?.value.trim() || '';
+  } else {
+    if (bloque) bloque.style.display = 'none';
+    if (hidden) hidden.value = val;
+  }
+}
+
+// Convierte el valor de un elemento del formulario al formato correcto para la hoja
+function getElValue(el) {
+  if (el.type === 'checkbox') return el.checked;
+  // Multi-select → CSV
+  if (el.multiple) return Array.from(el.selectedOptions).map(o => o.value).join(',');
+  const val = el.value.trim();
+  // Programación datetime-local → DD/MM/YYYY HH:mm
+  if (el.dataset.saveas === 'dd/MM/yyyy HH:mm' && val) {
+    const m = val.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]} ${m[4]}`;
+  }
+  // Duración datetime-local (hora fin) → minutos desde Programación
+  if (el.dataset.saveas === 'minutes-from-prog' && val) {
+    const form = el.closest('form') || document.getElementById('formulario');
+    const progEl = form ? form.querySelector('[data-saveas="dd/MM/yyyy HH:mm"]') : null;
+    if (progEl && progEl.value) {
+      const start = new Date(progEl.value);
+      const end   = new Date(val);
+      if (!isNaN(start) && !isNaN(end) && end > start) {
+        return Math.round((end - start) / 60000);
+      }
+    }
+    return '';
+  }
+  return val;
+}
+
+function elVacio(el) {
+  if (el.type === 'checkbox' || el.type === 'hidden') return false;
+  if (el.multiple) return el.selectedOptions.length === 0;
+  return !el.value.trim();
+}
+
+function guardarCambios1() {
+  const btnGuardar  = document.getElementById("btn-guardar1");
+  const form        = document.getElementById("formulario");
+  const mensajeError = document.getElementById("mensaje-error");
+  const index  = form.dataset.index;
+  const isNuevo = !index || index === "null";
+
+  btnGuardar.textContent = "Guardando...";
+  btnGuardar.disabled = true;
+
+  // Busca un elemento del formulario por su atributo name (independiente del orden visual)
+  function elByName(h) {
+    return form.querySelector('[name="' + h.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]');
+  }
+
+  let data;
+
+  if (isNuevo) {
+    // ─── NUEVO CURSO ──────────────────────────────────────────────────────
+    const cursoValor = (form.querySelector('#hidden-curso')?.value || '').trim();
+    if (!cursoValor) {
+      mensajeError.textContent = "Debe seleccionar o escribir el nombre del curso.";
+      mensajeError.style.display = "block";
+      btnGuardar.textContent = "Guardar"; btnGuardar.disabled = false;
+      return;
+    }
+    // Recoger columnas 1..N en el orden exacto de headers (no en DOM-order)
+    let valid = true;
+    const vals = [];
+    for (let i = 1; i < headers.length; i++) {
+      const el = elByName(headers[i]);
+      if (!el) { vals.push(''); continue; }
+      if (elVacio(el)) { valid = false; break; }
+      vals.push(getElValue(el));
+    }
+    if (!valid) {
+      mensajeError.textContent = "Todos los campos son obligatorios.";
+      mensajeError.style.display = "block";
+      btnGuardar.textContent = "Guardar"; btnGuardar.disabled = false;
+      return;
+    }
+    mensajeError.style.display = "none";
+    data = [cursoValor, ...vals];
+  } else {
+    // ─── EDICIÓN ──────────────────────────────────────────────────────────
+    const elementos = Array.from(form.querySelectorAll("input, select, textarea"))
+      .filter(el => !el.dataset.helper);
+    if (elementos.some(el => elVacio(el))) {
+      mensajeError.textContent = "Todos los campos son obligatorios.";
+      mensajeError.style.display = "block";
+      btnGuardar.textContent = "Guardar"; btnGuardar.disabled = false;
+      return;
+    }
+    mensajeError.style.display = "none";
+    // Recoger en el orden exacto de headers (no en DOM-order)
+    data = headers.map(h => {
+      const el = elByName(h);
+      return el ? getElValue(el) : '';
+    });
+  }
+
+  const refrescarCursos = () => {
+    const dniUsuario = JSON.parse(localStorage.getItem('userName')).usuario;
+    // Limpiar cache para forzar datos frescos tras guardar
+    localStorage.removeItem(`datosDNI_${dniUsuario}`);
+    loadingStartG();
+    google.script.run
+      .withSuccessHandler(mostrarResultados)
+      .withFailureHandler(function(err) {
+        loadingEndG();
+        console.error('refrescarCursos error:', err);
+      })
+      .obtenerDatosPorDNI(dniUsuario);
+  };
+
+  const callbackAgregar = () => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro agregado correctamente',
+      timer: 1500,
+      showConfirmButton: false,
+    });
+    cerrarModal();
+    cargarDatos();
+    refrescarCursos();
+    google.script.run.withSuccessHandler(construirTabla).obtenerMatrizPermisos();
+    btnGuardar.textContent = "Guardar";
+    btnGuardar.disabled = false;
+  };
+
+  const callbackActualizar = () => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro actualizado correctamente',
+      timer: 1500,
+      showConfirmButton: false,
+    });
+    cerrarModal();
+    cargarDatos();
+    refrescarCursos();
+    btnGuardar.textContent = "Guardar";
+    btnGuardar.disabled = false;
+  };
+
+  if (isNuevo) {
+    google.script.run.withSuccessHandler(callbackAgregar).agregarRegistro(data);
+  } else {
+    google.script.run.withSuccessHandler(callbackActualizar).actualizarRegistro(data);
+  }
+}
+
+
+
+function cargarDatos() {
+  document.getElementById("loadingCursosG").style.display = "block";
+
+  // Cargar listas y datos en paralelo
+  google.script.run.withSuccessHandler(function(listas) {
+    listasGlobales = listas;
+  }).getTodasLasListas();
+
+  google.script.run.withSuccessHandler(function(res) {
+    if (!res?.headers || !res?.filas) return console.error("Datos incompletos:", res);
+
+    headers = res.headers;
+    datosGlobales = res.filas;
+
+    // Construir mapa tipo → cursos para el filtro dinámico del formulario
+    cursosPorTipo = {};
+    datosGlobales.forEach(fila => {
+      const tipo = fila[1]; // índice 1 = Tipo de Programa
+      const curso = fila[0];
+      if (tipo && curso) {
+        if (!cursosPorTipo[tipo]) cursosPorTipo[tipo] = [];
+        cursosPorTipo[tipo].push(curso);
+      }
+    });
+
+    const thead = document.getElementById("encabezados");
+    thead.innerHTML = headers.map(t => `<th>${t}</th>`).join("") + "<th>Acción</th>";
+
+    mostrarFilas(datosGlobales);
+    document.getElementById("loadingCursosG").style.display = "none";
+  }).obtenerMatrizInvertida();
+}
+
+
+function eliminarRegistro(index) {
+  const curso = datosGlobales[index][0]; // Valor único
+
+  if (!curso) return alert("Registro inválido.");
+
+  Swal.fire({
+    title: 'Alerta',
+    text: `¿Estás seguro de eliminar el registro del curso: "${curso}"?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // ✅ Todo esto se ejecuta SOLO cuando el backend haya eliminado el registro
+      google.script.run.withSuccessHandler(() => {
+        Swal.fire('Eliminado!', 'El curso ha sido eliminado.', 'success');
+        cargarDatos();
+        google.script.run.withSuccessHandler(construirTabla).obtenerMatrizPermisos();
+      }).eliminarRegistroPorCurso(curso);
+    }
+  });
+}
+
+
+function mostrarFilas(data) {
+  const tbody = document.getElementById("cuerpo");
+  tbody.innerHTML = "";
+
+  data.forEach((fila, i) => {
+    const tr = document.createElement("tr");
+
+fila.forEach((celda, colIndex) => {
+  const td = document.createElement("td");
+
+  if (colIndex === 13 && typeof celda === "string" && celda.startsWith("http")) {
+    // 📸 Imagen — fila[13] = row 14 de Matriz
+    const img = document.createElement("img");
+    img.src = celda;
+    img.alt = "Imagen";
+    img.style.maxWidth = "100px";
+    img.style.maxHeight = "60px";
+    td.appendChild(img);
+
+  } else if (colIndex === 14 && typeof celda === "string" && celda.startsWith("http")) {
+    // 📂 Link — fila[14] = row 15 de Matriz
+    const btnLink = document.createElement("button");
+    btnLink.innerHTML = '<i class="fa-solid fa-folder"></i>';
+    btnLink.classList.add("btn", "btn-sm", "btn-secondary");
+    btnLink.onclick = () => window.open(celda, "_blank");
+    td.appendChild(btnLink);
+
+  } else if (
+    typeof celda === "boolean" ||
+    celda === "TRUE" ||
+    celda === "FALSE" ||
+    celda === "true" ||
+    celda === "false" ||
+    celda === "VERDADERO" ||
+    celda === "FALSO"
+  ) {
+    // ✅ Booleano (última columna: Certificación)
+    const esVerdadero = celda === true || celda === "TRUE" || celda === "true" || celda === "VERDADERO";
+    td.textContent = esVerdadero ? "Sí" : "No";
+    td.style.color = esVerdadero ? "green" : "red";
+    td.style.fontWeight = "bold";
+
+  } else {
+    // Texto normal
+    td.textContent = celda;
+  }
+
+  tr.appendChild(td);
+});
+
+
+    const btnTd = document.createElement("td");
+
+    const btnEditar = document.createElement("button");
+    btnEditar.innerHTML = '<i class="fa-solid fa-pen"></i>';
+    btnEditar.classList.add("btn", "btn-sm", "btn-info");
+    btnEditar.onclick = () => abrirFormulario(i);
+    btnTd.appendChild(btnEditar);
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    btnEliminar.classList.add("btn", "btn-sm", "btn-danger");
+    btnEliminar.onclick = () => eliminarRegistro(i);
+    btnTd.appendChild(btnEliminar);
+
+    const btnCrearReg = document.createElement("button");
+    btnCrearReg.innerHTML = '<i class="fa-solid fa-clipboard-list"></i>';
+    btnCrearReg.classList.add("btn", "btn-sm", "btn-success", "ms-1");
+    btnCrearReg.title = "Crear Registro de Asistencia";
+    btnCrearReg.onclick = () => crearRegistroParaCurso(i);
+    btnTd.appendChild(btnCrearReg);
+
+    tr.appendChild(btnTd);
+    tbody.appendChild(tr);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const buscador = document.getElementById("buscador");
+
+  buscador.addEventListener("input", function () {
+    const texto = this.value.toLowerCase();
+
+    const filtrados = datosGlobales.filter(fila =>
+      fila.some(celda => String(celda).toLowerCase().includes(texto))
+    );
+
+    mostrarFilas(filtrados);
+  });
+});
+
+function crearRegistroParaCurso(index) {
+  const fila = datosGlobales[index];
+  if (!fila) return;
+  const curso      = String(fila[0]  || "").trim();
+  const area       = String(fila[4]  || "").trim();
+  const capacitador = String(fila[6] || "").trim();
+  const puntajeMin = String(fila[12] || "0").trim();
+
+  localStorage.setItem('prefilledRegistroCurso', JSON.stringify({ curso, area, capacitador, puntajeMin }));
+
+  const tab = document.getElementById('v-pills-registros-tab');
+  if (tab) {
+    tab.click();
+  } else {
+    Swal.fire('Error', 'No se encontró el módulo de Registros.', 'error');
+  }
+}
+
+  </script>
+</body>
+</html>

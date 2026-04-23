@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html><head>
+ <base target="_top">
+<style>
+   /* ✅ ESTILOS ORIGINALES OPTIMIZADOS */
+    .tiktok-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #000;
+      color: white;
+      aspect-ratio: 9/16;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      /* ✅ Optimizaciones de rendimiento */
+      transform: translateZ(0); /* GPU acceleration */
+      backface-visibility: hidden;
+      will-change: transform;
+      contain: layout style paint;
+    }
+
+    .tiktok-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      /* ✅ Optimizaciones para imágenes */
+      image-rendering: optimizeQuality;
+      transition: transform 0.3s ease;
+    }
+
+    /* ✅ Efecto hover mejorado */
+    .tiktok-card:hover img {
+      transform: scale(1.02);
+    }
+
+
+
+    .overlay-buttons button:hover {
+      background-color: #f0f0f0;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .overlay-buttons button:active {
+      transform: scale(0.95);
+    }
+
+    .overlay-buttons button i {
+      font-size: 18px;
+      color: #000;
+    }
+
+    .tiktok-text {
+      position: relative;
+      z-index: 2;
+      padding: 8px 10px;
+      background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+      font-size: 12px;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+      line-height: 1.4; /* ✅ Mejor legibilidad */
+    }
+
+
+    .tiktok-text::-webkit-scrollbar {
+      display: none;
+    }
+
+    .estado-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: bold;
+      z-index: 3;
+      color: #fff;
+      background-color: rgba(220, 53, 69, 0.9);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      /* ✅ Animación sutil */
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+
+    .badge-potencial {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 12px;
+      margin-left: 4px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      /* ✅ Transición suave */
+      transition: transform 0.2s ease;
+    }
+
+    .badge-potencial:hover {
+      transform: scale(1.05);
+    }
+
+    .badge-potencial.alto {
+      background-color: #dc3545;
+      box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+    }
+
+    .badge-potencial.medio {
+      background-color: #fd7e14;
+      box-shadow: 0 0 8px rgba(253, 126, 20, 0.4);
+    }
+
+    .badge-potencial.bajo {
+      background-color: #28a745;
+      box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+    }
+
+    
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.avatar-circle-only {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo neutro oscuro */
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid #dee2e6; /* ✅ borde blanco plomo */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.avatar-circle-only:hover {
+  transform: scale(1.05);
+}
+
+.nombre-completo {
+  position: absolute;
+  left: -12px;
+  top: 0;
+  transform: translateX(-100%);
+  color: white; /* ✅ blanco visible en fondo claro */
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.6); /* ✅ sombra más fuerte */
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.hidden-nombre {
+  display: none;
+}
+
+    /* ✅ NUEVAS OPTIMIZACIONES Y MEJORAS */
+    
+    /* Skeleton loading para cards */
+    .skeleton-card {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 12px;
+      aspect-ratio: 9/16;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Optimizaciones para performance */
+    #tabla-registro {
+      contain: layout style paint;
+    }
+
+    .card-container {
+      transform: translateZ(0);
+    }
+
+    /* Estados de loading */
+    .loading-overlay {
+      backdrop-filter: blur(2px);
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    /* Transiciones para botones */
+    .btn-transition {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-transition:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-transition:active {
+      transform: translateY(0);
+    }
+
+    /* Mejorar contraste para accesibilidad */
+    .btn:focus {
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+      outline: none;
+    }
+
+    /* Responsive improvements */
+    /* @media (max-width: 576px) {
+      .tiktok-card {
+        aspect-ratio: 3/4; /* Menos alto en móviles 
+      }*/ 
+
+      @media (max-width: 576px) {
+  .tiktok-card {
+    height: 95vh;
+    width: 100vw;
+    max-width: 100%;
+    max-height: 100vh;
+    aspect-ratio: auto; /* ❌ Elimina el aspect-ratio fijo */
+    border-radius: 0; /* Opcional, para ocupar toda la pantalla */
+  }
+}
+      
+    .overlay-buttons {
+      position: absolute;
+      right: 10px;
+      bottom: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+    }
+
+     
+    .overlay-buttons button {
+      background-color: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      /* ✅ Transiciones optimizadas */
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    /* Mejoras visuales adicionales */
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Indicador de progreso */
+    .progress-indicator {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    /* Scroll suave */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Nombre completo en cards de inspección */
+    .nombre-completo.show {
+      display: block;
+    }
+</style>
+
+  <body>
+
+<div class="d-flex align-items-center mt-3">
+  <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+    <i class="fas fa-exclamation-triangle text-white"></i>
+  </div>
+  <div>
+    <h5 class="mb-0 text-success">Reporte de desvíos</h5>
+    <small class="text-muted">Actos, Condiciones, NC, Incidentes</small>
+  </div>
+</div>
+
+  <!-- CARDS -->
+  <div class="container-fluid my-1 px-0" id="page1Desvios">
+<!-- ✅ Botones superiores alineados: 2 a la izquierda, 1 a la derecha -->
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3" role="toolbar" aria-label="Acciones principales">
+
+  <!-- 🔹 Grupo izquierdo: Desvíos + Inspecciones -->
+  <div class="d-flex align-items-center gap-1">
+    <!-- Botón Reportar Desvío -->
+    <button type="button" 
+            class="btn btn-dark position-relative shadow-sm btn-sm rounded-pill btn-transition" 
+            data-bs-toggle="modal" 
+            data-bs-target="#myModalDesvios" 
+            onclick="clearFormDesvios()"
+            aria-label="Reportar nuevo desvío">
+      <i class="fa-solid fa-user-shield" aria-hidden="true"></i> Reportar Desvío
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            aria-label="Estadísticas: pendientes sobre total">
+        <i class="fa fa-bell" aria-hidden="true"></i> 
+        <span id="total2" aria-live="polite">0</span>/<span id="total1" aria-live="polite">0</span>
+      </span>
+    </button>
+
+    <!-- Botón Inspecciones -->
+    <button type="button" 
+            class="btn btn-secondary shadow-sm btn-sm rounded-pill btn-transition"
+            data-bs-toggle="modal" 
+            data-bs-target="#exampleModalInspeccioes"
+            aria-label="Ver inspecciones">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Inspecciones
+    </button>
+  </div>
+
+</div>
+
+<!-- Filtro por mes — Desvíos -->
+<style>
+  .chips-mes{ display:flex; flex-wrap:wrap; gap:5px; overflow-x:auto; }
+  .chip-mes{ padding:.15rem .65rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:.78rem; white-space:nowrap; transition:background .15s,color .15s,border-color .15s; }
+  .chip-mes:hover{ background:#f1f5f9; }
+  .chip-mes.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
+</style>
+<div class="d-flex align-items-center gap-2 mb-2 mt-1 flex-wrap" style="font-size:12px">
+  <span class="text-muted fw-bold" style="white-space:nowrap"><i class="fa fa-calendar-alt me-1"></i>Mes:</span>
+  <div id="chipMesesDesvios" class="chips-mes">
+    <span class="chip-mes" data-mes="Todos">Todos</span>
+    <span class="chip-mes" data-mes="1">Ene</span>
+    <span class="chip-mes" data-mes="2">Feb</span>
+    <span class="chip-mes" data-mes="3">Mar</span>
+    <span class="chip-mes" data-mes="4">Abr</span>
+    <span class="chip-mes" data-mes="5">May</span>
+    <span class="chip-mes" data-mes="6">Jun</span>
+    <span class="chip-mes" data-mes="7">Jul</span>
+    <span class="chip-mes" data-mes="8">Ago</span>
+    <span class="chip-mes" data-mes="9">Sep</span>
+    <span class="chip-mes" data-mes="10">Oct</span>
+    <span class="chip-mes" data-mes="11">Nov</span>
+    <span class="chip-mes" data-mes="12">Dic</span>
+  </div>
+</div>
+
+    <!-- ✅ Spinner mejorado -->
+    <div id="spinnerDesvios" class="text-center my-4 loading-overlay d-none" role="status" aria-live="polite">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 small text-muted">Estamos organizando los datos para ti...</p>
+    </div>
+
+    <!-- ✅ Skeleton loading -->
+    <div id="skeleton-loading" class="d-none">
+      <div class="row g-3 py-2">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Contenedor de tabla optimizado -->
+    <div id="tabla-registro" 
+         role="region" 
+         aria-label="Listado de desvíos"
+         class="card-container"></div>
+
+    <!-- ✅ Mensaje cuando no hay resultados -->
+    <div id="no-results" class="text-center my-5 d-none">
+      <i class="fa-solid fa-search fa-3x text-muted mb-3"></i>
+      <h5 class="text-muted">No se encontraron resultados</h5>
+      <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+    </div>
+
+    <!-- ✅ Botón Cargar más -->
+    <div class="text-center my-3">
+      <button id="cargarMas" 
+              class="btn btn-outline-secondary shadow-sm btn-transition"
+              aria-label="Cargar más desvíos">
+        <i class="fa-solid fa-arrow-down me-1" aria-hidden="true"></i> Ver más
+      </button>
+    </div>
+
+    <!-- ✅ Indicador de progreso -->
+    <div id="progress-indicator" class="text-center progress-indicator d-none">
+      Mostrando <span id="items-shown">0</span> de <span id="items-total">0</span> elementos
+    </div>
+  </div>
+
+
+<!-- MODAL DESVIOS -->
+
+<div class="modal fade" id="myModalDesvios" tabindex="-1" aria-labelledby="myModalDesviosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered print-container">
+    <div class="modal-content shadow-lg rounded-3">
+
+      <!-- Marca de agua -->
+      <div class="watermark"></div>
+
+      <!-- Modal Header -->
+      <div class="modal-header bg-dark py-2">
+        <h5 class="modal-title mt-0 mb-0 w-100 text-center text-white" id="myModalDesviosLabel">Reporte de Actos y Condiciones</h5>
+        <button type="button" class="btn-close" style="filter: invert(1);" data-bs-dismiss="modal" aria-label="Cerrar" onclick="clearFormDesvios();"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body bg-light">
+        <form id="myFormDesvios" class="bg-white p-2 rounded shadow-sm" onsubmit="handleFormSubmitDesvios(this)">
+          
+          <!-- Mensajes -->
+          <div id="messageDesvios"></div>
+          <input type="hidden" id="RecId" name="RecId">
+          <div id="message1Desvios" class="text-danger fw-bold text-center mb-1"></div>
+
+          <div class="row">
+            <!-- Reportante -->
+            <div class="col-md-6">
+              <label class="form-label">Reportante (ID)</label>
+              <input type="text" class="form-control" id="nameDesvios" name="nameDesvios" readonly>
+              <input type="text" class="form-control-plaintext text-primary small" id="nombreDesvios" name="nombreDesvios" readonly>
+            </div>
+
+            <!-- Empresa -->
+            <div class="col-md-6">
+              <label class="form-label">Empresa</label>
+              <select class="form-select" id="num" name="num" required>
+                <option value="">--Empresa del reportado--</option>
+              </select>
+            </div>
+
+            <!-- Lugar -->
+            <div class="col-md-6">
+              <label class="form-label">Lugar</label>
+              <select class="form-select" id="classroom" name="classroom" required>
+                <option value="">--Elegir lugar--</option>
+              </select>
+            </div>
+
+            <!-- Gestión -->
+            <div class="col-md-6">
+              <label class="form-label">Blanco</label>
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="">--Elegir blanco--</option>
+              </select>
+            </div>
+
+            <!-- Potencial -->
+            <div class="col-md-6">
+              <label class="form-label">Potencial</label>
+              <select class="form-select" id="address" name="address" required>
+                <option value="">--Elegir potencial--</option>
+              </select>
+              <div id="message2Desvio" class="text-danger small"></div>
+            </div>
+
+            <!-- Tipo -->
+            <div class="col-md-6">
+              <label class="form-label">Tipo</label>
+              <input type="text" class="form-control" id="emailDesvios" name="emailDesvios" list="listDesvios" placeholder="Acto / Condición" required autocomplete="off">
+              <datalist id="listDesvios"></datalist>
+            </div>
+
+            <!-- Riesgo crítico -->
+            <div class="col-md-6">
+              <label class="form-label">Riesgo crítico</label>
+              <select class="form-select" id="estado" name="estado" required>
+                <option value="">--Elegir riesgo--</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Clasificación</label>
+              <select class="form-select" id="clasi" name="clasi" required>
+                <option value="">--Elegir clasificación--</option>
+              </select>
+            </div>
+            <!-- Proceso -->
+            <div class="col-md-6">
+              <label class="form-label">Proceso asociado</label>
+              <select class="form-select" id="procesoDesvios" name="procesoDesvios" required>
+                <option value="">--Elegir proceso--</option>
+              </select>
+
+              <!-- <label class="form-label mt-2">Nombre del reportado</label>
+              <input type="text" class="form-control" id="amonestado" name="amonestado" required placeholder="Si no hay, colocar NA"> -->
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nombre del reportado</label>
+              <input type="text" class="form-control" id="amonestado" name="amonestado" list="listTrabajador" required autocomplete="off" placeholder="Si no hay, colocar NA">
+              <datalist id="listTrabajador"></datalist>
+            </div>
+
+            <!-- Imagen Inicial-->
+            <div class="col-md-6">
+              <label class="form-label">Imagen Inicial</label>
+              <input type="file" class="form-control" id="myFile1" name="myFile1" accept="image/*">
+              <input type="hidden" id="data1" name="imgAnterior1">
+              <input type="hidden" id="annotatedData" name="annotatedData">
+              <img id="imgForm1" style="display:none;" alt=""/>
+              <small style="font-size: 10px;">Sube una imagen, dibuja sobre ella y presiona IA para analizar.</small>
+              <!-- ════ CANVAS ANNOTATOR ════ -->
+              <div id="annotator-container" style="display:none; margin-top:6px;">
+                <div id="ann-toolbar" style="background:#1e293b;padding:5px 7px;border-radius:6px 6px 0 0;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+                  <!-- Herramientas -->
+                  <div style="display:flex;gap:2px;">
+                    <button type="button" class="ann-tool" data-tool="brush"  title="Pincel libre"  style="font-size:14px;padding:2px 5px;border:2px solid #fff;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">✏️</button>
+                    <button type="button" class="ann-tool" data-tool="arrow"  title="Flecha"        style="font-size:14px;padding:2px 5px;border:2px solid transparent;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">➡️</button>
+                    <button type="button" class="ann-tool" data-tool="circle" title="Círculo"       style="font-size:14px;padding:2px 5px;border:2px solid transparent;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">⭕</button>
+                    <button type="button" class="ann-tool" data-tool="rect"   title="Rectángulo"    style="font-size:14px;padding:2px 5px;border:2px solid transparent;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">⬜</button>
+                    <button type="button" class="ann-tool" data-tool="text"   title="Texto"         style="font-size:13px;padding:2px 6px;border:2px solid transparent;border-radius:4px;background:#334155;color:#fff;cursor:pointer;font-weight:bold;">T</button>
+                  </div>
+                  <div style="width:1px;height:22px;background:rgba(255,255,255,0.25);"></div>
+                  <!-- Colores -->
+                  <div style="display:flex;gap:3px;align-items:center;">
+                    <button type="button" class="ann-color" data-color="#FFFF00" style="width:18px;height:18px;border-radius:50%;background:#FFFF00;border:2px solid #fff;cursor:pointer;padding:0;"></button>
+                    <button type="button" class="ann-color" data-color="#FF0000" style="width:18px;height:18px;border-radius:50%;background:#FF0000;border:2px solid transparent;cursor:pointer;padding:0;"></button>
+                    <button type="button" class="ann-color" data-color="#0080FF" style="width:18px;height:18px;border-radius:50%;background:#0080FF;border:2px solid transparent;cursor:pointer;padding:0;"></button>
+                    <button type="button" class="ann-color" data-color="#00CC44" style="width:18px;height:18px;border-radius:50%;background:#00CC44;border:2px solid transparent;cursor:pointer;padding:0;"></button>
+                    <button type="button" class="ann-color" data-color="#FF8000" style="width:18px;height:18px;border-radius:50%;background:#FF8000;border:2px solid transparent;cursor:pointer;padding:0;"></button>
+                    <button type="button" class="ann-color" data-color="#FFFFFF" style="width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:2px solid #888;cursor:pointer;padding:0;"></button>
+                  </div>
+                  <div style="width:1px;height:22px;background:rgba(255,255,255,0.25);"></div>
+                  <!-- Grosor -->
+                  <input type="range" id="ann-size" min="1" max="20" value="4" style="width:55px;cursor:pointer;accent-color:#facc15;" title="Grosor de línea">
+                  <div style="width:1px;height:22px;background:rgba(255,255,255,0.25);"></div>
+                  <!-- Undo / Clear -->
+                  <button type="button" id="ann-undo"  title="Deshacer" style="font-size:14px;padding:2px 6px;border:1px solid #475569;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">↩</button>
+                  <button type="button" id="ann-clear" title="Limpiar todo" style="font-size:14px;padding:2px 6px;border:1px solid #475569;border-radius:4px;background:#334155;color:#fff;cursor:pointer;">🗑</button>
+                </div>
+                <div style="position:relative;display:block;line-height:0;border:1px solid #475569;border-top:none;border-radius:0 0 4px 4px;overflow:hidden;">
+                  <canvas id="canvas-base" style="display:block;max-width:100%;"></canvas>
+                  <canvas id="canvas-draw" style="position:absolute;top:0;left:0;touch-action:none;"></canvas>
+                </div>
+              </div>
+            </div>
+            <!-- Imagen Cierre-->
+            <div class="col-md-6">
+              <label class="form-label">Imagen Cierre</label>
+              <input type="file" class="form-control" id="myFile2" name="myFile2">
+              <img id="imgForm2" style="max-width: 200px; display: block;" />
+              <input type="hidden" id="data2" name="imgAnterior2">
+            </div>
+
+           <!-- Clasificación y Reportado -->
+            <!-- Descripción + IA -->
+            <div class="col-md-12">
+              <label class="form-label">Descripción</label>
+              <div class="input-group">
+                <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+                <button class="btn btn-outline-dark" type="button" id="generarDescripcion">IA</button>
+              </div>
+            </div>
+
+            
+            <!-- Medidas correctivas -->
+            <div class="col-md-12">
+              <label class="form-label">Medidas correctivas inmediatas</label>
+              <div class="input-group">
+                <textarea class="form-control" id="acciones" name="acciones" required></textarea>
+                <button class="btn btn-outline-dark" type="button" id="generarAcciones">IA</button>
+              </div>
+            </div>
+
+            <!-- Plan de acción -->
+            <div class="col-md-12">
+              <label class="form-label">Plan de acción</label>
+              <div class="input-group">
+                <textarea class="form-control" id="plan" name="plan" required></textarea>
+                <button class="btn btn-outline-dark" type="button" id="generarPlan">IA</button>
+              </div>
+            </div>
+          
+            <!-- Responsable y Fecha -->
+            <div class="col-md-6">
+              <label class="form-label">Responsable</label>
+              <input type="text" class="form-control" id="resp" name="resp" list="listTrabajador" required autocomplete="off">
+              <datalist id="listTrabajador"></datalist>
+            </div>
+             <!-- Responsable y Fecha -->
+            <div class="col-md-3">
+              <label class="form-label">Fecha</label>
+              <input type="datetime-local" class="form-control" id="fechaDesvios" name="fechaDesvios" placeholder="dd/mm/aaaa" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="estadoDesvios" name="estadoDesvios" required>
+                <option value="Abierto">Abierto</option>
+                <option value="Cerrado">Cerrado</option>
+              </select>
+              <!-- <label class="form-label mt-2">Nombre del reportado</label>
+              <input type="text" class="form-control" id="amonestado" name="amonestado" required placeholder="Si no hay, colocar NA"> -->
+            </div>
+           </div>
+          <!-- Botones finales -->
+          <div class="text-end mt-4">
+            <button id="btnGuardarDesvio" type="submit" class="btn btn-dark rounded-pill"><i class="fas fa-save"></i> Enviar</button>
+            <button type="button" class="btn btn-secondary rounded-pill" onclick="clearFormDesvios()">Limpiar</button>
+            <button type="button" class="btn btn-warning rounded-pill" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL INSPECCIONES -->
+<div class="modal fade" id="exampleModalInspeccioes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="max-width: 95% !important;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <!-- <h5 class="modal-title" id="exampleModalLabel">REGISTRO DE INSPECCIONES</h5> -->
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+<div class="container-fluid mt-0 border p-1 bg-white print-container">
+  <!-- inidcio accordion -->
+  <div class="accordion" id="accordionRegistro">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingRegistroDesvios">
+      <button class="accordion-button py-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegistro" aria-expanded="true" aria-controls="collapseRegistro">
+        ➕
+      </button>
+    </h2>
+    <div id="collapseRegistro" class="accordion-collapse collapse" aria-labelledby="headingRegistroDesvios" data-bs-parent="#accordionRegistro">
+      <div class="accordion-body">
+  <!-- Cabecera -->
+  <div class="row mb-2">
+    <div class="col-md-2 d-flex align-items-center justify-content-center">
+      <img src="https://lh5.googleusercontent.com/d/1db5DNfVhPvQvj0NEnVS64MmltUx_9Nk-" alt="Logo" style="height: 40px;">
+    </div>
+    <div class="col-md-8 d-flex align-items-center justify-content-center">
+      <h5 class="mb-2" style="align-items-center"><strong>REGISTRO DE INSPECCIONES</strong></h5>
+    </div>
+    <div class="col-md-2">
+      <table class="table table-bordered table-sm my-0 text-center">
+        <tbody>
+          <tr>
+            <td rowspan="3">Cód: CCCC-SGI-F-23<br>Versión: 00<br>Fecha: 15/05/2025</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Datos del Empleador -->
+  <div class="mb-3 border p-2 bg-light">
+    <strong>1. Datos del Empleador Principal:</strong>
+    <div class="row mt-2">
+      <div class="col"><label>Razón Social</label><input class="border p-1" placeholder="SIG EIRL"></div>
+      <div class="col"><label>N° RUC</label><input class="border p-1" placeholder="123456789"></div>
+      <div class="col"><label>Domicilio</label><input class="border p-1" placeholder="Carrtera interior Km56"></div>
+      <div class="col"><label>Actividad Económica</label><input class="border p-1" placeholder="Ingeniería y Construcción"></div>
+      <div class="col"><label>N° de Trabajadores</label><input class="border p-1" placeholder="0000"></div>
+      <div class="col"><label>Responsable del registro</label><input class="border p-1" placeholder="SIG EIRL"></div>
+    </div>
+  </div>
+        </div>
+    </div>
+  </div>
+</div>
+<!-- fin accordion -->
+  <!-- Datos de la Inspección -->
+  <div class="mb-3 border p-2 bg-warning-subtle bg-light">
+    <strong>2. Datos de la Inspección:</strong>
+    <div class="row mt-2">
+      <div class="col-md-3">
+        <label class="form-label">Empresa Inspeccionada<span style="color: red;">*</span></label>
+        <select class="form-select" id="filtroEmpresa">
+          <option value="">-- Todas --</option>
+          <!-- Más opciones dinámicas -->
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label>Fecha Inicial<span style="color: red;">*</span></label>
+        <input type="date" class="form-control" id="fechaInicial">
+      </div>
+      <div class="col-md-2">
+        <label>Fecha Final<span style="color: red;">*</span></label>
+        <input type="date" class="form-control" id="fechaFinal">
+      </div>
+      <div class="col-md-2">
+        <label>Tipo de Inspección</label>
+        <select class="form-select" id="filtroTipo">
+          <option value="">-- Todas --</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label>Lugar</label>
+        <select class="form-select" id="filtroLugar">
+          <option value="">-- Todas --</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-3">
+        <label>Inspeccionado por:</label>
+        <select class="form-select" id="filtroResponsable">
+          <option value="">-- Todas --</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label>Blanco</label>
+        <select class="form-select" id="filtroBlanco">
+          <option value="">-- Todas --</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label>Responsable</label>
+        <select class="form-select" id="filtroResponsable2">
+          <option value="">-- Todas --</option>
+        </select>
+      </div>
+    <div class="col-md-3">
+        <label>Estado</label>
+        <select class="form-select" id="filtroestadoinpse">
+          <option value="">-- Todas --</option>
+          <option value="Abierto">Abierto</option>
+          <option value="Cerrado">Cerrado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-3 mb-1">
+      <div class="col text-center">
+        <button class="btn btn-info btn-sm rounded-pill" onclick="aplicarFiltrosInspecciones()">Buscar</button>
+        <button class="btn btn-secondary btn-sm rounded-pill" onclick="limpiarFiltros()" style="margin-left: 10px;">Limpiar</button>
+        <button class="text-left btn btn-warning btn-sm rounded-pill" id="btnCheckPrint" onclick="window.print()" style="font-size:15px;">
+          <i class="fa-solid fa-print"></i>
+        </button>
+        <button class="btn btn-danger btn-sm rounded-pill" onclick="capturarDatosInspeccion()">Exportar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+<div id="tablaDatosInpsecciones" style="text-align: center; color: gray;">
+  ⚠️Debe seleccionar por lo menos un rago de fecha.⚠️
+</div>
+ </div>
+</div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+<script>
+// ✅ Función unificada para mostrar estados de carga
+function mostrarEstadoCarga(tipo, mostrar = true) {
+  const skeleton = document.getElementById('skeleton-loading');
+  const spinner = document.getElementById('spinnerDesvios');
+  const container = document.getElementById("tabla-registro");
+  
+  if (tipo === 'skeleton' && mostrar) {
+    // Mostrar skeleton al inicio de búsqueda
+    skeleton?.classList.remove('d-none');
+    spinner?.classList.add('d-none');
+  } else if (tipo === 'spinner' && mostrar) {
+    // Mostrar spinner para carga adicional (scroll infinito)
+    skeleton?.classList.add('d-none');
+    spinner?.classList.remove('d-none');
+  } else {
+    // Ocultar todo - SIN modificar el container
+    skeleton?.classList.add('d-none');
+    spinner?.classList.add('d-none');
+  }
+}
+
+    // ✅ Mejorar función de toggle nombre
+    function toggleNombreUsuario(element) {
+      const nombreCompleto = element.querySelector('.nombre-completo');
+      if (nombreCompleto) {
+        nombreCompleto.classList.toggle('show');
+        
+        // Auto-ocultar después de 3 segundos
+        if (nombreCompleto.classList.contains('show')) {
+          setTimeout(() => {
+            nombreCompleto.classList.remove('show');
+          }, 3000);
+        }
+      }
+    }
+
+    // ✅ Lazy loading para imágenes
+    function setupLazyLoading() {
+      if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+                img.classList.add('fade-in');
+                imageObserver.unobserve(img);
+              }
+            }
+          });
+        }, { rootMargin: '50px' });
+        
+        // Observer para nuevas imágenes
+        const tablaRegistro = document.getElementById('tabla-registro');
+        if (tablaRegistro) {
+          const mutationObserver = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+              mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1) {
+                  const images = node.querySelectorAll('img[data-src]');
+                  images.forEach(img => imageObserver.observe(img));
+                  
+                  // Añadir animación fade-in a las cards
+                  const cards = node.querySelectorAll('.tiktok-card');
+                  cards.forEach(card => card.classList.add('fade-in'));
+                }
+              });
+            });
+          });
+          
+          mutationObserver.observe(tablaRegistro, {
+            childList: true,
+            subtree: true
+          });
+        }
+      }
+    }
+
+  </script>
+  <script>
+    function previewFile(inputId, imgId, dataId) {
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+      const data = document.getElementById(dataId);
+
+      input.addEventListener("change", function () {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.addEventListener("load", function () {
+          img.src = reader.result;
+          data.value = reader.result;
+        });
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Inicializar para ambos inputs
+    previewFile("myFile1", "imgForm1", "data1");
+    previewFile("myFile2", "imgForm2", "data2");
+
+
+//buscador por DNI
+const inputElement = document.getElementById("nameDesvios");
+const outputElement = document.getElementById("nombreDesvios");
+
+let ultimaBusqueda = "";
+
+inputElement.addEventListener("input", function () {
+  const valorActual = this.value.trim();
+  ultimaBusqueda = valorActual;
+
+  if (valorActual === "") {
+    outputElement.value = "";
+    return;
+  }
+
+  // Mostrar mensaje de búsqueda mientras espera respuesta
+  outputElement.value = "Buscando...";
+
+  google.script.run.withSuccessHandler(function (resultado) {
+    // Solo actualiza si el valor aún coincide con la última búsqueda
+    if (valorActual === ultimaBusqueda) {
+      if (resultado && resultado.trim() !== "") {
+        outputElement.value = resultado;
+      } else {
+        outputElement.value = "No se encontró";
+      }
+    }
+  }).onInputChange(valorActual);
+});
+  
+    //Change valor
+    document.getElementById('address').addEventListener('change', function() {
+        updateMessage(this.value);
+      });
+
+function updateMessage(value) {
+  var messageDiv = document.getElementById('message2Desvio');
+  var val = value.toLowerCase(); // 🔹 Convierte a minúsculas
+
+  switch (val) {
+    case 'alto':
+      messageDiv.textContent = '⚠️ Corrección inmediata';
+      break;
+    case 'medio':
+      messageDiv.textContent = '⚠️ Plazo 2 días';
+      break;
+    case 'bajo':
+      messageDiv.textContent = '⚠️ Plazo 7 días';
+      break;
+    default:
+      messageDiv.textContent = '';
+      break;
+  }
+}
+
+
+  </script>
+
+  </html>
+
+  <!-- PARA DESCARGAR EN FORMATO PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script>
+// BLOQUE CARD ✅ FASE 1 – Cache inteligente implementado
+class CacheManager {
+  static getWithExpiry(key, expiryHours = 12) {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    
+    const data = JSON.parse(item);
+    const now = new Date().getTime();
+    
+    if (now > data.timestamp + (expiryHours * 60 * 60 * 1000)) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    
+    return data.value;
+  }
+  
+  static setWithExpiry(key, value, expiryHours = 12) {
+    const data = {
+      value: value,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  
+  static getSessionWithExpiry(key, expiryMinutes = 30) {
+    const item = sessionStorage.getItem(key);
+    if (!item) return null;
+    
+    const data = JSON.parse(item);
+    const now = new Date().getTime();
+    
+    if (now > data.timestamp + (expiryMinutes * 60 * 1000)) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+    
+    return data.value;
+  }
+  
+  static setSessionWithExpiry(key, value, expiryMinutes = 30) {
+    const data = {
+      value: value,
+      timestamp: new Date().getTime()
+    };
+    sessionStorage.setItem(key, JSON.stringify(data));
+  }
+}
+
+// Variables globales optimizadas
+var cachedDataDesvios = [];
+let passwordsDesvios = {
+  eliminar: [],
+  editar: []
+};
+
+let offset = 0;
+const limit = 20;
+let filtroMes = "Todos"; // Por defecto muestra todo
+let headers6 = [];
+let totalCoincidencias = 0;
+let searchTimeout;
+let currentController;
+let isLoadingMore = false;
+let currentSearchId = 0; // ✅ NUEVO: ID único para cada búsqueda
+let pendingReplacement = false;
+
+// ✅ FASE 3 – Debounce para búsqueda
+function debounceSearch(func, delay = 300) {
+  return function executedFunction(...args) {
+    clearTimeout(searchTimeout);
+    
+    // ✅ Cancelar petición anterior
+    if (currentController) {
+      currentController.abort();
+    }
+    
+    searchTimeout = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
+
+// ✅ FASE 2 – Virtual Scroll con IntersectionObserver
+class VirtualScrollManager {
+  constructor(container) {
+    this.container = container;
+    // ✅ CONFIGURACIÓN MÁS AGRESIVA PARA DETECTAR ELEMENTOS
+    this.observer = new IntersectionObserver(
+      (entries) => this.handleIntersection(entries),
+      { 
+        rootMargin: '200px', // ✅ Aumentado de 50px a 200px
+        threshold: [0, 0.1] // ✅ Múltiples thresholds
+      }
+    );
+    this.visibleCards = new Set();
+  }
+  
+  handleIntersection(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        this.visibleCards.add(entry.target);
+        entry.target.style.display = 'block';
+        entry.target.style.visibility = 'visible';
+      } else {
+        // ✅ SIN OCULTAR AGRESIVAMENTE - mejor rendimiento
+        this.visibleCards.delete(entry.target);
+      }
+    });
+  }
+  
+  observeCard(card) {
+    this.observer.observe(card);
+  }
+  
+  disconnect() {
+    this.observer.disconnect();
+    this.visibleCards.clear();
+  }
+}
+
+// Scroll infinito definido más abajo (FASE 4) — NO duplicar aquí
+
+function updateCargarMasButton() {
+  const btnCargarMas = document.getElementById("cargarMas");
+  if (btnCargarMas) {
+    const hayMasDatos = offset < totalCoincidencias;
+    btnCargarMas.style.display = hayMasDatos ? "block" : "none";
+    
+    if (hayMasDatos) {
+      const loaded = Math.min(offset, totalCoincidencias);
+      btnCargarMas.innerHTML = `Cargar más (${loaded}/${totalCoincidencias})`;
+      btnCargarMas.disabled = isLoadingMore; // ✅ Deshabilitar durante carga
+    }
+  }
+}
+// ✅ Template pre-compilado para tarjetas
+function createCardTemplate(fila, headers6) {
+  const colorPotencial = {
+    "Alto": "red",
+    "Medio": "orange", 
+    "Bajo": "green"
+  }[fila[6]] || "DarkBlue";
+
+  const mensajeWhatsApp = encodeURIComponent(`*---REPORTE DE RAC---*\n` +
+    `*ID:* ${fila[0]}\n` +
+    `*Reportante:* ${fila[2]}\n` +
+    `*Empresa:* ${fila[3]}\n` +
+    `*Lugar:* ${fila[4]}\n` +
+    `*Blanco:* ${fila[5]}\n` +
+    `*Potencial:* ${fila[6]}\n` +
+    `*Tipo:* ${fila[7]}\n` +
+    `*Descripción:* ${fila[8]}\n` +
+    `*Responsable:* ${fila[9]}\n` +
+    `*Fecha:* ${fila[10]}\n` +
+    `*Reportado:* ${fila[12]}\n` +
+    `*Clasificación:* ${fila[11]}\n` +
+    `*Proceso:* ${fila[13]}\n` +
+    `*Correctivo:* ${fila[14]}\n` +
+    `*R. Critico:* ${fila[15]}\n` +
+    `*Plan Acción:* ${fila[16]}\n` +
+    `*Estado:* ${fila[20]}\n🖼️ ${fila[17]}`);
+
+  const imagenPrincipal = fila[17] && fila[17].startsWith("http") ? fila[17] : fila[19];
+
+  return `
+    <div class='tiktok-card' style='position: relative;'>
+      ${fila[20] === 'Abierto' ? `
+        <div class="estado-badge abierto">
+          ${fila[20]}
+        </div>` : ''
+    }
+
+      <img src='${imagenPrincipal}' 
+           loading="lazy" 
+           onclick='showImageDesvios("${imagenPrincipal}")'>
+
+      ${fila[19] && String(fila[19]).startsWith("http") ? `
+        <div style='position: absolute; top: 12px; right: 60px; z-index: 3;'>
+          <button onclick='showImageDesvios("${fila[19]}")' style='border: none; background: transparent; padding: 0;'>
+            <img src='${fila[19]}' 
+                 loading="lazy"
+                 style='width: 44px; height: 44px; object-fit: cover; 
+                        border-radius: 8px; 
+                        border: 2px solid white;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.5);'>
+          </button>
+        </div>` : ""
+    }
+
+      <div class='overlay-buttons'>
+        <div class="avatar-wrapper" onclick="toggleNombreUsuario(this)">
+          <div class="avatar-circle-only">
+            ${fila[2].split(' ').map(p => p[0]).join('').substring(0, 3).toUpperCase()}
+          </div>
+          <div class="nombre-completo hidden-nombre">
+            ${fila[2]}
+          </div>
+        </div>
+
+        <button onclick='editDataDesvios(this);' data-record-id='${fila[0]}'><i class='fa fa-edit'></i></button>
+        <button onclick='deleteDataDesvios(this);' data-record-id='${fila[0]}'><i class='fa fa-trash'></i></button>
+        <button onclick='sendWhatsAppDesvios("${mensajeWhatsApp}");'><i class='fa-brands fa-whatsapp'></i></button>
+        <button onclick='setIDAndOpenLink("${fila[0]}");'><i class="fa-solid fa-file-pdf"></i></button>
+      </div>
+
+      <div class='tiktok-text' style='max-height: 80%; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;'>
+        <div style="font-size: 16px; font-weight: bold; color: white;">ID: ${fila[0]} – ${fila[5]}</div>
+        <div>
+          <strong>${headers6[6] || "Potencial"}:</strong> 
+          <span class="badge-potencial ${fila[6].toLowerCase()}">${fila[6]}</span>
+        </div>
+        <div>
+          <div id='desc-preview-${fila[0]}'
+              style="
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              ">
+            ${fila[8]}
+          </div>
+
+          <div id='desc-full-${fila[0]}' style="display: none;">
+            ${fila[8]}
+          </div>
+        </div>
+
+<div id='extra-content-${fila[0]}' style='display: none; margin-top: 6px; font-size: 13px;'>
+  <ul style="padding-left: 0;">
+    <li><b>${headers6[3] || "Empresa"}:</b> ${fila[3]}</li>
+    <li><b>${headers6[4] || "Lugar"}:</b> ${fila[4]}</li>
+    <li><b>${headers6[7] || "Tipo"}:</b> ${fila[7]}</li>
+    <li><b>${headers6[9] || "Responsable"}:</b> ${fila[9]}</li>
+    <li><b>${headers6[10] || "Fecha"}:</b> ${fila[10]}</li>
+    <li><b>${headers6[12] || "Reportado"}:</b> ${fila[12]}</li>
+    <li><b>${headers6[11] || "Clasificación"}:</b> ${fila[11]}</li>
+    <li><b>${headers6[13] || "Proceso"}:</b> ${fila[13]}</li>
+    <li><b>${headers6[14] || "Correctivo"}:</b> ${fila[14]}</li>
+    <li><b>${headers6[15] || "R. Crítico"}:</b> ${fila[15]}</li>
+    <li><b>${headers6[16] || "Plan Acción"}:</b> ${fila[16]}</li>
+    <li><b>${headers6[20] || "Estado"}:</b> ${fila[20]}</li>
+  </ul>
+</div>
+
+        <div class='text-end pb-0'>
+          <a href='#' onclick='toggleTextDesvios("desc", "${fila[0]}", event, this); return false;' style='color:#0bf; font-weight:bold;'> Ver más</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+const camposHeadersMap = {
+  nameDesvios: 2,
+  num: 3,
+  classroom: 4,
+  gender: 5,
+  address: 6,
+  emailDesvios: 7,
+  descripcion: 8,
+  resp: 9,
+  fechaDesvios: 10,
+  clasi: 11,
+  estado: 15,
+  procesoDesvios: 13,
+  acciones: 14,
+  plan: 16,
+  amonestado: 12,
+  estadoDesvios: 20,
+  filtroEmpresa: 3,
+  filtroTipo: 7,
+  filtroLugar: 4,
+  filtroResponsable: 2,
+  filtroBlanco: 5,
+  filtroResponsable2: 9,
+  filtroestadoinpse: 20
+};
+
+// ✅ Cargar passwords con cache
+async function cargarPasswordsDesvios() {
+  const cached = CacheManager.getSessionWithExpiry('passwordsDesvios', 60);
+  if (cached) {
+    passwordsDesvios = cached;
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    google.script.run.withSuccessHandler((data) => {
+      passwordsDesvios = data;
+      CacheManager.setSessionWithExpiry('passwordsDesvios', data, 60);
+      resolve();
+    }).getPasswordsDesvios();
+  });
+}
+
+function functionInit() {  
+  preventFormSubmit();
+}
+
+// Virtual scroll manager
+let virtualScrollManager;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  functionInit();
+
+  // ✅ Inicializar virtual scroll
+  const container = document.getElementById("tabla-registro");
+  if (container) {
+    virtualScrollManager = new VirtualScrollManager(container);
+  }
+
+  // ✅ Asignar texto por defecto
+  const inputAcciones = document.getElementById("acciones");
+  if (inputAcciones) {
+    inputAcciones.value = "Ingrese las medidas correctivas que se implementarán de inmediato.";
+    inputAcciones.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  // ✅ Carga paralela optimizada con Promise.allSettled
+  const loadPromises = [
+    cargarPasswordsDesvios(),
+    new Promise(resolve => {
+      const total1 = document.getElementById('total1');
+      const total2 = document.getElementById('total2');
+      if (total1 && total2) {
+        google.script.run.withSuccessHandler(data => {
+          total1.innerHTML = data[0];
+          total2.innerHTML = data[1];
+          resolve();
+        }).withFailureHandler(err => {
+          console.warn("Error cargando totales:", err);
+          resolve();
+        }).setStatusDesvios();
+      } else {
+        resolve();
+      }
+    })
+  ];
+
+  await Promise.allSettled(loadPromises);
+});
+
+function reemplazarLabelsFormulario() {
+  Object.entries(camposHeadersMap).forEach(([id, index]) => {
+    const label = document.querySelector(`label[for="${id}"]`) ||
+                  document.querySelector(`#${id}`)?.closest(".col-md-6, .col-md-3, .col-md-12")?.querySelector("label");
+    if (label && headers6[index]) {
+      label.innerHTML = headers6[index];
+    }
+  });
+}
+
+// ✅ FASE 8 – Delegación de eventos
+document.addEventListener('DOMContentLoaded', function() {
+  const btnCargarMas = document.getElementById("cargarMas");
+
+  if (btnCargarMas) {
+    btnCargarMas.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!isLoadingMore) cargarDatosDesvios();
+    });
+  }
+
+  // Chips de mes — marcar "Todos" por defecto y escuchar clicks
+  (function() {
+    var boxMeses = document.getElementById('chipMesesDesvios');
+    if (!boxMeses) return;
+    // Marcar "Todos" como activo al inicio
+    var chipTodos = boxMeses.querySelector('.chip-mes[data-mes="Todos"]');
+    if (chipTodos) chipTodos.classList.add('active');
+    boxMeses.querySelectorAll('.chip-mes').forEach(function(chip) {
+      var mes = chip.getAttribute('data-mes');
+      chip.addEventListener('click', function() {
+        boxMeses.querySelectorAll('.chip-mes').forEach(function(x) { x.classList.remove('active'); });
+        chip.classList.add('active');
+        filtroMes = (mes === 'Todos') ? 'Todos' : parseInt(mes);
+        reiniciarTablaDesvios(false);
+      });
+    });
+  })();
+
+  mostrarEstadoCarga('skeleton', true);
+});
+
+// ✅ Cargar headers con cache
+async function cargarHeaders() {
+  const cached = CacheManager.getWithExpiry('headers6', 12);
+  if (cached) {
+    headers6 = cached;
+    poblarSelectores();
+    reiniciarTablaDesvios(true); // ✅ Pasar flag de carga inicial
+    reemplazarLabelsFormulario();
+    return;
+  }
+
+  google.script.run.withSuccessHandler(data => {
+    headers6 = data;
+    CacheManager.setWithExpiry('headers6', data, 12);
+    poblarSelectores();
+    reiniciarTablaDesvios(true); // ✅ Pasar flag de carga inicial
+    reemplazarLabelsFormulario();
+  }).withFailureHandler(err => {
+    console.error("Error cargando headers:", err);
+    mostrarEstadoCarga('', false);
+  }).getHeaders();
+}
+
+function poblarSelectores() {
+  const sel1 = document.getElementById("columnaFiltro1");
+  const sel2 = document.getElementById("columnaFiltro2");
+  
+  if (sel1 && sel2) {
+    headers6.forEach(col => {
+      [sel1, sel2].forEach(sel => {
+        const opt = document.createElement("option");
+        opt.value = col;
+        opt.textContent = col;
+        sel.appendChild(opt);
+      });
+    });
+  }
+}
+
+// Llamar a cargar headers al inicializar
+document.addEventListener('DOMContentLoaded', cargarHeaders);
+
+// ✅ Modificar reiniciarTablaDesvios para usar skeleton
+function reiniciarTablaDesvios(esCargaInicial = false) {
+  currentSearchId++;
+  const searchId = currentSearchId;
+  
+  if (currentController) {
+    currentController.abort();
+  }
+  currentController = new AbortController();
+
+  offset = 0;
+  cachedDataDesvios = [];
+  isLoadingMore = false;
+  pendingReplacement = true;
+  
+  // ✅ Solo mostrar skeleton en carga inicial
+  if (esCargaInicial) {
+    mostrarEstadoCarga('skeleton', true);
+  }
+  
+  cargarDatosDesvios(searchId, esCargaInicial);
+}
+
+// ✅ Modificar cargarDatosDesvios
+function cargarDatosDesvios(searchId = currentSearchId, esCargaInicial = false) {
+  if (isLoadingMore) return;
+  isLoadingMore = true;
+  
+  // ✅ SOLO mostrar skeleton en carga inicial Y offset 0
+  // Mostrar spinner al cambiar filtro (chip, etc.)
+  // Mostrar spinner en scroll infinito (offset > 0)
+  if (esCargaInicial && offset === 0) {
+    mostrarEstadoCarga('skeleton', true);
+  } else if (!esCargaInicial && offset === 0) {
+    mostrarEstadoCarga('spinner', true);  // chip click → mostrar spinner
+  } else if (offset > 0) {
+    mostrarEstadoCarga('spinner', true);
+  }
+  
+  const btnCargarMas = document.getElementById("cargarMas");
+  if (btnCargarMas) btnCargarMas.disabled = true;
+
+  google.script.run
+    .withSuccessHandler((data) => {
+      if (searchId !== currentSearchId) {
+        isLoadingMore = false;
+        return;
+      }
+      renderizarTabladDesvios(data, searchId);
+    })
+    .withFailureHandler(err => {
+      mostrarEstadoCarga('', false);
+      isLoadingMore = false;
+      if (btnCargarMas) btnCargarMas.disabled = false;
+      Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Error al cargar registros', toast: true, position: 'top-end', timer: 4000, showConfirmButton: false });
+    })
+    .getDatosRegistro(offset, limit, filtroMes);
+}
+
+// ✅ FASE 2 – Optimización DOM con DocumentFragment
+// ✅ Modificar renderizarTabladDesvios
+function renderizarTabladDesvios(respuesta, searchId = currentSearchId) {
+  if (searchId !== currentSearchId) {
+    isLoadingMore = false;
+    return;
+  }
+
+  const container = document.getElementById("tabla-registro");
+  const btnCargarMas = document.getElementById("cargarMas");
+
+  if (!respuesta || !respuesta.data || respuesta.data.length === 0) {
+    if (offset === 0) {
+      container.innerHTML = "<p>No se encontraron resultados.</p>";
+      pendingReplacement = false;
+    }
+    mostrarEstadoCarga('', false);
+    isLoadingMore = false;
+    if (btnCargarMas) btnCargarMas.disabled = false;
+    return;
+  }
+  // Actualizar badge con total del mes
+  if (offset === 0) {
+    var _badgeDesvios = document.getElementById("total2");
+    if (_badgeDesvios) _badgeDesvios.textContent = respuesta.total;
+  }
+
+  // ✅ Si es nueva búsqueda (offset 0), REEMPLAZAR todo
+  if (offset === 0 && pendingReplacement) {
+    if (virtualScrollManager) {
+      virtualScrollManager.disconnect();
+      virtualScrollManager = new VirtualScrollManager(container);
+    }
+    
+    container.innerHTML = "";
+    cachedDataDesvios = [...respuesta.data];
+    pendingReplacement = false;
+  } else {
+    cachedDataDesvios = [...cachedDataDesvios, ...respuesta.data];
+  }
+
+  if (cachedDataDesvios.length > 500) {
+    cachedDataDesvios = cachedDataDesvios.slice(-250);
+  }
+
+  // ✅ OCULTAR loading después de procesar datos
+  mostrarEstadoCarga('', false);
+  isLoadingMore = false;
+  if (btnCargarMas) btnCargarMas.disabled = false;
+  totalCoincidencias = respuesta.total;
+
+  // Crear y agregar contenido
+  const fragment = document.createDocumentFragment();
+  const cardsRow = document.createElement("div");
+  cardsRow.className = "row g-3 py-2";
+
+  respuesta.data.forEach((fila) => {
+    const card = document.createElement("div");
+    card.className = "col-sm-6 col-md-4 col-lg-3";
+    card.innerHTML = createCardTemplate(fila, headers6);
+    
+    if (virtualScrollManager) {
+      virtualScrollManager.observeCard(card);
+    }
+    
+    cardsRow.appendChild(card);
+  });
+
+  fragment.appendChild(cardsRow);
+  container.appendChild(fragment);
+  
+  offset += limit;
+  updateCargarMasButton();
+}
+
+// ✅ FASE 4 – Scroll con passive para mejor rendimiento
+document.addEventListener('scroll', function() {
+  const btnCargarMas = document.getElementById("cargarMas");
+  if (!btnCargarMas || btnCargarMas.style.display === "none") return;
+  
+  const rect = btnCargarMas.getBoundingClientRect();
+  const inView = rect.top < window.innerHeight && rect.bottom > 0;
+  
+  if (inView && !btnCargarMas.disabled) {
+    cargarDatosDesvios();
+  }
+}, { passive: true });
+
+// ✅ Limpieza de memoria al cerrar
+window.addEventListener('beforeunload', function() {
+  if (virtualScrollManager) {
+    virtualScrollManager.disconnect();
+  }
+  if (currentController) {
+    currentController.abort();
+  }
+  clearTimeout(searchTimeout);
+});
+
+
+function toggleTextDesvios(type, index, event, link) {
+  if (event) event.preventDefault();
+
+  const extra = document.getElementById(`extra-content-${index}`);
+  const preview = document.getElementById(`desc-preview-${index}`);
+  const full = document.getElementById(`desc-full-${index}`);
+
+  const isHidden = extra.style.display === 'none';
+
+  // Mostrar/ocultar contenido adicional
+  extra.style.display = isHidden ? '' : 'none';
+
+  // Mostrar/ocultar descripción
+  if (preview && full) {
+  if (isHidden) {
+    preview.style.display = 'none';
+    full.style.display = 'inline';
+  } else {
+    preview.style.display = '-webkit-box'; // 🔧 Esto mantiene el truncado en 1 línea
+    full.style.display = 'none';
+  }
+}
+  // Cambiar texto del enlace
+  if (link) link.textContent = isHidden ? 'Menos' : 'Más';
+}
+
+
+
+function preventFormSubmit() {
+  var forms = document.querySelectorAll('form');
+  forms.forEach(form => {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+    });
+  });
+}
+
+function handleFormSubmitDesvios(formObject) {
+  const btn = document.getElementById("btnGuardarDesvio");
+  btn.textContent = "Reportando...";
+  btn.disabled = true;
+
+  // 🎨 Fusionar canvas y actualizar campo annotatedData antes de enviar
+  if (window._annotator) {
+    var merged = window._annotator.getMergedBase64(0.85);
+    if (merged) {
+      document.getElementById('annotatedData').value = merged.split(',')[1];
+    }
+  }
+
+  Swal.fire({
+    title: 'Guardando...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  google.script.run.withSuccessHandler(function() {
+    Swal.close();
+    document.getElementById("messageDesvios").innerHTML = "<div class='alert alert-success' role='alert'>Se ha registrado correctamente!.</div>";
+    Swal.fire({
+      position: 'top',
+      icon: 'success',
+      title: 'Se ha guardado con éxito',
+      showConfirmButton: false,
+      timer: 2500
+    });
+
+    btn.textContent = "Reportar";
+    btn.disabled = false;
+    $('#myModalDesvios').modal('hide');
+    clearFormDesvios();
+
+    // ✅ Actualizar SIN skeleton
+    reiniciarTablaDesvios(false); // false = NO es carga inicial
+
+    let total1 = document.getElementById('total1');
+    let total2 = document.getElementById('total2');
+    google.script.run.withSuccessHandler(function(data) {
+      total1.innerHTML = data[0];    
+      total2.innerHTML = data[1];
+    }).setStatusDesvios();
+
+  }).withFailureHandler(function(error) {
+    Swal.close();
+    document.getElementById("messageDesvios").innerHTML = "<div class='alert alert-danger' role='alert'>Ha ocurrido un error al guardar la información. Por favor, inténtelo de nuevo más tarde.</div>";
+    Swal.fire({
+      position: 'top',
+      icon: 'error',
+      title: 'Error al guardar la información',
+      showConfirmButton: true
+    });
+    btn.textContent = "Reportar";
+    btn.disabled = false;
+  }).processFormDesvios(formObject);
+}
+
+
+function clearFormDesvios() {
+  const userObj = JSON.parse(localStorage.getItem('userName') || '{}');
+  const usuario = userObj.usuario || '';
+  const nombre = userObj.nombre || '';
+
+  // Resetear el formulario
+  document.getElementById("myFormDesvios").reset();
+
+  // Restaurar valores guardados
+  const inputUsuario = document.getElementById('nameDesvios');
+  const inputNombre = document.getElementById('nombreDesvios');
+  if (inputUsuario) inputUsuario.value = usuario;
+  if (inputNombre) inputNombre.value = nombre;
+
+  // Limpiar imágenes y sus inputs relacionados
+  document.getElementById("myFile1").value = "";
+  document.getElementById("myFile2").value = "";
+
+  document.getElementById("imgForm1").src = "";
+  document.getElementById("imgForm2").src = "";
+
+  document.getElementById("data1").value = "";
+  document.getElementById("data2").value = "";
+
+  // Limpiar otros campos
+  document.getElementById("RecId").value = "";
+  document.getElementById("messageDesvios").innerHTML = "";
+  document.getElementById("message2Desvio").innerHTML = "";
+
+  // Limpiar todos los textarea dentro del formulario
+  const textareas = document.querySelectorAll('#myFormDesvios textarea');
+  textareas.forEach(textarea => textarea.value = '');
+
+  // 🔥 Limpiar variables globales de imagen IA
+  base64Image = "";
+  mimeType = "";
+
+  // 🎨 Limpiar canvas anotador
+  document.getElementById("annotatedData").value = "";
+  if (window._annotator) window._annotator.resetAnnotator();
+}
+
+// Función para establecer el ID en la celda B5 y abrir el enlace en la celda B39
+function setIDAndOpenLink(recordId) {
+  Swal.fire({
+    title: '¿Desea exportar este reporte a PDF?',
+    text: "Se generará un documento con los datos del reporte.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, exportar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Por favor, espere.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      google.script.run.withSuccessHandler(function(url) {
+        window.open(url, '_blank');
+        Swal.close();
+      }).setIDAndGetLink(recordId);
+    }
+  });
+}
+
+
+function deleteDataDesvios(el) {
+  pedirPassword('Para borrar debe ingresar su Password', passwordsDesvios.eliminar, () => {
+    Swal.fire({
+      title: 'Eliminado!!',
+      icon: 'success',
+      timer: 1500
+    });
+    const recordId = el.getAttribute("data-record-id");
+    google.script.run.withSuccessHandler(reiniciarTablaDesvios).deleteDataDesvios(recordId);
+  });
+}
+
+function editDataDesvios(el) {
+  const recordId = el.getAttribute("data-record-id");
+  pedirPassword('Para editar debe ingresar su Password', passwordsDesvios.editar, () => {
+    const registro = cachedDataDesvios.find(row => row[0] == recordId);
+    if (registro) {
+      populateFormDesvios([registro]);
+      $('#myModalDesvios').modal('show');
+    } else {
+      Swal.fire('Error', 'No se encontró el registro en memoria.', 'error');
+    }
+  });
+}
+
+function pedirPassword(label, listaPermitida, onSuccess) { 
+  Swal.fire({
+    title: 'Ingrese su password',
+    input: 'password',
+    inputLabel: label,
+    inputPlaceholder: 'Ingrese su password',
+    inputAttributes: {
+      maxlength: 10,
+      autocapitalize: 'off',
+      autocorrect: 'off'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: (password) => {
+      if (!password) return false;
+      if (listaPermitida.includes(password)) {
+        return true;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Password incorrecto',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        return false;
+      }
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      onSuccess();
+    }
+    // Opcionalmente puedes manejar si cancela
+    else if (result.isDismissed) {
+    }
+  });
+}
+
+
+  function populateFormDesvios(records) {
+    document.getElementById('RecId').value = records[0][0];
+    document.getElementById('nameDesvios').value = records[0][1];
+    document.getElementById('nombreDesvios').value = records[0][2];
+    document.getElementById('num').value = records[0][3];
+    document.getElementById('classroom').value = records[0][4];
+    document.getElementById('gender').value = records[0][5];
+    document.getElementById('address').value = records[0][6];
+    document.getElementById('emailDesvios').value = records[0][7];
+    document.getElementById('descripcion').value = records[0][8];
+    document.getElementById('resp').value = records[0][9];
+    var fechaHora = records[0][10].replace(' ', 'T'); // Reemplazar espacio por 'T' en la fecha y hora
+    document.getElementById('fechaDesvios').value = fechaHora;
+    document.getElementById('clasi').value = records[0][11];
+    document.getElementById('amonestado').value = records[0][12];
+    document.getElementById('procesoDesvios').value = records[0][13];
+    document.getElementById('acciones').value = records[0][14];
+    document.getElementById('estado').value = records[0][15];
+    document.getElementById('plan').value = records[0][16];
+    document.getElementById('imgForm1').src = records[0][17];
+    document.getElementById('imgForm2').src = records[0][19];
+    // 🎨 Cargar imagen inicial al anotador (modo edición)
+    if (records[0][17] && window._annotator) {
+      window._annotator.loadImage(records[0][17]);
+    }
+    document.getElementById('data1').value = records[0][17]; // imagen inicial
+    document.getElementById('data2').value = records[0][19]; // imagen cierre
+    document.getElementById('estadoDesvios').value = records[0][20];
+    document.getElementById("messageDesvios").innerHTML = "<div class='alert alert-warning' role='alert'>Código de registro: [ID: "+records[0][0]+"]<br><b>Al editar debe reemplazar con la nueva imagen del levantamiento</b></div>";
+
+       // Actualizar el mensaje debajo del input 'address' según el valor recuperado
+    updateMessage(records[0][6]);
+  }
+
+//Amp Img
+function showImageDesvios(imgUrl) {
+  var modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = 0;
+  modal.style.bottom = 0;
+  modal.style.left = 0;
+  modal.style.right = 0;
+  modal.style.zIndex = 9999;
+  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+
+  var img = document.createElement('img');
+  img.src = imgUrl;
+  img.style.maxWidth = '90%';
+  img.style.maxHeight = '90%';
+  img.style.border = "1px solid white";
+  img.style.borderRadius = "15px";
+
+  modal.appendChild(img);
+
+  modal.onclick = function() {
+    modal.remove();
+  };
+
+  document.body.appendChild(modal);
+}
+
+
+// Función para enviar mensaje por WhatsApp
+function sendWhatsAppDesvios(messageDesvios) {
+  Swal.fire({
+    title: 'Opciones de envío',
+    text: '¿Deseas ingresar un número o enviar a contactos?',
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Ingresar número',
+    denyButtonText: 'Mis contactos'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Si elige ingresar número, mostrar input para número de teléfono
+      Swal.fire({
+        title: 'Número de teléfono',
+        input: 'text',
+        inputLabel: 'Ingrese el N° de teléfono a quien se enviará',
+        inputPlaceholder: 'e.g. 941227099',
+        showCancelButton: true,
+        inputValidator: (value) => {
+          if (!value) {
+            return '¡Debe ingresar un número de teléfono!';
+          }
+        },
+        inputAttributes: {
+          maxlength: 10,
+          autocapitalize: 'off',
+          autocorrect: 'off'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          var telefono = "51" + result.value; // Agrega código de país
+          var url = "https://wa.me/" + telefono + "?text=" + messageDesvios;
+          window.open(url, '_blank'); // Abre WhatsApp con el número
+        }
+      });
+    } else if (result.isDenied) {
+      // Si elige enviar sin número, solo genera el enlace con el mensaje
+      var url = "https://wa.me/?text=" + messageDesvios;
+      window.open(url, '_blank'); // Abre WhatsApp sin un número
+    }
+  });
+}
+
+</script>
+
+<script>
+  //IMPRIMIR PDF INSPECCIONES
+
+function capturarDatosInspeccion() {
+  const datos = {
+    empresa: document.getElementById('filtroEmpresa').value.trim(),
+    fechaInicial: document.getElementById('fechaInicial').value.trim(),
+    fechaFinal: document.getElementById('fechaFinal').value.trim(),
+    lugar: document.getElementById('filtroLugar').value.trim(),
+    inspeccionadoPor: document.getElementById('filtroResponsable').value.trim(),
+    blanco: document.getElementById('filtroBlanco').value.trim(),
+    responsableArea: document.getElementById('filtroResponsable2').value.trim(),
+    filtroestadoinpse: document.getElementById('filtroestadoinpse').value.trim(),
+  };
+
+  // Validar campos obligatorios
+  if (!datos.empresa || !datos.fechaInicial || !datos.fechaFinal) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Campos obligatorios',
+      text: 'Debe completar por lo menos; Empresa, Fecha Inicial y Fecha Final para continuar.'
+    });
+    return;
+  }
+
+  // Confirmación antes de generar PDF
+  Swal.fire({
+    title: '¿Confirmar datos?',
+    text: "¿Ya filtró y revisó si hay datos antes de generar el PDF?",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, generar PDF',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Mostrar alerta de proceso
+      Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Por favor espere unos segundos.',
+        icon: 'dark',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Ejecutar función del servidor
+      google.script.run
+        .withSuccessHandler(function(url) {
+          Swal.close(); // Cierra el swal de carga
+          window.open(url, '_blank'); // Abre el PDF generado
+        })
+        .withFailureHandler(function(err) {
+          Swal.fire({ icon: 'error', title: 'Error al generar PDF', text: err.message || 'Error desconocido' });
+        })
+        .guardarDatosYGenerarPDF(datos);
+    }
+  });
+}
+
+function limpiarFiltros() {
+  document.getElementById('filtroEmpresa').value = '';
+  document.getElementById('fechaInicial').value = '';
+  document.getElementById('fechaFinal').value = '';
+  document.getElementById('filtroLugar').value = '';
+  document.getElementById('filtroResponsable').value = '';
+  document.getElementById('filtroBlanco').value = '';
+  document.getElementById('filtroResponsable2').value = '';
+  document.getElementById('filtroestadoinpse').value = '';
+
+  // También puedes borrar la tabla si ya hay resultados dibujados
+  document.getElementById("tablaDatosInpsecciones").innerHTML = '';
+}
+
+</script>
+
+<script>
+//INICIO - MOSTRAR MENSAJE DINÁMICAMENTE EN EL INPUT "Medidas correctivas inmediatas" usando IA
+
+document.addEventListener("DOMContentLoaded", function () {
+  function obtenerDatosFormulario() {
+    let reportante = document.getElementById("nameDesvios")?.value.trim() || "";
+    let empresa = document.getElementById("num")?.value.trim() || "";
+    let lugar = document.getElementById("classroom")?.value.trim() || "";
+    let blanco = document.getElementById("gender")?.value.trim() || "";
+    let potencial = document.getElementById("address")?.value.trim() || "";
+    let tipo = document.getElementById("emailDesvios")?.value.trim() || "";
+    let descripcion = document.getElementById("descripcion")?.value.trim() || "";
+    let responsable = document.getElementById("resp")?.value.trim() || "";
+    let fecha = document.getElementById("fechaDesvios")?.value.trim() || "";
+    let clasificacion = document.getElementById("clasi")?.value.trim() || "";
+    let nombreReportado = document.getElementById("amonestado")?.value.trim() || "";
+    let procesoDesviosG = document.getElementById("procesoDesvios")?.value.trim() || "";
+    let estadoDesviosG = document.getElementById("estadoDesvios")?.value.trim() || "";
+    let riesgoCritico = document.getElementById("estado")?.value.trim() || "";
+
+    //Adquirir imageURL
+  
+
+    return `Datos Form: ${reportante} | ${empresa} | ${lugar} | ${blanco} | ${potencial} | ${tipo} | ${descripcion} | ${responsable} | ${fecha} | ${clasificacion} | ${nombreReportado} | ${procesoDesviosG} | ${estadoDesviosG} |${riesgoCritico}`;
+  }
+
+  let reportButton1 = document.getElementById("generarAcciones"); // Botón "Generar Medidas" con IA
+  let reportButton2 = document.getElementById("generarPlan"); // Botón "Generar Plan" con IA
+  let reportButton3 = document.getElementById("generarDescripcion"); // Botón "Generar Descripción" con IA
+  let inputAcciones = document.getElementById("acciones"); // Campo de texto de "Medidas correctivas inmediatas"
+  let inputPlanAccion = document.getElementById("plan"); // Campo de texto de "Medidas correctivas inmediatas"
+  let inputDescripcion = document.getElementById("descripcion"); // Campo de texto de "Medidas correctivas inmediatas"
+ 
+  // INICIO LÓGICA DE DESCRIPCIÓN DE IMÁGENES CON IA
+  // Variables globales para almacenar la imagen en Base64 y su tipo MIME
+  let base64Image = "";
+  let mimeType = "";
+
+  // INICIO LISTENER DE IMÁGENES
+  let fileInput = document.getElementById("myFile1");
+  let fileInput2 = document.getElementById("myFile2");
+  let dataInput = document.getElementById("data1");
+  let imgPreview = document.getElementById("imgForm1");
+
+  if (fileInput) {
+    fileInput.addEventListener("change", function (event) {
+      let file = event.target.files[0];
+      if (file) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+          base64Image = reader.result.split(",")[1]; // Extraer solo los datos Base64
+          mimeType = file.type; // Obtener el tipo MIME de la imagen
+          
+          // Asignar base64Image al input hidden para posibles usos
+          dataInput.value = base64Image;
+
+          // Mostrar vista previa de la imagen
+          imgPreview.src = reader.result;
+        };
+      }
+    });
+  }
+  // FIN LISTENER DE IMÁGENES
+
+
+  if (reportButton3 && inputDescripcion) {
+    reportButton3.addEventListener("click", function () {
+      if (!base64Image) {
+        Swal.fire({
+        position: 'top',
+        icon: 'error',
+        title: 'Debe subir una imagen para generar la DESCRIPCIÓN',
+        showConfirmButton: true,
+        //timer: 2500
+      });
+        return;
+      }
+
+      // Deshabilitar botón y mostrar mensaje de carga
+      reportButton3.disabled = true;
+      inputDescripcion.value = "Generando Descripción...";
+      inputDescripcion.style.color = "gray";
+
+      // 🎨 Usar imagen anotada (canvas fusionado) si está disponible
+      var b64ParaIA   = base64Image;
+      var mimeParaIA  = mimeType;
+      if (window._annotator) {
+        var merged = window._annotator.getMergedBase64(0.85);
+        if (merged) {
+          b64ParaIA  = merged.split(',')[1];
+          mimeParaIA = 'image/jpeg';
+        }
+      }
+
+      // Llamar a la API de IA para procesar la imagen en BASE64 y generar la descripción
+      google.script.run
+        .withSuccessHandler(function (descripcionIA) {
+          // Mostrar resultado en el textarea
+          inputDescripcion.value = descripcionIA;
+          inputDescripcion.style.color = "black";
+
+          // Reactivar el botón
+          reportButton3.disabled = false;
+        })
+        .withFailureHandler(function (error) {
+          // Manejar errores
+          inputDescripcion.value = "Error al generar descripción.";
+          inputDescripcion.style.color = "red";
+          reportButton3.disabled = false;
+        })
+        .describirImagenBase64(b64ParaIA, mimeParaIA);
+    });
+  } else {
+    console.error("No se encontró el botón 'Generar' o el input 'descripcion'");
+  }
+  // FIN LÓGICA DE DESCRIPCIÓN DE IMÁGENES CON IA
+
+  //Lógica para generar las medidas correctivas usando IA
+  if (reportButton1 && inputAcciones) {
+    reportButton1.addEventListener("click", function () {
+      let datosFormulario = obtenerDatosFormulario();
+      // **Deshabilitar botón y mostrar mensaje de carga**
+      reportButton1.disabled = true;
+      inputAcciones.value = "Generando medidas correctivas...";
+      inputAcciones.style.color = "gray";
+
+      // Llamar a la API de IA
+      google.script.run
+        .withSuccessHandler(function (medidasCorrectivas) {
+          // **Mostrar resultado en el textarea**
+          inputAcciones.value = medidasCorrectivas;
+          inputAcciones.style.color = "black";
+
+          // **Reactivar el botón**
+          reportButton1.disabled = false;
+        })
+        .withFailureHandler(function (error) {
+          // **Manejar errores**
+          inputAcciones.value = "Error al generar medidas.";
+          inputAcciones.style.color = "red";
+          reportButton1.disabled = false;
+        })
+        .geminiAPI4(datosFormulario);
+    });
+  } else {
+    console.error("No se encontró el botón 'Generar' o el input 'acciones'");
+  }
+
+  //Lófica para la generación del plan de acción con IA
+  if (reportButton2 && inputPlanAccion) {
+    reportButton2.addEventListener("click", function () {
+      let datosFormulario = obtenerDatosFormulario();
+      
+
+      // **Deshabilitar botón y mostrar mensaje de carga**
+      reportButton2.disabled = true;
+      inputPlanAccion.value = "Generando plan de acción...";
+      inputPlanAccion.style.color = "gray";
+
+      // Llamar a la API de IA
+      google.script.run
+        .withSuccessHandler(function (planAccion) {
+          // **Mostrar resultado en el textarea**
+          inputPlanAccion.value = planAccion;
+          inputPlanAccion.style.color = "black";
+
+          // **Reactivar el botón**
+          reportButton2.disabled = false;
+        })
+        .withFailureHandler(function (error) {
+          // **Manejar errores**
+          inputPlanAccion.value = "Error al generar plan de acción.";
+          inputPlanAccion.style.color = "red";
+          reportButton2.disabled = false;
+        })
+        .geminiAPI5(datosFormulario);
+    });
+  } else {
+    console.error("No se encontró el botón 'Generar' o el input 'plan'");
+  }
+});
+
+//FIN - MOSTRAR MENSAJE DINÁMICAMENTE EN EL INPUT "Medidas correctivas inmediatas" usando IA
+</script>
+
+<!-- ════════════════════════════════════════════════════
+     CANVAS ANNOTATOR — Motor de anotación sobre imagen
+════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var canvasBase, canvasDraw, ctxDraw;
+  var currentTool  = 'brush';
+  var currentColor = '#FFFF00';
+  var currentSize  = 4;
+  var isDrawing    = false;
+  var startX = 0, startY = 0;
+  var snapshotBeforeShape = null; // ImageData antes de iniciar forma
+  var history = [];               // pila para undo (ImageData[])
+  var MAX_HISTORY = 25;
+
+  // ── Inicializar ──────────────────────────────────────────────────────────
+  function init() {
+    canvasBase = document.getElementById('canvas-base');
+    canvasDraw = document.getElementById('canvas-draw');
+    if (!canvasBase || !canvasDraw) return;
+    ctxDraw = canvasDraw.getContext('2d');
+
+    // Herramientas
+    document.querySelectorAll('.ann-tool').forEach(function (btn) {
+      btn.addEventListener('click', function () { selectTool(btn.dataset.tool); });
+    });
+
+    // Colores
+    document.querySelectorAll('.ann-color').forEach(function (btn) {
+      btn.addEventListener('click', function () { selectColor(btn.dataset.color); });
+    });
+
+    // Grosor
+    var sizeSlider = document.getElementById('ann-size');
+    if (sizeSlider) sizeSlider.addEventListener('input', function () { currentSize = parseInt(this.value); });
+
+    // Undo / Clear
+    var undoBtn  = document.getElementById('ann-undo');
+    var clearBtn = document.getElementById('ann-clear');
+    if (undoBtn)  undoBtn.addEventListener('click',  function(e){ e.preventDefault(); undo(); });
+    if (clearBtn) clearBtn.addEventListener('click', function(e){ e.preventDefault(); clearAll(); });
+
+    // Mouse
+    canvasDraw.addEventListener('mousedown',  onMouseDown);
+    canvasDraw.addEventListener('mousemove',  onMouseMove);
+    canvasDraw.addEventListener('mouseup',    onMouseUp);
+    canvasDraw.addEventListener('mouseleave', onMouseUp);
+
+    // Touch
+    canvasDraw.addEventListener('touchstart', onTouchStart, { passive: false });
+    canvasDraw.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    canvasDraw.addEventListener('touchend',   onTouchEnd,   { passive: false });
+  }
+
+  // ── Cargar imagen en canvas-base ─────────────────────────────────────────
+  function loadImage(src) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      var container = canvasBase.parentElement;
+      var maxW = (container ? container.clientWidth : 360) || 360;
+      var scale = Math.min(1, maxW / img.naturalWidth);
+      var w = Math.max(1, Math.round(img.naturalWidth  * scale));
+      var h = Math.max(1, Math.round(img.naturalHeight * scale));
+
+      canvasBase.width  = w; canvasBase.height  = h;
+      canvasDraw.width  = w; canvasDraw.height  = h;
+      canvasBase.style.width  = w + 'px'; canvasBase.style.height  = h + 'px';
+      canvasDraw.style.width  = w + 'px'; canvasDraw.style.height  = h + 'px';
+
+      canvasBase.getContext('2d').drawImage(img, 0, 0, w, h);
+      ctxDraw = canvasDraw.getContext('2d');
+      ctxDraw.clearRect(0, 0, w, h);
+      history = [];
+
+      document.getElementById('annotator-container').style.display = 'block';
+    };
+    img.onerror = function () {
+      // Si falla cross-origin, intentar con proxy de datos
+      if (src && !src.startsWith('data:')) {
+        // Mostrar anotador vacío con placeholder
+        document.getElementById('annotator-container').style.display = 'none';
+      }
+    };
+    img.src = src;
+  }
+
+  // ── Reset completo ────────────────────────────────────────────────────────
+  function resetAnnotator() {
+    if (ctxDraw && canvasDraw) ctxDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
+    if (canvasBase) canvasBase.getContext('2d').clearRect(0, 0, canvasBase.width, canvasBase.height);
+    history = [];
+    document.getElementById('annotator-container').style.display = 'none';
+  }
+
+  // ── Exportar fusión de ambos canvas como JPEG base64 ─────────────────────
+  function getMergedBase64(quality) {
+    quality = quality || 0.85;
+    if (!canvasBase || !canvasDraw || !canvasBase.width) return '';
+    var tmp    = document.createElement('canvas');
+    tmp.width  = canvasBase.width;
+    tmp.height = canvasBase.height;
+    var t = tmp.getContext('2d');
+    t.drawImage(canvasBase, 0, 0);
+    t.drawImage(canvasDraw, 0, 0);
+    return tmp.toDataURL('image/jpeg', quality);
+  }
+
+  // ── UI: selección de herramienta ──────────────────────────────────────────
+  function selectTool(tool) {
+    currentTool = tool;
+    document.querySelectorAll('.ann-tool').forEach(function (btn) {
+      btn.style.borderColor = btn.dataset.tool === tool ? '#facc15' : 'transparent';
+    });
+    canvasDraw.style.cursor = (tool === 'text') ? 'text' : 'crosshair';
+  }
+
+  // ── UI: selección de color ────────────────────────────────────────────────
+  function selectColor(color) {
+    currentColor = color;
+    document.querySelectorAll('.ann-color').forEach(function (btn) {
+      btn.style.borderColor = btn.dataset.color === color ? '#facc15' : (btn.dataset.color === '#FFFFFF' ? '#888' : 'transparent');
+    });
+  }
+
+  // ── Undo ──────────────────────────────────────────────────────────────────
+  function undo() {
+    if (history.length === 0) return;
+    var prev = history.pop();
+    ctxDraw.putImageData(prev, 0, 0);
+  }
+
+  // ── Limpiar ───────────────────────────────────────────────────────────────
+  function clearAll() {
+    saveHistory();
+    ctxDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
+  }
+
+  // ── Guardar estado para undo ──────────────────────────────────────────────
+  function saveHistory() {
+    if (!ctxDraw || !canvasDraw.width) return;
+    history.push(ctxDraw.getImageData(0, 0, canvasDraw.width, canvasDraw.height));
+    if (history.length > MAX_HISTORY) history.shift();
+  }
+
+  // ── Coordenadas del canvas (escala entre CSS pixels y canvas pixels) ──────
+  function getPos(e) {
+    var rect = canvasDraw.getBoundingClientRect();
+    var scaleX = canvasDraw.width  / rect.width;
+    var scaleY = canvasDraw.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top)  * scaleY
+    };
+  }
+
+  // ── Preparar contexto de dibujo ───────────────────────────────────────────
+  function applyStyle(cx) {
+    cx.strokeStyle = currentColor;
+    cx.fillStyle   = currentColor;
+    cx.lineWidth   = currentSize;
+    cx.lineJoin    = 'round';
+    cx.lineCap     = 'round';
+  }
+
+  // ── MOUSE events ─────────────────────────────────────────────────────────
+  function onMouseDown(e) {
+    if (e.preventDefault) e.preventDefault(); // guard: el objeto convertido desde touch no tiene este método
+    var pos = getPos(e);
+    startX = pos.x; startY = pos.y;
+
+    if (currentTool === 'text') {
+      handleText(startX, startY);
+      return;
+    }
+
+    isDrawing = true;
+    saveHistory();
+    snapshotBeforeShape = ctxDraw.getImageData(0, 0, canvasDraw.width, canvasDraw.height);
+
+    if (currentTool === 'brush') {
+      applyStyle(ctxDraw);
+      ctxDraw.beginPath();
+      ctxDraw.moveTo(startX, startY);
+    }
+  }
+
+  function onMouseMove(e) {
+    if (!isDrawing) return;
+    var pos = getPos(e);
+    drawPreview(pos.x, pos.y);
+  }
+
+  function onMouseUp(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    var pos = getPos(e);
+    if (currentTool !== 'brush') {
+      commitShape(pos.x, pos.y);
+    }
+    ctxDraw.closePath();
+  }
+
+  // ── TOUCH events ─────────────────────────────────────────────────────────
+  function touchToMouse(e) {
+    var t = e.touches[0] || e.changedTouches[0];
+    return { clientX: t.clientX, clientY: t.clientY };
+  }
+
+  function onTouchStart(e) {
+    e.preventDefault();
+    onMouseDown(touchToMouse(e));
+  }
+  function onTouchMove(e) {
+    e.preventDefault();
+    onMouseMove(touchToMouse(e));
+  }
+  function onTouchEnd(e) {
+    e.preventDefault();
+    onMouseUp(touchToMouse(e));
+  }
+
+  // ── Dibujo en tiempo real (preview de formas) ─────────────────────────────
+  function drawPreview(x, y) {
+    if (currentTool === 'brush') {
+      applyStyle(ctxDraw);
+      ctxDraw.lineTo(x, y);
+      ctxDraw.stroke();
+      return;
+    }
+    // Para formas: restaurar snapshot y dibujar sobre él
+    ctxDraw.putImageData(snapshotBeforeShape, 0, 0);
+    applyStyle(ctxDraw);
+    drawShape(ctxDraw, startX, startY, x, y);
+  }
+
+  // ── Confirmar forma final ─────────────────────────────────────────────────
+  function commitShape(x, y) {
+    ctxDraw.putImageData(snapshotBeforeShape, 0, 0);
+    applyStyle(ctxDraw);
+    drawShape(ctxDraw, startX, startY, x, y);
+  }
+
+  // ── Dibujar forma según herramienta ──────────────────────────────────────
+  function drawShape(cx, x1, y1, x2, y2) {
+    cx.beginPath();
+    if (currentTool === 'arrow') {
+      drawArrow(cx, x1, y1, x2, y2);
+    } else if (currentTool === 'circle') {
+      var rx = Math.abs(x2 - x1) / 2;
+      var ry = Math.abs(y2 - y1) / 2;
+      var cx2 = (x1 + x2) / 2;
+      var cy2 = (y1 + y2) / 2;
+      cx.ellipse(cx2, cy2, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2);
+      cx.stroke();
+    } else if (currentTool === 'rect') {
+      cx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    }
+  }
+
+  // ── Flecha con punta ─────────────────────────────────────────────────────
+  function drawArrow(cx, x1, y1, x2, y2) {
+    var headLen = Math.max(12, currentSize * 3.5);
+    var angle   = Math.atan2(y2 - y1, x2 - x1);
+    cx.moveTo(x1, y1);
+    cx.lineTo(x2, y2);
+    cx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6),
+              y2 - headLen * Math.sin(angle - Math.PI / 6));
+    cx.moveTo(x2, y2);
+    cx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6),
+              y2 - headLen * Math.sin(angle + Math.PI / 6));
+    cx.stroke();
+  }
+
+  // ── Texto ─────────────────────────────────────────────────────────────────
+  function handleText(x, y) {
+    var texto = window.prompt('Texto a agregar:');
+    if (!texto || !texto.trim()) return;
+    saveHistory();
+    applyStyle(ctxDraw);
+    ctxDraw.font = 'bold ' + Math.max(14, currentSize * 4) + 'px Arial';
+    ctxDraw.fillText(texto.trim(), x, y);
+  }
+
+  // ── Exportar y actualizar data1 (imagen guardada en BD) ──────────────────
+  function syncAnnotatedField() {
+    var dataURL = getMergedBase64(0.85);
+    if (!dataURL) return;
+    var b64 = dataURL.split(',')[1];
+    var el = document.getElementById('annotatedData');
+    if (el) el.value = b64;
+  }
+
+  // ── API pública ───────────────────────────────────────────────────────────
+  window._annotator = {
+    init:             init,
+    loadImage:        loadImage,
+    resetAnnotator:   resetAnnotator,
+    getMergedBase64:  getMergedBase64,
+    syncAnnotatedField: syncAnnotatedField
+  };
+
+  // Auto-init al cargar DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Listener myFile1 → cargar en canvas
+  document.addEventListener('DOMContentLoaded', function () {
+    var f1 = document.getElementById('myFile1');
+    if (!f1) return;
+    f1.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        window._annotator.loadImage(ev.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+})();
+</script>

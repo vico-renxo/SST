@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      #formulario3 input, select { width: 100%; margin-bottom: 10px; padding: 5px; }
+      .email-cell {
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="d-flex align-items-center mt-3">
+  <div class="bg-purple rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #6610f2;">
+    <i class="fas fa-users text-white" ></i>
+  </div>
+  <div>
+    <h5 class="mb-0" style="color: #6f42c1;">Usuarios</h5>
+    <small class="text-muted">Listas de usuarios</small>
+  </div>
+</div>
+
+    <div class="container-fluid my-1 px-0">
+<!-- ✅ Encabezado de acciones y buscador -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+
+  <!-- 🔹 Grupo izquierdo: Acciones -->
+  <div class="d-flex align-items-center gap-1">
+    <button onclick="abrirFormulario3()" class="btn btn-secondary btn-sm">
+      <i class="fa-solid fa-user-plus"></i> Nuevo usuario
+    </button>
+
+    <button class="btn btn-warning btn-sm" id="btn4" onclick="window.print()" style="font-size:15px;">
+      <i class="fa-solid fa-print"></i>
+    </button>
+
+    <input type="color" id="colorBorde" class="form-control form-control-color form-control-sm" value="#808080" title="Elige un color" style="width: 60px;">
+
+    <button id="guardarColor" class="btn btn-secondary btn-sm">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </button>
+
+    <button class="btn btn-warning btn-sm rounded-pill ms-2" onclick="abrirPanelNotifUsuarios()" title="Enviar alertas a trabajadores">
+      <i class="fas fa-bell me-1"></i> Alertas
+    </button>
+
+    <button class="btn btn-outline-secondary btn-sm rounded-pill ms-2" onclick="forzarRefrescoListas()" title="Actualiza los dropdowns de trabajadores, áreas y equipos en toda la app">
+      <i class="fa-solid fa-rotate me-1"></i> Refrescar listas
+    </button>
+
+    <!-- ── Separador + Personalizador de encabezados de tablas ── -->
+    <div style="width:1px;background:#dee2e6;align-self:stretch;margin:0 8px;"></div>
+    <div class="d-flex align-items-center gap-1" title="Personalizar color de encabezados en todas las tablas del sistema">
+      <i class="fa-solid fa-table-columns text-muted" style="font-size:12px;"></i>
+      <span class="text-muted" style="font-size:11px;white-space:nowrap;font-weight:500;">Tablas:</span>
+      <input type="color" id="tblBgColor"
+             class="form-control form-control-color form-control-sm"
+             value="#212529"
+             title="Color de fondo del encabezado"
+             style="width:32px;height:26px;padding:1px 2px;cursor:pointer;">
+      <input type="color" id="tblTxtColor"
+             class="form-control form-control-color form-control-sm"
+             value="#ffffff"
+             title="Color del texto del encabezado"
+             style="width:32px;height:26px;padding:1px 2px;cursor:pointer;">
+      <button id="btnGuardarTablas" class="btn btn-sm btn-outline-secondary" style="padding:2px 7px;" title="Guardar colores">
+        <i class="fa-solid fa-floppy-disk" style="font-size:12px;"></i>
+      </button>
+      <button id="btnResetTablas" class="btn btn-sm btn-outline-danger" style="padding:2px 7px;" title="Restablecer por defecto">
+        <i class="fa-solid fa-rotate-left" style="font-size:12px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔹 Grupo derecho: Buscador -->
+  <div class="d-flex align-items-center gap-2">
+    <input type="text" id="buscador3" class="form-control" placeholder="Buscar..." style="max-width: 250px; height:30px;">
+    <button id="btnBuscarUsuarios" class="btn btn-info btn-sm">
+      </i> Buscar
+    </button>
+  </div>
+
+</div>
+
+
+  <div id="loadingUsuarios" class="text-center my-4" style="display: none;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+  <p class="mt-2">Preparando información...</p>
+</div>
+
+  <div class="table-responsive print-container mt-2">
+    <table class="table table-bordered table-hover">
+      <thead><tr id="encabezados3"></tr></thead>
+      <tbody id="cuerpo3"></tbody>
+    </table>
+  </div>
+  <div class="text-start my-3">
+  <button id="btnVerMasUsuarios" class="btn btn-outline-secondary shadow-sm" onclick="verMasUsuarios()" style="display: none;"><i class="fa-solid fa-arrow-down"></i>Ver más</button>
+</div>
+</div>
+
+   <dialog id="modal3" class="border-0 rounded-3 shadow p-2" style="width: 90%; max-width: 500px;">
+  <div class="modal-content border-0">
+    <div class="modal-header py-2">
+      <h5 class="modal-title w-100 text-center" id="modal-titulo3">Editar Usuario</h5>
+      <button type="button" class="btn-close" aria-label="Cerrar" onclick="cerrarModal3()"></button>
+    </div>
+    <div class="modal-body">
+      <form id="formulario3" method="dialog">
+        <!-- Inputs generados dinámicamente -->
+      </form>
+      <div id="mensaje-error3" class="text-danger mt-2" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-guardar3" type="button" onclick="guardarCambios3()" class="btn btn-primary">Guardar</button>
+      <button type="button" onclick="cerrarModal3()" class="btn btn-secondary">Cancelar</button>
+    </div>
+  </div>
+</dialog>
+
+    <script>
+      let listas = { cargos: [], empresas: [], accesos: [] }; //SE PUEDE ELIMINAR
+
+      let headers3 = [], datos = [], totalUsuarios = 0;
+      let offsetUsuarios = 0;
+      const limitUsuarios = 40;
+      let filtroActivoUsuarios = "";
+
+      document.getElementById("btnBuscarUsuarios").addEventListener("click", () => {
+        offsetUsuarios = 0;
+        filtroActivoUsuarios = document.getElementById("buscador3").value.toLowerCase();
+        datos = []; // Reiniciar datos acumulados
+        cargarDatos3();
+      });
+
+      function verMasUsuarios() {
+        offsetUsuarios += limitUsuarios;
+        cargarDatos3();
+      }
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarDatos3();
+
+  google.script.run.withSuccessHandler(function (res) {
+    listas = res;
+  }).getTodasLasListas();
+
+  document.getElementById("buscador3").addEventListener("input", function () {
+    const txt = this.value.toLowerCase();
+    const filtrado = datos.filter(fila =>
+      fila.some(celda => String(celda).toLowerCase().includes(txt))
+    );
+    mostrarFilas3(filtrado);
+  });
+
+  google.script.run.withSuccessHandler(function (color) {
+    if (color) {
+      document.getElementById('img').style.borderColor = color;
+      document.getElementById('colorBorde').value = color;
+      document.getElementById('guardarColor').style.backgroundColor = color;
+      document.getElementById('guardarColor').style.borderColor = color;
+      document.getElementById('fotoPerfil').style.borderColor = color;
+      document.getElementById('iconoEmpresa').style.color = color;
+    }
+  }).getColor();
+});
+
+
+function cargarDatos3() {
+  document.getElementById("loadingUsuarios").style.display = "block";
+  const btnVerMasUsuarios = document.getElementById("btnVerMasUsuarios");
+  btnVerMasUsuarios.disabled = true;
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.headers3) {
+        document.getElementById("loadingUsuarios").style.display = "none";
+        btnVerMasUsuarios.disabled = false;
+        console.error('obtenerUsuariosPaginado devolvió respuesta inválida:', res);
+        return;
+      }
+      if (offsetUsuarios === 0) {
+        headers3 = res.headers3;
+        datos = res.filas;
+        document.getElementById("encabezados3").innerHTML = headers3.map(h => `<th>${h || ''}</th>`).join('') + "<th>Acción</th>";
+      } else {
+        datos = datos.concat(res.filas);
+      }
+      totalUsuarios = res.total;
+      mostrarFilas3(datos);
+      document.getElementById("loadingUsuarios").style.display = "none";
+      btnVerMasUsuarios.disabled = false;
+    })
+    .withFailureHandler(function (err) {
+      document.getElementById("loadingUsuarios").style.display = "none";
+      btnVerMasUsuarios.disabled = false;
+      console.error('Error en obtenerUsuariosPaginado:', err);
+    })
+    .obtenerUsuariosPaginado(offsetUsuarios, limitUsuarios, filtroActivoUsuarios);
+}
+
+
+function mostrarFilas3(data) {
+  const tbody = document.getElementById("cuerpo3");
+  tbody.innerHTML = "";
+
+  data.forEach((fila, i) => {
+    const tr = document.createElement("tr");
+    fila.forEach((celda, j) => {
+      const td = document.createElement("td");
+
+      // --- IMAGEN ---
+      if (headers3[j] === "IMAGEN" && celda) {
+        td.innerHTML = `<img src="${celda}" style="max-width:50px; max-height:50px;">`;
+
+      // --- FECHA CESE ---
+      } else if (headers3[j] === "FECHA CESE") {
+        if (celda instanceof Date && !isNaN(celda)) {
+          td.textContent = celda.toLocaleDateString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
+          td.style.color = '#dc3545';
+          td.style.fontWeight = '600';
+        } else if (celda) {
+          td.textContent = celda;
+          td.style.color = '#dc3545';
+        } else {
+          td.textContent = '—';
+          td.style.color = '#adb5bd';
+        }
+
+      // --- EMAIL (formateado) ---
+      } else if (headers3[j] === "EMAIL") {
+        const email = celda || "";
+        let visible = email;
+
+        const atIndex = email.indexOf("@");
+        if (atIndex > 3) {
+          const inicio = email.substring(0, 3); // primeras 3 letras
+          const dominio = email.substring(atIndex); // @gmail.com
+          visible = `${inicio}...${dominio}`;
+        }
+
+        td.textContent = visible;
+        td.classList.add("email-cell");
+        td.title = email; // Tooltip
+
+      // --- AUTORIZADO? ---
+      } else if (headers3[j] === "AUTORIZADO?") {
+        td.textContent = celda;
+        td.style.fontWeight = "bold";
+        td.style.backgroundColor = celda === "SI" ? "#d4edda" : "#f8d7da";
+        td.style.color = celda === "SI" ? "#155724" : "#721c24";
+
+      // --- RESTO ---
+      } else {
+        td.textContent = celda;
+      }
+
+      tr.appendChild(td);
+    });
+
+    // --- ACCIONES ---
+    const tdAcc = document.createElement("td");
+    tdAcc.innerHTML = `
+      <button onclick="abrirFormulario3('${fila[1]}')" class="btn btn-info btn-sm">
+        <i class="fa-solid fa-pen"></i>
+      </button>
+      <button onclick="eliminarRegistro3('${fila[1]}', '${fila[2]}')" class="btn btn-danger btn-sm">
+        <i class="fa-solid fa-trash"></i>
+      </button>`;
+    tr.appendChild(tdAcc);
+
+    tbody.appendChild(tr);
+  });
+
+  // Mostrar/ocultar botón “Ver más”
+  const btn = document.getElementById("btnVerMasUsuarios");
+  if (datos.length < totalUsuarios) {
+    btn.style.display = "block";
+  } else {
+    btn.style.display = "none";
+  }
+}
+
+       function abrirFormulario3(nombreUsuario) {
+          const modal3 = document.getElementById("modal3");
+          const form = document.getElementById("formulario3");
+
+          // Buscar el índice real en `datos` por el nombre
+          const index = datos.findIndex(fila => fila[1] == nombreUsuario); // columna 2 = índice 1
+          const isNuevo = index === -1;
+          const valores = isNuevo ? Array(headers3.length).fill("") : datos[index];
+
+          form.innerHTML = "";
+
+          const linkIndex = headers3.indexOf("IMAGEN");
+          const linkVal = valores[linkIndex] || "";
+          form.innerHTML += `
+            <div class="text-center mb-3">
+              <img id="preview-img" src="${linkVal}" alt="Imagen" class="img-thumbnail" style="max-width:150px; max-height:150px; border-radius:10px;">
+            </div>
+          `;
+
+          document.getElementById("modal-titulo3").textContent = isNuevo ? "Nuevo Usuario" : "Editar Usuario";
+
+          let accesosHTML = "";
+
+          headers3.forEach((h, i) => {
+            let val = valores[i] || "";
+            let inputHTML = `<div class="mb-3"><label class="form-label">${h}</label>`;
+              // Si es campo ID (primera columna)
+          if (i === 0) {
+            if (!isNuevo) {
+              inputHTML += `<input type="text" name="${h}" class="form-control" value="${val}" readonly>`;
+            } else {
+              inputHTML += `<input type="text" name="${h}" class="form-control" value="" readonly placeholder="Se generará automáticamente">`;
+            }
+            inputHTML += `</div>`;
+            form.innerHTML += inputHTML;
+            return;
+          }
+
+            if (h === "CARGO") {
+              inputHTML += `<select name="${h}" class="form-select">` +
+                listas.cargos.map(op => `<option value="${op}" ${val === op ? "selected" : ""}>${op}</option>`).join('') +
+                `</select>`;
+            } else if (h === "EMPRESA") {
+              inputHTML += `<select name="${h}" class="form-select">` +
+                listas.empresas.map(op => `<option value="${op}" ${val === op ? "selected" : ""}>${op}</option>`).join('') +
+                `</select>`;
+            } else if (h === "AUTORIZADO?") {
+              inputHTML += `
+                <select name="${h}" class="form-select">
+                  <option value="SI" ${val === "SI" ? "selected" : ""}>SI</option>
+                  <option value="NO" ${val === "NO" ? "selected" : ""}>NO</option>
+                </select>
+              `;
+            } else if (h === "ACCESOS") {
+              accesosHTML = `
+                <div class="mb-3">
+                  <label class="form-label d-block">${h}</label>
+                  ${listas.accesos.map(op => {
+                    const checked = val.includes(op) ? "checked" : "";
+                    return `
+                      <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" style="max-width:40px;" name="Accesos" value="${op}" id="acceso-${op}" ${checked}>
+                        <label class="form-check-label ms-2" for="acceso-${op}">${op}</label>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+              return;
+            } else if (h === "FECHA CESE") {
+              // Campo opcional — solo se llena al liquidar al trabajador
+              // val puede ser Date, "YYYY-MM-DD", "DD/MM/YYYY" o vacío
+              let dateVal = '';
+              if (val instanceof Date && !isNaN(val)) {
+                dateVal = val.toISOString().split('T')[0];
+              } else if (typeof val === 'string' && val.trim()) {
+                if (val.includes('/')) {
+                  // "DD/MM/YYYY" → "YYYY-MM-DD"
+                  const p = val.trim().split('/');
+                  if (p.length === 3) dateVal = p[2] + '-' + p[1] + '-' + p[0];
+                } else {
+                  dateVal = val.trim().split('T')[0];
+                }
+              }
+              inputHTML += `
+                <input type="date" name="${h}" class="form-control" value="${dateVal}"
+                  title="Dejar vacío si el trabajador sigue activo">
+                <div class="form-text text-muted">Opcional. Completar solo al cesar/liquidar al trabajador.</div>
+              `;
+            } else if (h === "IMAGEN") {
+              inputHTML += `
+                <input type="text" name="${h}" class="form-control" value="${val}"
+                  oninput="document.getElementById('preview-img').src = this.value">
+              `;
+            } else {
+              if (i === 0 && isNuevo) {
+                inputHTML += `<input type="text" name="${h}" class="form-control" value="${val}" readonly>`;
+                inputHTML += `</div>`;
+                form.innerHTML += inputHTML;
+                return;
+              }
+
+              const oninput = (i === 1) ? `oninput="autocompletarDatosPorNumero(this.value)"` : "";
+              inputHTML += 
+                `<input type="text" name="${h}" class="form-control" value="${val}" ${i === 0 && !isNuevo ? "readonly" : ""} ${oninput}>`;
+            }
+
+            inputHTML += `</div>`;
+            form.innerHTML += inputHTML;
+          });
+
+          form.innerHTML += accesosHTML;
+          form.dataset.index = isNuevo ? "null" : index;
+          modal3.showModal();
+        }
+
+
+      function cerrarModal3() {
+        document.getElementById("modal3").close();
+      }
+
+      function guardarCambios3() {
+        const btnGuardar = document.getElementById("btn-guardar3");
+        const form = document.getElementById("formulario3");
+        const inputs = Array.from(form.elements);
+        const index = form.dataset.index;
+
+        // Limpiar mensaje de error al inicio
+        const mensajeError = document.getElementById("mensaje-error3");
+        mensajeError.style.display = "none";
+        mensajeError.textContent = "";
+
+        btnGuardar.textContent = "Guardando...";
+        btnGuardar.disabled = true;
+
+        const valores = headers3.map(h => {
+          if (h === "ACCESOS") {
+            return inputs
+              .filter(el => el.name === "Accesos" && el.checked)
+              .map(el => el.value)
+              .join(", ");
+          }
+          const campo = inputs.find(el => el.name === h);
+          return campo ? campo.value.trim() : "";
+        });
+
+        if (index === "null") {
+        valores[0] = "";
+      }
+        // Validar campos vacíos (FECHA CESE es opcional)
+        const camposOpcionales = ["FECHA CESE"];
+        if (valores.slice(1).some((v, i) => !v && !camposOpcionales.includes(headers3[i + 1]))) {
+          mensajeError.textContent = "Todos los campos son obligatorios (excepto Fecha Cese)";
+          mensajeError.style.display = "block";
+          btnGuardar.textContent = "Guardar";
+          btnGuardar.disabled = false;
+          return;
+        }
+
+        // Validar que no se repita el Usuario (columna B = índice 1)
+        if (index === "null") {
+          const usuarioNuevo = valores[1].toLowerCase().trim();
+
+          const yaExiste = datos.some(fila => String(fila[1]).toLowerCase().trim() === usuarioNuevo);
+
+          if (yaExiste) {
+            mensajeError.textContent = "Este usuario ya existe.";
+            mensajeError.style.display = "block";
+            btnGuardar.textContent = "Guardar";
+            btnGuardar.disabled = false;
+            return;
+          }
+        }
+
+  // Callback luego de guardar
+  const callback = () => {
+    cerrarModal3();
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro guardado correctamente',
+      timer: 1500,
+      showConfirmButton: false
+    });
+    cargarDatos3();
+    btnGuardar.textContent = "Guardar";
+    btnGuardar.disabled = false;
+  };
+
+  // Guardar nuevo o actualizar
+  if (index === "null") {
+    google.script.run.withSuccessHandler(callback).agregarUsuario(valores);
+  } else {
+    google.script.run.withSuccessHandler(callback).actualizarUsuario(valores);
+  }
+}
+
+
+function eliminarRegistro3(usuario, nombre) {
+  if (!usuario) return;
+
+  Swal.fire({
+    title: '¿Eliminar?',
+    text: `¿Deseas eliminar a "${nombre}"?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      google.script.run.withSuccessHandler(() => {
+        cargarDatos3();
+        Swal.fire('Eliminado', 'El usuario fue eliminado.', 'success');
+      }).eliminarUsuarioPorUsuario(usuario); // Debes tener esta función en Apps Script
+    }
+  });
+}
+
+      function autocompletarDatosPorNumero(valor) {
+      if (!valor.trim()) return;
+
+      google.script.run.withSuccessHandler(function (res) {
+        if (!res) return;
+
+        const form = document.getElementById("formulario3");
+        const textoInput = form.querySelector('[name="NOMBRES"]');
+        const select1 = form.querySelector('[name="CARGO"]');
+        const select2 = form.querySelector('[name="EMPRESA"]');
+        const emailInput = form.querySelector('[name="EMAIL"]');
+
+        if (textoInput) textoInput.value = res.texto || '';
+        if (select1) select1.value = res.select1 || '';
+        if (select2) select2.value = res.select2 || '';
+        if (emailInput) emailInput.value = res.emailInput || ''; // Aquí va el valor de la columna Q
+
+      }).buscarDatosPorNumero(valor);
+    }
+
+    </script>
+    <script>
+
+      // ══════════════════════════════════════════════════════════════════
+      //  PERSONALIZADOR DE ENCABEZADOS DE TABLAS (aplica a todo el sistema)
+      // ══════════════════════════════════════════════════════════════════
+      function _applyTableTheme(bg, txt) {
+        var s = document.getElementById('tbl-theme-style');
+        if (!s) {
+          s = document.createElement('style');
+          s.id = 'tbl-theme-style';
+          document.head.appendChild(s);
+        }
+        if (!bg && !txt) { s.textContent = ''; return; }
+        var css = 'thead th, thead td {';
+        if (bg)  css += 'background-color:' + bg  + ' !important;';
+        if (txt) css += 'color:'            + txt + ' !important;';
+        css += '}';
+        s.textContent = css;
+      }
+
+      // Cargar colores guardados al abrir el módulo
+      (function() {
+        var savedBg  = localStorage.getItem('tblHeaderBg');
+        var savedTxt = localStorage.getItem('tblHeaderTxt');
+        if (savedBg)  document.getElementById('tblBgColor').value  = savedBg;
+        if (savedTxt) document.getElementById('tblTxtColor').value = savedTxt;
+      })();
+
+      // Preview en vivo al mover el color picker
+      document.getElementById('tblBgColor').addEventListener('input', function() {
+        _applyTableTheme(this.value, document.getElementById('tblTxtColor').value);
+      });
+      document.getElementById('tblTxtColor').addEventListener('input', function() {
+        _applyTableTheme(document.getElementById('tblBgColor').value, this.value);
+      });
+
+      // Guardar en localStorage y aplicar globalmente
+      document.getElementById('btnGuardarTablas').addEventListener('click', function() {
+        var bg  = document.getElementById('tblBgColor').value;
+        var txt = document.getElementById('tblTxtColor').value;
+        localStorage.setItem('tblHeaderBg',  bg);
+        localStorage.setItem('tblHeaderTxt', txt);
+        _applyTableTheme(bg, txt);
+        Swal.fire({ icon: 'success', title: '¡Colores guardados!',
+          text: 'Se aplicarán en todas las tablas del sistema.',
+          timer: 1800, showConfirmButton: false });
+      });
+
+      // Restablecer colores por defecto
+      document.getElementById('btnResetTablas').addEventListener('click', function() {
+        localStorage.removeItem('tblHeaderBg');
+        localStorage.removeItem('tblHeaderTxt');
+        document.getElementById('tblBgColor').value  = '#212529';
+        document.getElementById('tblTxtColor').value = '#ffffff';
+        _applyTableTheme(null, null);
+        Swal.fire({ icon: 'info', title: 'Colores restablecidos',
+          text: 'Las tablas vuelven a su estilo original.',
+          timer: 1500, showConfirmButton: false });
+      });
+
+      document.getElementById('colorBorde').addEventListener('input', function () {
+        const color = this.value;
+        document.getElementById('img').style.borderColor = color;
+        document.getElementById('guardarColor').style.backgroundColor = color;
+        document.getElementById('guardarColor').style.borderColor = color;
+        document.getElementById('fotoPerfil').style.borderColor = color;
+        const iconoEmp = document.getElementById('iconoEmpresa');
+        if (iconoEmp) iconoEmp.style.color = color; // live preview del ícono de mes
+      });
+
+      document.getElementById('guardarColor').addEventListener('click', function () {
+        const color = document.getElementById('colorBorde').value;
+        localStorage.setItem('brandColor', color); // sync inmediato entre módulos
+        google.script.run.saveColor(color);
+        Swal.fire({
+          icon: 'success',
+          title: 'Color actualizado correctamente',
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      });
+
+    </script>
+
+<!-- ============================================================ -->
+<!--  PANEL DE ALERTAS / NOTIFICACIONES (solo admin)              -->
+<!-- ============================================================ -->
+<dialog id="dialogNotifUsuarios" class="border-0 rounded-3 shadow p-0" style="width:92%;max-width:520px;z-index:9999;">
+  <div style="background:linear-gradient(135deg,#ffc107,#ff9800);padding:14px 20px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center">
+    <h6 style="margin:0;font-weight:700;color:#1a1a2e"><i class="fas fa-bell me-2"></i>Centro de Alertas</h6>
+    <button type="button" class="btn-close" onclick="document.getElementById('dialogNotifUsuarios').close()"></button>
+  </div>
+  <div style="padding:20px">
+    <p class="text-muted" style="font-size:12px;margin-bottom:16px">
+      Enviar alertas con sonido y vibración al celular de los trabajadores.
+    </p>
+
+    <!-- Tipo de alerta -->
+    <div class="mb-3">
+      <label class="form-label fw-bold" style="font-size:13px">Tipo de alerta</label>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-dark notifU-tipo-btn" data-tipo="epp" onclick="setTipoNotifU('epp')">
+          <i class="fas fa-hard-hat me-1"></i> EPP
+        </button>
+        <button class="btn btn-sm btn-outline-dark notifU-tipo-btn" data-tipo="capacitacion" onclick="setTipoNotifU('capacitacion')">
+          <i class="fas fa-graduation-cap me-1"></i> Capacitación
+        </button>
+      </div>
+    </div>
+
+    <!-- Destinatario -->
+    <div class="mb-3">
+      <label class="form-label fw-bold" style="font-size:13px">Destinatario</label>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-dark notifU-modo-btn" data-modo="individual" onclick="setModoNotifU('individual')">
+          <i class="fas fa-user me-1"></i> Individual
+        </button>
+        <button class="btn btn-sm btn-outline-dark notifU-modo-btn" data-modo="todos" onclick="setModoNotifU('todos')">
+          <i class="fas fa-users me-1"></i> Todos
+        </button>
+      </div>
+    </div>
+
+    <!-- Select trabajador -->
+    <div class="mb-3" id="notifU_selectBox">
+      <label class="form-label fw-bold" style="font-size:13px">Trabajador</label>
+      <select id="notifU_trabajador" class="form-select form-select-sm">
+        <option value="">Cargando...</option>
+      </select>
+    </div>
+
+    <!-- Título -->
+    <div class="mb-3">
+      <label class="form-label fw-bold" style="font-size:13px">Título</label>
+      <input type="text" id="notifU_titulo" class="form-control form-control-sm" value="Alerta EPP" maxlength="60">
+    </div>
+
+    <!-- Mensaje -->
+    <div class="mb-3">
+      <label class="form-label fw-bold" style="font-size:13px">Mensaje</label>
+      <textarea id="notifU_mensaje" class="form-control form-control-sm" rows="3" maxlength="200">Revisa tu módulo de EPP. Tienes actualizaciones pendientes.</textarea>
+      <small class="text-muted"><span id="notifU_charCount">0</span>/200</small>
+    </div>
+
+    <!-- Mensajes rápidos EPP -->
+    <div class="mb-3" id="notifU_rapidosEPP">
+      <label class="form-label fw-bold" style="font-size:13px">Mensajes rápidos</label>
+      <div class="d-flex flex-wrap gap-1">
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Revisa tu módulo de EPP. Tienes actualizaciones pendientes.')">EPP Pendiente</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Tienes EPP vencidos. Acércate para el recambio.')">EPP Vencido</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Firma la recepción de tu EPP asignado en la app.')">Firmar EPP</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Reunión de entrega de EPP. Acudir de inmediato.')">Reunión EPP</button>
+      </div>
+    </div>
+
+    <!-- Mensajes rápidos Capacitación -->
+    <div class="mb-3" id="notifU_rapidosCap" style="display:none">
+      <label class="form-label fw-bold" style="font-size:13px">Mensajes rápidos</label>
+      <div class="d-flex flex-wrap gap-1">
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Tienes una capacitación pendiente. Revisa tu app.')">Cap. Pendiente</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Capacitación programada para hoy. Preséntate a tiempo.')">Cap. Hoy</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Firma tu registro de capacitación en la app.')">Firmar Registro</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="setMsgRapidoU('Evaluación disponible. Ingresa a la app para completarla.')">Evaluación</button>
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <div id="notifU_resultado" class="mb-2" style="display:none"></div>
+
+    <!-- Botón enviar -->
+    <button id="btnEnviarNotifU" class="btn btn-warning w-100 fw-bold" onclick="enviarNotifU()">
+      <i class="fas fa-paper-plane me-2"></i>Enviar Alerta
+    </button>
+  </div>
+</dialog>
+
+<script>
+// ============================================================
+//  CENTRO DE ALERTAS — Solo admin desde Usuarios
+// ============================================================
+var _notifUTrabCargados = false;
+var _notifUModo = 'individual';
+var _notifUTipo = 'epp';
+
+function abrirPanelNotifUsuarios(){
+  var dlg = document.getElementById('dialogNotifUsuarios');
+  if(dlg) dlg.showModal();
+  if(!_notifUTrabCargados) _cargarTrabNotifU();
+  _updateCharCountU();
+}
+
+function _cargarTrabNotifU(){
+  var sel = document.getElementById('notifU_trabajador');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Cargando...</option>';
+  google.script.run
+    .withSuccessHandler(function(lista){
+      _notifUTrabCargados = true;
+      sel.innerHTML = '<option value="">-- Selecciona trabajador --</option>';
+      (lista || []).forEach(function(t){
+        var opt = document.createElement('option');
+        opt.value = t.dni;
+        opt.textContent = t.nombre + (t.cargo ? ' - ' + t.cargo : '');
+        sel.appendChild(opt);
+      });
+    })
+    .withFailureHandler(function(){
+      sel.innerHTML = '<option value="">Error al cargar</option>';
+    })
+    .obtenerTrabajadoresParaNotificar();
+}
+
+function setTipoNotifU(tipo){
+  _notifUTipo = tipo;
+  document.querySelectorAll('.notifU-tipo-btn').forEach(function(b){
+    b.classList.toggle('btn-dark', b.dataset.tipo === tipo);
+    b.classList.toggle('btn-outline-dark', b.dataset.tipo !== tipo);
+  });
+  var tit = document.getElementById('notifU_titulo');
+  var msg = document.getElementById('notifU_mensaje');
+  var rEPP = document.getElementById('notifU_rapidosEPP');
+  var rCap = document.getElementById('notifU_rapidosCap');
+  if(tipo === 'epp'){
+    if(tit) tit.value = 'Alerta EPP';
+    if(msg) msg.value = 'Revisa tu módulo de EPP. Tienes actualizaciones pendientes.';
+    if(rEPP) rEPP.style.display = '';
+    if(rCap) rCap.style.display = 'none';
+  } else {
+    if(tit) tit.value = 'Alerta Capacitación';
+    if(msg) msg.value = 'Tienes una capacitación pendiente. Revisa tu app.';
+    if(rEPP) rEPP.style.display = 'none';
+    if(rCap) rCap.style.display = '';
+  }
+  _updateCharCountU();
+}
+
+function setModoNotifU(modo){
+  _notifUModo = modo;
+  document.querySelectorAll('.notifU-modo-btn').forEach(function(b){
+    b.classList.toggle('btn-dark', b.dataset.modo === modo);
+    b.classList.toggle('btn-outline-dark', b.dataset.modo !== modo);
+  });
+  var selectBox = document.getElementById('notifU_selectBox');
+  if(selectBox) selectBox.style.display = (modo === 'individual') ? '' : 'none';
+}
+
+function setMsgRapidoU(msg){
+  var ta = document.getElementById('notifU_mensaje');
+  if(ta){ ta.value = msg; _updateCharCountU(); }
+}
+
+function _updateCharCountU(){
+  var ta = document.getElementById('notifU_mensaje');
+  var cnt = document.getElementById('notifU_charCount');
+  if(ta && cnt) cnt.textContent = ta.value.length;
+}
+
+function enviarNotifU(){
+  var titulo = (document.getElementById('notifU_titulo').value || '').trim();
+  var mensaje = (document.getElementById('notifU_mensaje').value || '').trim();
+  var btn = document.getElementById('btnEnviarNotifU');
+  var resDiv = document.getElementById('notifU_resultado');
+
+  if(!titulo){ Swal.fire('Error','Escribe un título','warning'); return; }
+  if(!mensaje){ Swal.fire('Error','Escribe un mensaje','warning'); return; }
+
+  var dniOrDnis = '';
+  if(_notifUModo === 'individual'){
+    dniOrDnis = document.getElementById('notifU_trabajador').value;
+    if(!dniOrDnis){ Swal.fire('Error','Selecciona un trabajador','warning'); return; }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+  if(resDiv) resDiv.style.display = 'none';
+
+  var callback = function(result){
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Alerta';
+    if(resDiv){
+      resDiv.style.display = 'block';
+      if(result && result.ok){
+        var sent = result.sent || 0;
+        resDiv.innerHTML = '<div class="alert alert-success py-2 mb-0"><i class="fas fa-check-circle me-1"></i> Alerta enviada. <b>' + sent + '</b> notificación(es).</div>';
+      } else {
+        var err = (result && result.error) ? result.error : 'Error desconocido';
+        var reason = (result && result.reason) ? ' - ' + result.reason : '';
+        resDiv.innerHTML = '<div class="alert alert-warning py-2 mb-0"><i class="fas fa-exclamation-triangle me-1"></i> ' + err + reason + '</div>';
+      }
+    }
+  };
+
+  var errorCallback = function(err){
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Alerta';
+    if(resDiv){
+      resDiv.style.display = 'block';
+      resDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0"><i class="fas fa-times-circle me-1"></i> Error: ' + (err.message||err) + '</div>';
+    }
+  };
+
+  if(_notifUTipo === 'epp'){
+    google.script.run
+      .withSuccessHandler(callback)
+      .withFailureHandler(errorCallback)
+      .enviarAlertaEPP(_notifUModo, dniOrDnis, titulo, mensaje);
+  } else {
+    google.script.run
+      .withSuccessHandler(callback)
+      .withFailureHandler(errorCallback)
+      .enviarAlertaCapacitacion(_notifUModo, dniOrDnis, titulo, mensaje);
+  }
+}
+
+// Listener para contar caracteres
+document.addEventListener('DOMContentLoaded', function(){
+  var ta = document.getElementById('notifU_mensaje');
+  if(ta) ta.addEventListener('input', _updateCharCountU);
+});
+</script>
+
+  </body>
+</html>

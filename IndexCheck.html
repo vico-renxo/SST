@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <body>
+    <div class="d-flex align-items-center mt-3">
+  <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+    <i class="fas fa-tasks text-white"></i>
+  </div>
+  <div>
+    <h5 class="mb-0 text-success">Reporte de Check List</h5>
+    <small class="text-muted">Listas de verificación</small>
+  </div>
+</div>
+
+
+<div class="container-fluid my-1 px-0" id="page1">
+<!-- ✅ Botones superiores alineados: 2 a la izquierda, 1 a la derecha -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" role="toolbar" aria-label="Botones principales del checklist">
+  
+  <!-- 🔹 Grupo izquierdo: Reportar Checklist + Cumplimiento -->
+  <div class="d-flex align-items-center gap-1">
+    <!-- Botón Reportar Checklist -->
+    <button type="button" class="btn btn-dark position-relative shadow-sm btn-sm rounded-pill"
+            data-bs-toggle="modal" data-bs-target="#exampleModal2" onclick="clearForm()">
+      <i class="fa-solid fa-user-shield"></i> Reportar CheckList
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        <i class="fa fa-bell"></i> <span id="totalCheck2">0</span>/<span id="totalCheck1">0</span>
+      </span>
+    </button>
+
+    <!-- Botón Cumplimiento -->
+    <button type="button" class="btn btn-secondary shadow-sm btn-sm rounded-pill" id="btnActual">
+      <i class="fa-solid fa-clock"></i> Cumplimiento
+    </button>
+  </div>
+
+
+</div>
+
+
+<!-- Filtro por Equipo (chips) -->
+<style>
+  .check-chips{ display:flex; flex-wrap:wrap; gap:6px; overflow-x:auto; }
+  .check-chip{ padding:.15rem .7rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:.8rem; white-space:nowrap; transition:background .15s,color .15s,border-color .15s; }
+  .check-chip:hover{ background:#f1f5f9; }
+  .check-chip.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
+</style>
+<div class="d-flex align-items-center gap-2 mb-2" style="font-size:12px">
+  <span class="text-muted fw-bold" style="white-space:nowrap"><i class="fa fa-filter me-1"></i>Equipo:</span>
+  <div id="chipEquiposCheck" class="check-chips">
+    <span class="check-chip active" data-equipo="Todos">Todos</span>
+  </div>
+</div>
+
+<!-- Filtro por mes -->
+<div class="d-flex align-items-center gap-2 mb-2 flex-wrap" style="font-size:12px">
+  <span class="text-muted fw-bold" style="white-space:nowrap"><i class="fa fa-calendar-alt me-1"></i>Mes:</span>
+  <div id="chipMesesCheck" class="check-chips">
+    <span class="check-chip" data-mes="Todos">Todos</span>
+    <span class="check-chip" data-mes="1">Ene</span>
+    <span class="check-chip" data-mes="2">Feb</span>
+    <span class="check-chip" data-mes="3">Mar</span>
+    <span class="check-chip" data-mes="4">Abr</span>
+    <span class="check-chip" data-mes="5">May</span>
+    <span class="check-chip" data-mes="6">Jun</span>
+    <span class="check-chip" data-mes="7">Jul</span>
+    <span class="check-chip" data-mes="8">Ago</span>
+    <span class="check-chip" data-mes="9">Sep</span>
+    <span class="check-chip" data-mes="10">Oct</span>
+    <span class="check-chip" data-mes="11">Nov</span>
+    <span class="check-chip" data-mes="12">Dic</span>
+  </div>
+</div>
+
+
+  <!-- Spinner -->
+  <div id="spinnerCheck" class="text-center my-2" style="display: none;">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-1 small">Estamos organizando los datos para ti...</p>
+  </div>
+
+  <!-- Contenedor de tarjetas -->
+  <div id="tabla-registro-checklist"></div>
+
+  <!-- Botón Cargar más -->
+  <div class="text-center my-3">
+    <button id="cargarMasCheck" class="btn btn-outline-secondary shadow-sm">
+      <i class="fa-solid fa-arrow-down"></i> Ver más
+    </button>
+  </div>
+</div>
+
+    <!-- ✅ Skeleton loading -->
+    <div id="skeleton-loading2" class="d-none">
+      <div class="row g-3 py-2">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+<script>
+// ✅ CACHE MANAGER
+class CacheManagerCheck {
+  static getWithExpiry(key, expiryHours = 12) {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    
+    const data = JSON.parse(item);
+    const now = new Date().getTime();
+    
+    if (now > data.timestamp + (expiryHours * 60 * 60 * 1000)) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    
+    return data.value;
+  }
+  
+  static setWithExpiry(key, value, expiryHours = 12) {
+    const data = {
+      value: value,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  
+  static getSessionWithExpiry(key, expiryMinutes = 30) {
+    const item = sessionStorage.getItem(key);
+    if (!item) return null;
+    
+    const data = JSON.parse(item);
+    const now = new Date().getTime();
+    
+    if (now > data.timestamp + (expiryMinutes * 60 * 1000)) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+    
+    return data.value;
+  }
+  
+  static setSessionWithExpiry(key, value, expiryMinutes = 30) {
+    const data = {
+      value: value,
+      timestamp: new Date().getTime()
+    };
+    sessionStorage.setItem(key, JSON.stringify(data));
+  }
+}
+
+// ✅ VARIABLES GLOBALES OPTIMIZADAS
+let offsetCheck = 0;
+const limitCheck = 20;
+let filtroMesCheck = "Todos"; // Por defecto muestra todo
+let filtroEquipoCheck = "Todos";
+let headersCheckG = [];
+let itemsDataCheck = [];
+let itemsMap = new Map();
+let totalCoincidenciasCheck = 0;
+
+// ✅ VARIABLES DE CONTROL - Agregadas las que faltaban
+let searchTimeoutCheck;
+let currentControllerCheck;
+let isLoadingMoreCheck = false;
+let currentSearchIdCheck = 0; // ✅ NUEVO: ID único para cada búsqueda
+let pendingReplacementCheck = false; // ✅ NUEVO: Control de parpadeo
+
+var cachedDataCheckList = []; 
+let loginPasswords = [];
+let deletePasswords = [];
+
+// ✅ DEBOUNCE MEJORADO
+function debounceSearchCheck(func, delay = 300) {
+  return function executedFunction(...args) {
+    clearTimeout(searchTimeoutCheck);
+    
+    // ✅ Cancelar petición anterior
+    if (currentControllerCheck) {
+      currentControllerCheck.abort();
+    }
+    
+    searchTimeoutCheck = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
+
+// ✅ CARGAR PASSWORDS CON CACHE (sin cambios)
+async function cargarPasswordsCheck() {
+  const cached = CacheManagerCheck.getSessionWithExpiry('passwordsCheck', 60);
+  if (cached) {
+    loginPasswords = cached.loginPasswords;
+    deletePasswords = cached.deletePasswords;
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    google.script.run.withSuccessHandler((passwords) => {
+      loginPasswords = passwords.loginPasswords;
+      deletePasswords = passwords.deletePasswords;
+      CacheManagerCheck.setSessionWithExpiry('passwordsCheck', passwords, 60);
+      resolve();
+    }).withFailureHandler(err => { resolve(); console && console.warn('Error cargando passwords:', err); }).getAccessPasswords();
+  });
+}
+
+// ✅ INICIALIZACIÓN (sin cambios - está bien)
+google.script.run.withSuccessHandler(data => {
+  itemsDataCheck = data;
+
+  itemsMap = data.reduce((map, row) => {
+    const equipo = row[1];
+    if (!map.has(equipo)) {
+      map.set(equipo, []);
+    }
+    map.get(equipo).push(row);
+    return map;
+  }, new Map());
+
+  google.script.run.withSuccessHandler(headersData => {
+    headersCheckG = headersData;
+    const sel1 = document.getElementById("columnaFiltroCheck1");
+    const sel2 = document.getElementById("columnaFiltroCheck2");
+
+    if (sel1 && sel2) {
+      headersCheckG.forEach(col => {
+        [sel1, sel2].forEach(sel => {
+          const opt = document.createElement("option");
+          opt.value = col;
+          opt.textContent = col;
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    cargarDatosCheckG();
+    actualizarLabelsYPlaceholdersChecklist();
+  }).withFailureHandler(err => { Swal.fire({ icon:'error', title:'Error', text: err.message||'Error al cargar headers', toast:true, position:'top-end', timer:4000, showConfirmButton:false }); }).getHeadersCheck();
+
+}).withFailureHandler(err => { Swal.fire({ icon:'error', title:'Error', text: err.message||'Error al cargar datos', toast:true, position:'top-end', timer:4000, showConfirmButton:false }); }).getItemsData();
+
+// Cargar chips de equipo desde INVENTARIO col D
+google.script.run.withSuccessHandler(function(equipos) {
+  var box = document.getElementById('chipEquiposCheck');
+  if (!box || !equipos || !equipos.length) return;
+  equipos.forEach(function(eq) {
+    var chip = document.createElement('span');
+    chip.className = 'check-chip';
+    chip.setAttribute('data-equipo', eq);
+    chip.textContent = eq;
+    box.appendChild(chip);
+
+  });
+  box.querySelectorAll('.check-chip').forEach(function(el) {
+    el.addEventListener('click', function() {
+      box.querySelectorAll('.check-chip').forEach(function(x) { x.classList.remove('active'); });
+      el.classList.add('active');
+      filtroEquipoCheck = el.getAttribute('data-equipo');
+      reiniciarTablaCheck();
+    });
+  });
+}).withFailureHandler(function(err) { /* chips opcionales, ignorar */ }).getEquiposCheck();
+
+const camposChecklist = {
+  ad9: 5,
+  ad6: 6,
+  ad5: 7,
+  numid: 0,
+  empresacheck: 1,     // Nuevo campo
+  name: 2,
+  codigo: 3,
+  inps: 4,
+  procesoCheck: 5,
+  no: 6,
+  lugarCheck: 7,
+  idline: 9,
+  accion: 8,
+  imagen: 10,
+  estadoCheck2: 12,
+  plazoCheck: 13
+};
+
+function actualizarLabelsYPlaceholdersChecklist() {
+  Object.entries(camposChecklist).forEach(([id, index]) => {
+    const label = document.querySelector(`label[for="${id}"]`) ||
+                  document.querySelector(`#${id}`)?.closest(".col-md-6, .col-12")?.querySelector("label");
+
+    const input = document.getElementById(id);
+
+    if (label && headersCheckG[index]) {
+      label.textContent = headersCheckG[index];
+    }
+
+    if (input && headersCheckG[index] && input.tagName === "INPUT" && input.type !== "file") {
+      input.placeholder = headersCheckG[index];
+    }
+  });
+}
+
+// ✅ EVENT LISTENERS
+document.addEventListener('DOMContentLoaded', function() {
+  const btncargarMasCheck = document.getElementById("cargarMasCheck");
+
+  if (btncargarMasCheck) {
+    btncargarMasCheck.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!isLoadingMoreCheck) cargarDatosCheckG();
+    });
+  }
+
+  // Chips de mes — marcar "Todos" por defecto y escuchar clicks
+  (function() {
+    var boxMeses = document.getElementById('chipMesesCheck');
+    if (!boxMeses) return;
+    var chipTodos = boxMeses.querySelector('.check-chip[data-mes="Todos"]');
+    if (chipTodos) chipTodos.classList.add('active');
+    boxMeses.querySelectorAll('.check-chip').forEach(function(chip) {
+      var mes = chip.getAttribute('data-mes');
+      chip.addEventListener('click', function() {
+        boxMeses.querySelectorAll('.check-chip').forEach(function(x) { x.classList.remove('active'); });
+        chip.classList.add('active');
+        filtroMesCheck = (mes === 'Todos') ? 'Todos' : parseInt(mes);
+        reiniciarTablaCheck();
+      });
+    });
+  })();
+
+  // Cargar totales
+  var totalCheck1 = document.getElementById('totalCheck1');
+  var totalCheck2 = document.getElementById('totalCheck2');
+  if (totalCheck1 && totalCheck2) {
+    google.script.run.withSuccessHandler(function(data) {
+      totalCheck2.innerHTML = data[0];
+      totalCheck1.innerHTML = data[1];
+    }).withFailureHandler(function() { /* totales opcionales */ }).setStatusCheck();
+  }
+
+  cargarPasswordsCheck();
+  mostrarEstadoCargaCheck('skeleton', true);
+});
+
+function checkPasswordLocal(password) {
+  return loginPasswords.includes(password);
+}
+
+function checkDeletePasswordLocal(password) {
+  return deletePasswords.includes(password);
+}
+
+// ✅ CORREGIR: Reiniciar tabla sin parpadeo
+function reiniciarTablaCheck() {
+  currentSearchIdCheck++;
+  const searchId = currentSearchIdCheck;
+  
+  if (currentControllerCheck) {
+    currentControllerCheck.abort();
+  }
+  currentControllerCheck = new AbortController();
+
+  offsetCheck = 0;
+  cachedDataCheckList = [];
+  isLoadingMoreCheck = false;
+  pendingReplacementCheck = true;
+  
+  // ✅ MOSTRAR SKELETON para nueva búsqueda
+  mostrarEstadoCargaCheck('skeleton', true);
+  
+  cargarDatosCheckG(searchId);
+}
+
+// ✅ CORREGIR: Cargar datos con validación de búsqueda
+function cargarDatosCheckG(searchId = currentSearchIdCheck) {
+  if (isLoadingMoreCheck) return;
+  isLoadingMoreCheck = true;
+
+  if (offsetCheck === 0) {
+    mostrarEstadoCargaCheck('skeleton', true);
+  } else {
+    mostrarEstadoCargaCheck('spinner', true);
+  }
+
+  const btncargarMasCheck = document.getElementById("cargarMasCheck");
+  if (btncargarMasCheck) btncargarMasCheck.disabled = true;
+
+  google.script.run
+    .withSuccessHandler((data) => {
+      if (searchId !== currentSearchIdCheck) {
+        isLoadingMoreCheck = false;
+        return;
+      }
+      renderizarTablaCheck(data, searchId);
+    })
+    .withFailureHandler(err => {
+      mostrarEstadoCargaCheck('', false);
+      isLoadingMoreCheck = false;
+      if (btncargarMasCheck) btncargarMasCheck.disabled = false;
+      Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Error al cargar registros', toast: true, position: 'top-end', timer: 4000, showConfirmButton: false });
+    })
+    .getDatosRegistroCheck(offsetCheck, limitCheck, filtroMesCheck, filtroEquipoCheck);
+}
+
+// ✅ CORREGIR: Renderizar tabla con validación y sin parpadeo
+function renderizarTablaCheck(respuesta, searchId = currentSearchIdCheck) {
+  if (searchId !== currentSearchIdCheck) {
+    isLoadingMoreCheck = false;
+    return;
+  }
+
+  const contenedorCheck = document.getElementById("tabla-registro-checklist");
+  const btncargarMasCheck = document.getElementById("cargarMasCheck");
+
+  if (!respuesta || !respuesta.data || respuesta.data.length === 0) {
+    if (offsetCheck === 0) {
+      contenedorCheck.innerHTML = "<p>No se encontraron resultados.</p>";
+      pendingReplacementCheck = false;
+    }
+    mostrarEstadoCargaCheck('', false);
+    isLoadingMoreCheck = false;
+    if (btncargarMasCheck) btncargarMasCheck.disabled = false;
+    return;
+  }
+
+  // ✅ Si es nueva búsqueda (offset 0), REEMPLAZAR todo
+  if (offsetCheck === 0 && pendingReplacementCheck) {
+    contenedorCheck.innerHTML = "";
+    cachedDataCheckList = respuesta;
+    pendingReplacementCheck = false;
+  }
+
+  // ✅ OCULTAR loading después de procesar datos
+  mostrarEstadoCargaCheck('', false);
+  isLoadingMoreCheck = false;
+  if (btncargarMasCheck) btncargarMasCheck.disabled = false;
+
+  totalCoincidenciasCheck = respuesta.total;
+  // Actualizar badge con total del mes seleccionado
+  if (offsetCheck === 0) {
+    var _badgeMes = document.getElementById("totalCheck2");
+    if (_badgeMes) _badgeMes.textContent = respuesta.total;
+  }
+
+  const fragment = document.createDocumentFragment();
+  const cardsRow = document.createElement("div");
+  cardsRow.className = "row g-3 py-2";
+
+  // ✅ RENDERIZAR DATOS NORMALMENTE
+  respuesta.data.forEach(fila => {
+    const complianceList = fila[14].split(',').map(c => c.trim());
+    const items = itemsMap.get(fila[2]) || [];
+
+    // ✅ CONTADOR MODIFICADO: Excluir títulos (NA de ítems que empiezan con número+punto)
+    const { siCount, noCount, otrosCount } = complianceList.reduce((acc, v, i) => {
+      const itemText = items[i] && items[i][2] ? items[i][2] : '';
+      const esTitulo = /^\d+\./.test(itemText.trim()) && v === 'NA';
+      if (esTitulo) return acc; // No contar títulos
+      if (v === 'Si') acc.siCount++;
+      else if (v === 'No') acc.noCount++;
+      else acc.otrosCount++;
+      return acc;
+    }, { siCount: 0, noCount: 0, otrosCount: 0 });
+
+    // ✅ GENERAR DETALLES CON TÍTULOS VISUALES + OBSERVACIONES
+    const { texto: detallesTexto, html: detallesHTML, sectionTitles } = generarDetallesItems(complianceList, items);
+    const observacionesHTML = generarObservacionesHTML(fila, sectionTitles);
+
+    const mensajeWhatsApp = generarMensajeWhatsApp(fila, siCount, noCount, detallesTexto);
+    const imagenPrincipal = (!fila[10] || fila[10].trim() === "" || fila[10] === "NA") ? "https://lh5.googleusercontent.com/d/1uU0A4gwDjF2X35ussSiTnuXbibK6lnGN" : fila[10];
+
+    const cardHTML = `
+  <div class='col-sm-6 col-md-4 col-lg-3'>
+    <div class='tiktok-card' style='overflow: hidden; position: relative;'>
+      
+           ${(() => {
+        const totalRespuestas = siCount + noCount;
+        const cumplimiento = totalRespuestas > 0 ? Math.round((siCount / totalRespuestas) * 100) : 0;
+        const estado = fila[12] || 'Sin estado';
+
+        // Color del estado
+        let colorEstado = '#6c757d'; // gris por defecto
+        if (estado === 'Abierto') colorEstado = '#dc3545'; // rojo
+        else if (estado === 'Cerrado') colorEstado = '#28a745'; // verde
+        else if (estado === 'Conforme') colorEstado = '#ffc107'; // amarillo
+
+        // Color dinámico según porcentaje
+        let colorCumplimiento = '#dc3545'; // rojo por defecto
+        if (cumplimiento >= 95) colorCumplimiento = '#28a745'; // verde
+        else if (cumplimiento >= 80) colorCumplimiento = '#ffc107'; // amarillo
+
+        return `
+          <div style="position: absolute; top: 10px; left: 5px; z-index: 5; display: flex; gap: 6px; flex-wrap: wrap;">
+            <div class="estado-badge" style="background-color:${colorEstado}; left: 55px;">${estado}</div>
+            <div class="estado-badge" style="background-color:${colorCumplimiento}; color:#000;">
+              ${cumplimiento}%
+            </div>
+          </div>`;
+      })()}
+
+      <img src='${imagenPrincipal}' loading="lazy" onclick='showImageCheckList("${imagenPrincipal}")'>
+      <div class='overlay-buttons'>
+        <div class="avatar-wrapper" onclick="toggleNombreUsuario(this)">
+          ${(function(){
+            // Usar Responsable de Área (fila[11]); si es "sin personal" o vacío, usar Inspector (fila[6])
+            var nombreAvatar = (fila[11] === 'Área inspeccionada sin personal presente' || !fila[11])
+              ? (fila[6] || '')
+              : fila[11];
+            var initials = (nombreAvatar).split(' ').map(p => p[0] || '').join('').substring(0, 3).toUpperCase();
+            return '<div class="avatar-circle-only">' + initials + '</div>' +
+                   '<div class="nombre-completo hidden-nombre">' + nombreAvatar + '</div>';
+          })()}
+        </div>
+        <button onclick='checkPasswordAndEdit(${JSON.stringify(fila)})'><i class='fa-solid fa-screwdriver-wrench'></i></button>
+        <button onclick='deleteData(${fila[0]}, this)'><i class='fa fa-trash'></i></button>
+        <button onclick="sendWhatsApp('${mensajeWhatsApp}')"><i class="fa-brands fa-whatsapp"></i></button>
+        <button class='exportPdfBtn' data-column-a='${fila[0]}' title="Exportar PDF"><i class="fa-solid fa-file-pdf"></i></button>
+      </div>
+      <div class='tiktok-text' style='max-height: 80%; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;'>
+        <div style="font-size: 16px; font-weight: bold; color: white;">ID: ${fila[0]} – ${fila[2]}</div>
+        <div><strong>${headersCheckG[7] || "Lugar"}:</strong> ${fila[7]}</div>
+        <div>
+          <b>Cumplimiento:</b>
+          <i class="fa-solid fa-check" style="color:green;"></i> ${siCount} &nbsp;
+          <i class="fa-solid fa-xmark" style="color:red;"></i> ${noCount} &nbsp;
+          <i class="fa-solid fa-circle" style="color:blue;"></i> ${otrosCount}
+        </div>
+        <div id='extra-content-check-${fila[0]}' style='display: none; margin-top: 6px; font-size: 13px;'>
+        <ul style="padding: 0; margin: 0;">
+          <li><b>${headersCheckG[9] || "Fecha"}:</b> ${fila[9]}</li>
+          <li><b>${headersCheckG[1] || "Empresa"}:</b> ${fila[1]}</li>
+          <li><b>Responsable:</b> ${fila[11] || '-'}</li>
+          <li><b>${headersCheckG[5] || "Proceso"}:</b> ${fila[5]}</li>
+          <li><b>${headersCheckG[13] || "Frecuencia"}:</b> ${fila[13]}</li>
+          <li><b>${headersCheckG[8] || "Plan"}:</b> ${fila[8]}</li>
+          <li><b>${headersCheckG[4] || "Área"}:</b> ${fila[4]}</li>
+        </ul>
+          <hr class="my-1">
+          <div class="mt-2">${detallesHTML}</div>
+          ${observacionesHTML}
+        </div>
+        <div class='text-end mb-0'>
+          <a href='#' class='text-info fw-bold' onclick='toggleExtraContentCheck("${fila[0]}", this); return false;'>Ver más</a>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+    const div = document.createElement("div");
+    div.innerHTML = cardHTML;
+    cardsRow.appendChild(div.firstElementChild);
+  });
+
+  // ✅ COMPLETAR FILA INCOMPLETA SI ES LA ÚLTIMA CARGA
+  const esUltimaCarga = (offsetCheck + respuesta.data.length) >= totalCoincidenciasCheck;
+  if (esUltimaCarga) {
+    const totalElementosEnPantalla = respuesta.data.length;
+    const elementosEnUltimaFila = totalElementosEnPantalla % 4;
+    
+    if (elementosEnUltimaFila > 0) {
+      const placeholdersNecesarios = 4 - elementosEnUltimaFila;
+      
+      for (let i = 0; i < placeholdersNecesarios; i++) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'col-sm-6 col-md-4 col-lg-3';
+        placeholder.innerHTML = '<div style="height: 1px; visibility: hidden;"></div>';
+        cardsRow.appendChild(placeholder);
+      }
+    }
+  }
+
+  fragment.appendChild(cardsRow);
+  contenedorCheck.appendChild(fragment);
+  
+  offsetCheck += limitCheck;
+  
+  // ✅ Actualizar botón cargar más
+  if (btncargarMasCheck) {
+    const hayMasDatos = offsetCheck < totalCoincidenciasCheck;
+    
+    if (hayMasDatos) {
+      btncargarMasCheck.style.display = "block";
+      btncargarMasCheck.disabled = false;
+      btncargarMasCheck.innerHTML = `Cargar más (${offsetCheck}/${totalCoincidenciasCheck})`;
+    } else {
+      btncargarMasCheck.style.display = "none";
+    }
+  }
+}
+
+// ✅ MOSTRAR CARGA MEJORADA (sin modificar DOM hasta tener datos)
+function mostrarEstadoCargaCheck(tipo, mostrar = true) {
+  const skeleton = document.getElementById('skeleton-loading2');
+  const spinner = document.getElementById('spinnerCheck');
+  const container = document.getElementById("tabla-registro-checklist");
+  
+  if (tipo === 'skeleton' && mostrar) {
+    // Mostrar skeleton al inicio de búsqueda
+    skeleton?.classList.remove('d-none');
+    spinner?.style.setProperty('display', 'none');
+    if (container) {
+      container.style.opacity = "0.6";
+      container.style.pointerEvents = "none";
+    }
+  } else if (tipo === 'spinner' && mostrar) {
+    // Mostrar spinner para carga adicional (scroll infinito)
+    skeleton?.classList.add('d-none');
+    spinner?.style.setProperty('display', 'block');
+    if (container) {
+      container.style.opacity = "0.6";
+      container.style.pointerEvents = "none";
+    }
+  } else {
+    // Ocultar todo
+    skeleton?.classList.add('d-none');
+    spinner?.style.setProperty('display', 'none');
+    if (container) {
+      container.style.opacity = "1";
+      container.style.pointerEvents = "auto";
+    }
+  }
+}
+
+// ✅ SCROLL MEJORADO
+document.addEventListener('scroll', function() {
+  const btncargarMasCheck = document.getElementById("cargarMasCheck");
+  if (!btncargarMasCheck || isLoadingMoreCheck) return;
+  
+  const scrollPosition = window.innerHeight + window.scrollY;
+  const documentHeight = document.documentElement.scrollHeight;
+  const threshold = documentHeight - 800;
+  
+  if (scrollPosition >= threshold && offsetCheck < totalCoincidenciasCheck) {
+    cargarDatosCheckG(); // ✅ Usar función principal
+  }
+}, { passive: true });
+
+// ✅ LIMPIEZA DE MEMORIA AL CERRAR
+window.addEventListener('beforeunload', function() {
+  if (currentControllerCheck) {
+    currentControllerCheck.abort();
+  }
+  clearTimeout(searchTimeoutCheck);
+});
+
+
+function toggleExtraContentCheck(id, el) {
+  const content = document.getElementById(`extra-content-check-${id}`);
+  const visible = content.style.display === "block";
+  content.style.display = visible ? "none" : "block";
+  el.textContent = visible ? "Ver más" : "Ver menos";
+}
+
+
+//Función password
+async function checkPasswordAndEdit(rowData) {
+  const { value: password, isConfirmed, isDismissed } = await Swal.fire({
+    title: 'Ingrese su password',
+    input: 'password',
+    inputLabel: 'Se requiere password para la edición',
+    inputPlaceholder: 'Password aquí',
+    inputAttributes: {
+      maxlength: 10,
+      autocapitalize: 'off',
+      autocorrect: 'off'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (isDismissed) {
+    return; // No hacer nada si canceló
+  }
+
+  if (isConfirmed && password) {
+    // Mostrar mensaje de carga
+    Swal.fire({
+      title: 'Verificando...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    // Simular verificación local
+    setTimeout(() => {
+      Swal.close(); // Cerrar mensaje de carga
+
+      if (checkPasswordLocal(password)) {
+        fillModalWithData(rowData); // Llenar modal con los datos
+        $('#staticBackdrop').modal('show');
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Password incorrecto',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    }, 300);
+  }
+}
+
+
+function fillModalWithData(data) {
+  // ✅ Guardar data completa para subsanación
+  window.currentCheckData = data;
+
+  document.getElementById('numid').value = data[0];
+  document.getElementById('empresacheck').value = data[1];
+  document.getElementById('name').value = data[2];
+  document.getElementById('codigo').value = data[3];
+  document.getElementById('inps').value = data[4];
+  document.getElementById('procesoCheck').value = data[5];
+  document.getElementById('no').value = data[6];           // Supervisor de Operaciones
+  document.getElementById('lugarCheck').value = data[7];
+  if (document.getElementById('responsableCheck')) {
+    document.getElementById('responsableCheck').value = data[11] || ''; // Responsable de Área
+  }
+  document.getElementById('accion').value = data[8];
+  document.getElementById('idline').value = data[9];
+  document.getElementById('imagen').value = data[10];
+  document.getElementById('plazoCheck').value = data[13];
+
+  // Mostrar imagen original si hay URL
+  const imagenPreview = document.getElementById('imagen-preview');
+  if (data[10]) {
+    imagenPreview.src = data[10];
+    imagenPreview.style.display = 'block';
+  } else {
+    imagenPreview.src = '';
+    imagenPreview.style.display = 'none';
+  }
+
+  // ✅ Actualizar contadores de cumplimiento
+  if (typeof updateComplianceCounts === 'function') {
+    updateComplianceCounts(data[2], data[14]);
+  } else if (typeof updateComplianceCountsAndShowItems === 'function') {
+    updateComplianceCountsAndShowItems(data[2], data[14]);
+  }
+
+  // ✅ Poblar sección de observaciones para subsanación
+  if (typeof populateSubsanacion === 'function') {
+    populateSubsanacion(data, data[2]);
+  }
+}
+
+
+//DELETE DATA
+async function deleteData(id, el) {
+  const { value: password } = await Swal.fire({
+    title: 'Ingrese su password',
+    input: 'password',
+    inputLabel: 'Se requiere password para eliminar',
+    inputPlaceholder: 'Password aquí',
+    inputAttributes: {
+      maxlength: 10,
+      autocapitalize: 'off',
+      autocorrect: 'off'
+    },
+    showCancelButton: true
+  });
+
+  if (password) {
+    if (checkDeletePasswordLocal(password)) {
+      // Mostrar mensaje de validación
+      Swal.fire({
+        title: 'Password correcto',
+        text: 'Eliminando...',
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Ejecutar eliminación
+      google.script.run.withSuccessHandler(() => {
+        reiniciarTablaCheck();
+        Swal.close();
+      }).withFailureHandler(err => {
+        Swal.fire('Error al eliminar', err.message || String(err), 'error');
+      }).deleteData(id);
+
+    } else {
+      Swal.fire('Password incorrecto', '', 'error');
+    }
+  }
+}
+
+//ampliar imagen
+function showImageCheckList(imgUrl) {
+  var modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = 0;
+  modal.style.bottom = 0;
+  modal.style.left = 0;
+  modal.style.right = 0;
+  modal.style.zIndex = 9999;
+  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+
+  var img = document.createElement('img');
+  img.src = imgUrl;
+  img.style.maxWidth = '90%';
+  img.style.maxHeight = '90%';
+  img.style.border = '1px solid white';
+  img.style.borderRadius = '15px';
+  img.style.boxShadow = '0 0 20px rgba(255,255,255,0.5)';
+
+  modal.appendChild(img);
+
+  modal.onclick = function () {
+    modal.remove();
+  };
+
+  document.body.appendChild(modal);
+}
+
+</script>
+<script>
+
+// ✅ MODIFICADO: Títulos con fondo azul, sin numeración, sin contar
+function generarDetallesItems(complianceList, items) {
+  let texto = '', html = '';
+  let itemCounter = 0;
+  let sectionTitles = [];
+
+  complianceList.forEach((valor, i) => {
+    const itemText = items[i] && items[i][2] ? items[i][2] : '';
+    const esTitulo = /^\d+\./.test(itemText.trim()) && valor === 'NA';
+
+    if (esTitulo) {
+      // ✅ TÍTULO: fondo azul, letra blanca, sin número, no se cuenta
+      sectionTitles.push(itemText.replace(/^\d+\.\s*/, '').trim());
+      html += `<div style="background-color:#2c5aa0; color:#fff; font-weight:bold; padding:3px 8px; border-radius:3px; margin:5px 0 2px 0; text-align:center; font-size:0.82em;">
+        <i class="fa-solid fa-list-check me-1"></i>${itemText}
+      </div>`;
+      texto += `── ${itemText} ──\n`;
+    } else {
+      // ✅ ÍTEM NORMAL: se cuenta secuencialmente
+      itemCounter++;
+      if (valor === 'No') {
+        texto += `X ${itemCounter}. ${itemText}\n`;
+        html += `<div class="small" style="color:#ff81b4;"><b><i class="fa-solid fa-square-xmark"></i></b> ${itemCounter}. ${itemText}</div>`;
+      } else if (valor === 'Si') {
+        texto += `✓ ${itemCounter}. ${itemText}\n`;
+        html += `<div class="small" style="color:#81ff8a;"><b><i class="fa-solid fa-square-check"></i></b> ${itemCounter}. ${itemText}</div>`;
+      } else {
+        texto += `O ${itemCounter}. ${itemText}\n`;
+        html += `<div class="small" style="color:#83c1ff;"><i class="fa-regular fa-square-full"></i> ${itemCounter}. ${itemText}</div>`;
+      }
+    }
+  });
+
+  return { texto, html, sectionTitles };
+}
+
+// ✅ NUEVA FUNCIÓN: Generar HTML de observaciones por sección
+// Helper local: parsear celda codificada "num::url~~num::url" o URL directa
+function parseObsCellCard(cellValue) {
+  if (!cellValue) return [];
+  var s = String(cellValue).trim();
+  if (!s) return [];
+  if (!s.includes('::')) return [{ num: '', value: s }];
+  return s.split('~~').filter(Boolean).map(function(part) {
+    var si = part.indexOf('::');
+    if (si === -1) return { num: '', value: part };
+    return { num: part.substring(0, si), value: part.substring(si + 2) };
+  });
+}
+
+function generarObservacionesHTML(fila, sectionTitles) {
+  let html = '';
+  let hasObs = false;
+
+  for (let s = 0; s < 10; s++) {
+    var fotoRaw       = (fila[68 + s * 3] || '').trim();
+    var subRaw        = (fila[69 + s * 3] || '').trim();
+    var comentarioRaw = (fila[70 + s * 3] || '').trim();
+
+    if (!fotoRaw && !comentarioRaw) continue;
+
+    if (!hasObs) {
+      html += `<hr class="my-2" style="border-color:rgba(255,255,255,0.15);">
+        <div style="font-weight:bold; color:#ff9800; margin:4px 0; font-size:0.9em;">
+          <i class="fa-solid fa-clipboard-list me-1"></i>OBSERVACIONES
+        </div>`;
+      hasObs = true;
+    }
+
+    var titulo = sectionTitles[s] || ('Sección ' + (s + 1));
+
+    // Parsear celdas codificadas
+    var fotoItems    = parseObsCellCard(fotoRaw);
+    var subItems     = parseObsCellCard(subRaw);
+    var comentItems  = parseObsCellCard(comentarioRaw);
+
+    var subByNum     = {};
+    subItems.forEach(function(i) { subByNum[i.num] = i.value; });
+    var comentByNum  = {};
+    comentItems.forEach(function(i) { comentByNum[i.num] = i.value; });
+
+    // Determinar si toda la sección está subsanada o en gestión
+    const obsCount  = fotoItems.filter(i => i.value).length;
+    const grCount   = fotoItems.filter(i => i.value && subByNum[i.num] === 'EN_GESTION').length;
+    const realSub   = fotoItems.filter(i => i.value && subByNum[i.num] && subByNum[i.num] !== 'EN_GESTION').length;
+    const subCount  = grCount + realSub;
+    const secSubsanada  = obsCount > 0 && realSub >= obsCount;
+    const secEnGestion  = !secSubsanada && obsCount > 0 && subCount >= obsCount && grCount > 0;
+
+    var borderColor = secSubsanada ? '#28a745' : (secEnGestion ? '#6c757d' : '#ff9800');
+    html += `<div style="margin:4px 0; padding:5px 8px; background:rgba(255,255,255,0.06); border-radius:4px; border-left:3px solid ${borderColor};">`;
+    html += `<div style="font-weight:bold; font-size:0.82em; color:#ffcc80;">▸ ${titulo}`;
+    if (secSubsanada) {
+      html += ` <span style="font-size:0.7em; background:#28a745; color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;">✓ Subsanada</span>`;
+    } else if (secEnGestion) {
+      html += ` <span style="font-size:0.7em; background:#6c757d; color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;"><i class="fa-solid fa-clock-rotate-left"></i> En Gestión del Responsable</span>`;
+    } else {
+      html += ` <span style="font-size:0.7em; background:#ff9800; color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;">Pendiente</span>`;
+    }
+    html += `</div>`;
+
+    // Per-ítem: comentario + fotos
+    const itemNums = new Set([
+      ...fotoItems.filter(i => i.value).map(i => i.num),
+      ...comentItems.filter(i => i.value).map(i => i.num)
+    ]);
+
+    itemNums.forEach(function(num) {
+      var fotoUrl  = (fotoItems.find(i => i.num === num) || {}).value || '';
+      var subUrl   = subByNum[num] || '';
+      var coment   = comentByNum[num] || '';
+
+      if (num) {
+        html += `<div style="font-size:0.78em; color:#ccc; margin:2px 0; font-weight:bold;">Ítem ${num}</div>`;
+      }
+      if (coment) {
+        html += `<div style="font-size:0.78em; color:#ddd; margin:2px 0;"><i class="fa-regular fa-comment me-1"></i>${coment}</div>`;
+      }
+
+      html += `<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin:3px 0;">`;
+      if (fotoUrl) {
+        html += `<div>
+          <div style="font-size:0.65em; color:#aaa;">Original:</div>
+          <div onclick='showImageCheckList("${fotoUrl}")'
+            style="width:56px; height:56px; background-image:url(${fotoUrl}); background-size:cover; background-position:center;
+            border-radius:4px; border:1px solid rgba(255,255,255,0.3); cursor:pointer; display:inline-block; position:relative;"
+            title="Tap para ampliar"><i class="fa-solid fa-expand" style="position:absolute; bottom:2px; right:2px; font-size:8px; color:rgba(255,255,255,0.7);"></i></div>
+        </div>`;
+      }
+      if (subUrl === 'EN_GESTION') {
+        html += `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+          width:56px; height:56px; background:rgba(108,117,125,0.25); border-radius:4px;
+          border:2px solid #6c757d; text-align:center; padding:2px;">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size:14px; color:#adb5bd; margin-bottom:2px;"></i>
+          <span style="font-size:0.5em; color:#adb5bd; line-height:1.1;">En Gestión del Responsable</span>
+        </div>`;
+      } else if (subUrl) {
+        html += `<div>
+          <div style="font-size:0.65em; color:#8f8;">Subsanación:</div>
+          <div onclick='showImageCheckList("${subUrl}")'
+            style="width:56px; height:56px; background-image:url(${subUrl}); background-size:cover; background-position:center;
+            border-radius:4px; border:2px solid #28a745; cursor:pointer; display:inline-block; position:relative;"
+            title="Tap para ampliar"><i class="fa-solid fa-expand" style="position:absolute; bottom:2px; right:2px; font-size:8px; color:rgba(255,255,255,0.7);"></i></div>
+        </div>`;
+      }
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+// ── PDF export desde IndexCheck ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.exportPdfBtn');
+  if (!btn) return;
+  var columnAValue = btn.getAttribute('data-column-a');
+  Swal.fire({
+    title: '¿Exportar PDF?',
+    text: 'Se generará el reporte de inspección ID: ' + columnAValue,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, generar',
+    cancelButtonText: 'Cancelar'
+  }).then(function(res) {
+    if (!res.isConfirmed) return;
+    Swal.fire({ title: 'Generando PDF…', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    google.script.run
+      .withSuccessHandler(function(url) {
+        Swal.close();
+        window.open(url, '_blank');
+      })
+      .withFailureHandler(function(err) {
+        Swal.fire('Error', err.message || String(err), 'error');
+      })
+      .getPdfUrl(columnAValue);
+  });
+});
+
+function generarMensajeWhatsApp(fila, siCount, noCount, detallesTexto) {
+  return `*---REPORTE DE CHECKLIST---*
+*ID:* ${fila[0]}
+*Empresa:* ${fila[1]}
+*Equipo:* ${fila[2]}
+*Código:* ${fila[3]}
+*Área:* ${fila[4]}
+*Supervisor de Operaciones:* ${fila[6]}
+*Responsable de Área:* ${fila[11] || '-'}
+*Proceso:* ${fila[5]}
+*Lugar:* ${fila[7]}
+*Fecha:* ${fila[9]}
+*Cumplimiento - Sí:* ${siCount}
+*Cumplimiento - No:* ${noCount}
+*Plan:* ${fila[8]}
+*Imagen:* ${fila[10]}
+*Estado:* ${fila[12]}
+*Plazo:* ${fila[13]}
+
+*Ítems evaluados:*
+${detallesTexto}`.replace(/\n/g, "\\n").replace(/"/g, '&quot;');
+}
+
+</script>
+</body>
+</html>

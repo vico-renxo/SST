@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div class="d-flex align-items-center mt-3">
+      <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #6f42c1;">
+        <i class="fas fa-clipboard-list text-white"></i>
+      </div>
+      <div>
+        <h5 class="mb-0" style="color: #6f42c1;">Registro de Asistencia a Capacitaciones</h5>
+        <small class="text-muted">Sesiones de asistencia</small>
+      </div>
+    </div>
+
+    <div class="container-fluid my-1 px-0">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <!-- IZQUIERDA -->
+        <div class="d-flex align-items-center gap-1">
+          <button onclick="abrirFormularioTemas()" class="btn btn-secondary btn-sm">Nuevo Registro</button>
+          <button class="btn btn-warning btn-sm" onclick="window.print()" style="font-size:15px;">
+            <i class="fa-solid fa-print"></i>
+          </button>
+        </div>
+
+        <!-- DERECHA -->
+        <div class="d-flex align-items-center gap-1">
+          <input type="text" id="buscadorTemas" class="form-control" placeholder="Buscar..." style="max-width: 250px; height:30px;">
+          <button id="btnBuscarTemas" class="btn btn-info btn-sm">Buscar</button>
+        </div>
+      </div>
+
+      <div id="loadingTablaTemas" class="text-center my-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando registros...</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table print-container">
+          <thead><tr id="encabezadosTemas"></tr></thead>
+          <tbody id="cuerpoTemas"></tbody>
+        </table>
+      </div>
+
+      <div class="text-start my-3">
+        <button id="btnVerMasTemas" class="btn btn-outline-secondary shadow-sm" style="display:none;" onclick="verMasTemas()">
+          <i class="fa-solid fa-arrow-down"></i> Ver más
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL -->
+    <dialog id="modal2Temas" class="border-0 rounded-3 shadow p-2" style="width: 90%; max-width: 520px;">
+      <div class="modal-content border-0">
+        <div class="modal-header py-2">
+          <h5 class="modal-title w-100 text-center" id="modal-tituloTemas">Nuevo Registro</h5>
+          <button type="button" class="btn-close" aria-label="Cerrar" onclick="cerrarModalTemas()"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formularioTemas" method="dialog"></form>
+          <div id="mensaje-errorTemas" class="text-danger mt-2" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-guardarTemas" type="button" onclick="guardarCambiosTemas()" class="btn btn-primary">Guardar</button>
+          <button type="button" onclick="cerrarModalTemas()" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+      let datosGlobalesTemas = [];
+      let headersTemas = [];
+      let datosTemas = [];
+      let totalTemas = 0;
+      let offsetTemas = 0;
+      const limitTemas = 30;
+      let filtroTemas = "";
+      let cursosMap = {}; // { [cursoNombre]: { area, capacitador, puntajeMin } }
+
+      function esAdmin() {
+        try {
+          const u = JSON.parse(localStorage.getItem('userName'));
+          const a = (u?.accesos || '').toLowerCase();
+          return a.includes('todo');
+        } catch (e) { return false; }
+      }
+
+      document.getElementById("btnBuscarTemas").addEventListener("click", () => {
+        offsetTemas = 0;
+        filtroTemas = document.getElementById("buscadorTemas").value.toLowerCase();
+        datosTemas = [];
+        cargarDatosTemas();
+      });
+
+      function verMasTemas() {
+        offsetTemas += limitTemas;
+        cargarDatosTemas();
+      }
+
+      function cargarDatosTemas() {
+        document.getElementById("loadingTablaTemas").style.display = "block";
+        const btnVerMas = document.getElementById("btnVerMasTemas");
+        btnVerMas.disabled = true;
+
+        google.script.run.withSuccessHandler(function (res) {
+          if (!res?.headersTemas || !res?.filas) {
+            console.error("Datos incompletos:", res);
+            document.getElementById("loadingTablaTemas").style.display = "none";
+            btnVerMas.disabled = false;
+            return;
+          }
+
+          if (offsetTemas === 0) {
+            headersTemas = res.headersTemas;
+            datosTemas = res.filas;
+            datosGlobalesTemas = datosTemas.slice();
+            document.getElementById("encabezadosTemas").innerHTML =
+              `<th>Código</th><th>Temas</th><th>Área</th><th>Capacitador</th><th>Duración</th>` +
+              `<th>Tipo de Capacitación</th><th>Fecha de Registro</th><th>Lugar</th>` +
+              `<th>Progreso</th><th>Acción</th>`;
+          } else {
+            datosTemas = datosTemas.concat(res.filas);
+            datosGlobalesTemas = datosTemas.slice();
+          }
+
+          totalTemas = res.total;
+          mostrarFilasTemas(datosTemas);
+
+          btnVerMas.style.display = datosTemas.length < totalTemas ? "inline-block" : "none";
+          document.getElementById("loadingTablaTemas").style.display = "none";
+          btnVerMas.disabled = false;
+
+          // Cargar progreso de firmas por registro
+          cargarProgreso(datosTemas);
+        }).obtenerMatrizTemasPaginado(offsetTemas, limitTemas, filtroTemas);
+      }
+
+      function mostrarFilasTemas(data) {
+        const tbody = document.getElementById("cuerpoTemas");
+        tbody.innerHTML = "";
+        const admin = esAdmin();
+        const fragment = document.createDocumentFragment();
+
+        // Columnas visibles: idx → label (coincide con TEMAS 0-based)
+        const COLS_VISIBLES = [0, 1, 2, 3, 4, 7, 8, 11];
+
+        data.forEach((fila) => {
+          const tr = document.createElement("tr");
+
+          COLS_VISIBLES.forEach((idx) => {
+            const td = document.createElement("td");
+            td.textContent = fila[idx] != null ? fila[idx] : "";
+            tr.appendChild(td);
+          });
+
+          const btnTd = document.createElement("td");
+
+          const btnEditar = document.createElement("button");
+          btnEditar.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          btnEditar.className = "btn btn-sm btn-info me-1";
+          btnEditar.onclick = () => abrirFormularioTemas(fila[0]);
+          btnTd.appendChild(btnEditar);
+
+          const btnEliminar = document.createElement("button");
+          btnEliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          btnEliminar.className = "btn btn-sm btn-danger";
+          btnEliminar.onclick = () => eliminarRegistroTemas(fila[0]);
+          btnTd.appendChild(btnEliminar);
+
+          // Cerrar button (admin only, only if ABIERTO)
+          if (admin) {
+            const estadoActual = String(fila[7] || "").trim().toUpperCase();
+            if (estadoActual === "ABIERTO") {
+              const btnCerrar = document.createElement("button");
+              btnCerrar.innerHTML = '<i class="fa-solid fa-lock"></i>';
+              btnCerrar.className = "btn btn-sm btn-warning ms-1";
+              btnCerrar.title = "Cerrar registro";
+              btnCerrar.onclick = () => cerrarRegistroTemas(fila[0]);
+              btnTd.appendChild(btnCerrar);
+            }
+          }
+
+          // Celda de progreso (se rellena luego con cargarProgreso)
+          const tdProgreso = document.createElement("td");
+          tdProgreso.id = `progreso-${fila[0]}`;
+          tdProgreso.innerHTML = '<span class="text-muted small">...</span>';
+          tr.appendChild(tdProgreso);
+
+          tr.appendChild(btnTd);
+          fragment.appendChild(tr);
+        });
+
+        tbody.appendChild(fragment);
+      }
+
+      function cargarProgreso(data) {
+        const registros = data.map(fila => ({
+          codigo: fila[0],
+          tema:   fila[1],
+          fecha:  fila[8]
+        }));
+        if (!registros.length) return;
+
+        google.script.run.withSuccessHandler(function(conteos) {
+          Object.entries(conteos).forEach(([codigo, stats]) => {
+            const cell = document.getElementById(`progreso-${codigo}`);
+            if (!cell) return;
+            const pct   = stats.pct;
+            const color = pct >= 80 ? 'success' : pct >= 50 ? 'warning' : 'danger';
+            cell.innerHTML =
+              `<span class="badge bg-${color} fs-6">${stats.firmados}/${stats.total}</span>` +
+              `<br><small class="text-muted">${pct}%</small>`;
+          });
+        }).obtenerConteoPorRegistros(registros);
+      }
+
+      function abrirFormularioTemas(codigo = null) {
+        const modal2 = document.getElementById("modal2Temas");
+        const form   = document.getElementById("formularioTemas");
+        const isNuevo = codigo === null;
+
+        document.getElementById("modal-tituloTemas").textContent =
+          isNuevo ? "Nuevo Registro" : "Editar Registro";
+
+        let valores = [];
+        let indexOriginal = "null";
+
+        if (!isNuevo) {
+          const filaOriginal = datosGlobalesTemas.find((f, i) => {
+            if (String(f[0]).trim() === String(codigo).trim()) {
+              indexOriginal = i;
+              return true;
+            }
+          });
+          if (!filaOriginal) { alert("No se pudo encontrar el registro."); return; }
+          valores = filaOriginal;
+        }
+
+        const cursoActual      = valores[1]  || "";
+        const capacitadorActual = valores[3] || "";
+        const areaActual       = valores[2]  || "";
+        const estadoActual     = valores[7]  || "ABIERTO";
+        const examenActual     = valores[10] || "No";
+        const puntajeActual    = String(valores[12] || "0");
+        const fechaActual      = convertirFechaInputDate(valores[8]);
+
+        // Build curso options from cursosMap
+        const opcionesCurso = Object.keys(cursosMap).map(nombre =>
+          `<option value="${nombre.replace(/"/g, '&quot;')}" ${nombre === cursoActual ? "selected" : ""}>${nombre}</option>`
+        ).join("");
+
+        form.innerHTML = `
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Curso</label>
+            <select id="reg-curso" class="form-select" onchange="autoRellenarCurso()">
+              <option value="">Seleccione curso...</option>
+              ${opcionesCurso}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Capacitador</label>
+            <input id="reg-capacitador" class="form-control" value="${capacitadorActual}" readonly style="background:#f5f5f5;">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha del Evento</label>
+            <input id="reg-fecha" type="date" class="form-control" value="${fechaActual}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Estado</label>
+            <select id="reg-estado" class="form-select">
+              <option value="ABIERTO" ${estadoActual === "ABIERTO" ? "selected" : ""}>ABIERTO</option>
+              <option value="CERRADO" ${estadoActual === "CERRADO" ? "selected" : ""}>CERRADO</option>
+            </select>
+          </div>
+          <input type="hidden" id="reg-area"    value="${areaActual}">
+          <input type="hidden" id="reg-examen"  value="${examenActual}">
+          <input type="hidden" id="reg-puntaje" value="${puntajeActual}">
+        `;
+
+        form.dataset.index = isNuevo ? "null" : indexOriginal;
+
+        // If editing, trigger auto-fill to show readonly capacitador correctly
+        if (!isNuevo && cursoActual) {
+          // values already set from existing record — no auto-fill needed
+        }
+
+        modal2.showModal();
+      }
+
+      function autoRellenarCurso() {
+        const sel    = document.getElementById("reg-curso");
+        const nombre = sel.value;
+        const info   = cursosMap[nombre] || {};
+
+        const el = id => document.getElementById(id);
+        if (el("reg-capacitador")) el("reg-capacitador").value = info.capacitador || "";
+        if (el("reg-area"))        el("reg-area").value        = info.area        || "";
+        if (el("reg-puntaje"))     el("reg-puntaje").value     = info.puntajeMin  || "0";
+        if (el("reg-examen"))      el("reg-examen").value      = parseFloat(info.puntajeMin || "0") > 0 ? "Sí" : "No";
+      }
+
+      function convertirFechaInputDate(valor) {
+        if (!valor) return "";
+        const d = new Date(valor);
+        if (isNaN(d)) return "";
+        const yyyy = d.getFullYear();
+        const mm   = String(d.getMonth() + 1).padStart(2, "0");
+        const dd   = String(d.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+      }
+
+      function cerrarModalTemas() {
+        document.getElementById("modal2Temas").close();
+      }
+
+      function guardarCambiosTemas() {
+        const form  = document.getElementById("formularioTemas");
+        const index = form.dataset.index;
+        const btnGuardar = document.getElementById("btn-guardarTemas");
+        const mensajeError = document.getElementById("mensaje-errorTemas");
+
+        const curso       = (document.getElementById("reg-curso")?.value || "").trim();
+        const capacitador = (document.getElementById("reg-capacitador")?.value || "").trim();
+        const fecha       = document.getElementById("reg-fecha")?.value || "";
+        const estado      = document.getElementById("reg-estado")?.value || "ABIERTO";
+        const area        = document.getElementById("reg-area")?.value || "";
+        const examen      = document.getElementById("reg-examen")?.value || "No";
+        const puntaje     = document.getElementById("reg-puntaje")?.value || "0";
+
+        if (!curso || !fecha) {
+          mensajeError.textContent = "Curso y Fecha del Evento son obligatorios.";
+          mensajeError.style.display = "block";
+          return;
+        }
+        mensajeError.style.display = "none";
+
+        btnGuardar.textContent = "Guardando...";
+        btnGuardar.disabled = true;
+
+        // horaInicio stores the event date (midnight ISO)
+        const horaInicioISO = fecha ? new Date(fecha + "T00:00:00").toISOString() : "";
+
+        const dataObj = {
+          codigo: "",
+          tema: curso,
+          area: area,
+          capacitador: capacitador,
+          duracion: "",
+          intentos: "",
+          validez: "",
+          estado: estado,
+          horaInicio: horaInicioISO,
+          horaFin: "",
+          examen: examen,
+          valoracion: "",
+          puntajeMinimo: puntaje
+        };
+
+        if (index !== "null") {
+          const idx = parseInt(index);
+          dataObj.codigo = datosGlobalesTemas[idx][0];
+        }
+
+        const callback = (codigoGenerado) => {
+          localStorage.removeItem("lista_temas_local");
+          cerrarModalTemas();
+          offsetTemas = 0;
+          cargarDatosTemas();
+          btnGuardar.textContent = "Guardar";
+          btnGuardar.disabled = false;
+
+          if (index === "null") {
+            Swal.fire({
+              title: 'Registro creado',
+              html: `
+                <p class="text-muted mb-2">Comparte este código con los participantes:</p>
+                <div style="font-size: 42px; font-weight: bold; letter-spacing: 3px; margin-bottom:12px;">
+                  ${codigoGenerado}
+                </div>
+                <button id="btnCopiarCodigo" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-copy"></i> Copiar código
+                </button>
+              `,
+              showConfirmButton: false,
+              didOpen: () => {
+                document.getElementById("btnCopiarCodigo").addEventListener("click", () => {
+                  copiarTextoCompat(codigoGenerado);
+                  Swal.fire({ icon: "success", title: "Código copiado", timer: 1000, showConfirmButton: false });
+                });
+              }
+            });
+          } else {
+            Swal.fire({ icon: "success", title: "Registro actualizado", timer: 1500, showConfirmButton: false });
+          }
+        };
+
+        if (index === "null") {
+          google.script.run.withSuccessHandler(callback).agregarTema(dataObj);
+        } else {
+          google.script.run.withSuccessHandler(callback).actualizarTema(dataObj);
+        }
+      }
+
+      function copiarTextoCompat(texto) {
+        const temp = document.createElement("input");
+        temp.value = texto;
+        document.body.appendChild(temp);
+        temp.select();
+        temp.setSelectionRange(0, 99999);
+        try { document.execCommand("copy"); } catch (e) { console.error("Error al copiar:", e); }
+        document.body.removeChild(temp);
+      }
+
+      function cerrarRegistroTemas(codigo) {
+        Swal.fire({
+          title: '¿Cerrar registro?',
+          text: 'Los participantes ya no podrán firmar este registro.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, cerrar',
+          cancelButtonText: 'Cancelar',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            google.script.run.withSuccessHandler(() => {
+              offsetTemas = 0;
+              cargarDatosTemas();
+              Swal.fire('Cerrado', 'El registro fue cerrado.', 'success');
+            }).cerrarRegistroManual(codigo);
+          }
+        });
+      }
+
+      function eliminarRegistroTemas(codigo) {
+        if (!codigo) return alert("Registro inválido.");
+        Swal.fire({
+          title: '¿Eliminar?',
+          text: `¿Deseas eliminar el registro "${codigo}"?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            google.script.run.withSuccessHandler(() => {
+              datosTemas = datosTemas.filter(fila => String(fila[0]) !== String(codigo));
+              datosGlobalesTemas = datosGlobalesTemas.filter(fila => String(fila[0]) !== String(codigo));
+              mostrarFilasTemas(datosTemas);
+              Swal.fire('Eliminado', 'El registro fue eliminado.', 'success');
+            }).eliminarTemaPorCodigo(codigo);
+          }
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Search filter
+        document.getElementById("buscadorTemas").addEventListener("input", function () {
+          const texto = this.value.toLowerCase();
+          const filtrados = datosGlobalesTemas.filter(fila =>
+            fila.some(celda => String(celda).toLowerCase().includes(texto))
+          );
+          mostrarFilasTemas(filtrados);
+        });
+
+        // Load courses from Matriz to populate the form select
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res?.filas) {
+              res.filas.forEach(fila => {
+                const nombre = String(fila[0] || "").trim();
+                if (!nombre) return;
+                cursosMap[nombre] = {
+                  area:        String(fila[4]  || ""),
+                  capacitador: String(fila[6]  || ""),
+                  puntajeMin:  String(fila[12] || "0")
+                };
+              });
+            }
+
+            // Check for pre-fill from Cursos.html "Crear Registro" button
+            const prefill = localStorage.getItem('prefilledRegistroCurso');
+            if (prefill) {
+              localStorage.removeItem('prefilledRegistroCurso');
+              try {
+                const { curso } = JSON.parse(prefill);
+                if (curso && cursosMap[curso]) {
+                  setTimeout(() => {
+                    abrirFormularioTemas();
+                    const sel = document.getElementById("reg-curso");
+                    if (sel) {
+                      sel.value = curso;
+                      autoRellenarCurso();
+                    }
+                  }, 200);
+                }
+              } catch (e) { console.warn("prefill error", e); }
+            }
+          })
+          .obtenerMatrizInvertida();
+
+        cargarDatosTemas();
+      });
+    </script>
+  </body>
+</html>

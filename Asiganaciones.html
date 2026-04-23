@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>EPP – Consulta por DNI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root{
+      --card-radius:16px;
+      --shadow-sm:0 4px 12px rgba(0,0,0,.08);
+      --shadow-md:0 8px 24px rgba(0,0,0,.12);
+    }
+
+    .epp-head-card{
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #e9ecef; border-radius: var(--card-radius);
+      padding: 20px; box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px); margin-bottom: 20px;
+    }
+
+    .epp-section-card{ padding: 0; margin-bottom: 16px; }
+
+    .epp-big-input{ display: flex; gap: 12px; }
+    .epp-big-input input{
+      flex: 1; padding: 14px 16px; border: 1px solid #e9ecef;
+      border-radius: 12px; font-size: 16px; background: rgba(255,255,255,0.9);
+    }
+    .epp-big-input button{
+      padding: 14px 20px; border: none; background: #0d6efd; color:#fff;
+      border-radius: 12px; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .epp-big-input button:hover{ transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,110,253,0.3); }
+
+    .epp-small-muted{ color:#6c757d; font-size:.9rem; }
+
+    /* Chips */
+    .epp-chip{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 8px; border-radius:999px; border:1px solid #dee2e6;
+      background:#fff; color:#212529; cursor:pointer; font-weight:600; font-size:.85rem;
+      transition:.2s;
+    }
+    
+    .epp-chip:hover{ transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.06); }
+    .epp-chip.active{ background:#0d6efd; color:#fff; border-color:#0d6efd; }
+
+    /* Grid */
+    .epp-flex-row{ display:grid; grid-template-columns: repeat(auto-fill, minmax(min(280px,100%),1fr)); gap:16px; }
+
+    /* Card */
+    .epp-unified-card{
+      position:relative; display:flex; flex-direction:column;
+      height:400px; border-radius:var(--card-radius); overflow:hidden;
+      box-shadow:var(--shadow-sm); transition: all .3s; background:#000;
+    }
+    .epp-unified-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .epp-card-media{ height:100%; width:100%; overflow:hidden; }
+    .epp-card-media img{
+      width:100%; height:100%; object-fit:cover; display:block; transition: transform .3s;
+    }
+    .epp-unified-card:hover .epp-card-media img{ transform: scale(1.05); }
+
+    /* Contenido sobre imagen */
+    .epp-card-content{
+      position:absolute; bottom:0; left:0; right:0; color:#fff;
+      padding:12px; padding-bottom:32px; /* espacio para "Ver más" */
+      background:
+        linear-gradient(to top, rgba(0,0,0,0.58), rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.02) 80%, transparent 92%);
+      max-height:40%; overflow:hidden; transition:max-height .3s;
+      /* Mejora de legibilidad en blancos: sutil halo oscuro + delineado sin “glow” agresivo */
+      text-shadow:
+        0 1px 2px rgba(0,0,0,.65),
+        0 0 1px rgba(0,0,0,.45);
+    }
+    .epp-card-content.expanded{
+      max-height:100%; overflow:auto;
+      background:
+        linear-gradient(to top, rgba(0,0,0,0.18), rgba(0,0,0,0.04) 40%, transparent 85%) !important;
+    }
+    .epp-card-content:not(.expanded)::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.28), rgba(0,0,0,0)) !important;
+      pointer-events:none;
+    }
+
+    .epp-card-header{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      margin-bottom:8px; gap:8px;
+    }
+    .epp-card-title{
+      font-size:1.1rem; font-weight:700; margin:0; line-height:1.3;
+      letter-spacing:.2px;
+      /* Sombra de texto optimizada para fondos claros/oscuros */
+      text-shadow:
+        0 2px 4px rgba(0,0,0,.55),
+        0 0 1px rgba(0,0,0,.5);
+    }
+
+    /* Badges + archivo */
+    .epp-status-badges{ display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; margin-bottom:6px; }
+    .epp-badge{
+      padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:700;
+      white-space:nowrap; line-height:1.2; background:rgba(255,255,255,0.16);
+      border:1px solid rgba(255,255,255,0.42);
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+      backdrop-filter: blur(2px);
+    }
+    .epp-badge-previsto{ background:#e3f2fd; color:#0b5394; border-color:#bbdefb; }
+    .epp-badge-entregado{ background:#e8f5e8; color:#1b5e20; border-color:#c8e6c9; }
+    .epp-badge-devolvible{ background:#fff3e0; color:#e65100; border-color:#ffe0b2; }
+    .epp-badge-proximo{ background:#fce4ec; color:#ad1457; border-color:#f8bbd0; }
+
+    .epp-btn-sm{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:28px; height:28px; border-radius:8px;
+      background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4);
+      text-decoration:none; color:#fff;
+      transition:.2s;
+    }
+    .epp-btn-sm:hover{ transform: translateY(-1px); }
+
+    /* Detalles: ocultos por defecto, visibles al expandir */
+    .epp-card-content .epp-card-info{ display:none; }
+    .epp-card-content.expanded .epp-card-info{
+      display:flex; flex-direction:column; gap:6px; font-size:.88rem; line-height:1.45; margin-bottom:6px;
+    }
+    .epp-info-row{ display:flex; align-items:center; gap:6px; }
+    .epp-info-row strong{ font-weight:700; }
+
+    /* "Ver más" como texto */
+    .ver-mas-btn{
+      position:absolute; right:12px; bottom:10px; z-index:1;
+      padding:0; background:transparent; border:0; border-radius:0;
+      color:#ffd166; font-weight:700; font-size:.86rem; cursor:pointer; text-decoration:none;
+      text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    }
+    .ver-mas-btn:hover{ text-decoration:underline; }
+
+    /* Skeleton */
+    .epp-skeleton{ position:relative; overflow:hidden; background:#e9ecef; border-radius:8px; }
+    .epp-skeleton::after{
+      content:""; position:absolute; inset:0; transform:translateX(-100%);
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+      animation:epp-shimmer 1.3s infinite;
+    }
+    @keyframes epp-shimmer{ 100%{ transform:translateX(100%); } }
+
+    /* Toast */
+    .epp-toast{
+      position:fixed; right:16px; bottom:16px; background:#212529; color:#fff;
+      padding:12px 16px; border-radius:12px; opacity:0; transform:translateY(10px);
+      transition:opacity .3s, transform .3s; z-index:9999; font-size:.95rem;
+      box-shadow:0 4px 16px rgba(0,0,0,0.2);
+    }
+    .epp-toast.show{ opacity:1; transform:translateY(0); }
+    .epp-toast.info{ background:#0d6efd; }
+    .epp-toast.warn{ background:#f59f00; }
+    .epp-toast.err{ background:#dc3545; }
+    .epp-toast.ok{ background:#198754; }
+
+    /* Utilidades */
+    .d-none{ display:none !important; }
+    .mb-3{ margin-bottom:1rem; }
+    .m-0{ margin:0; }
+    .mt-2{ margin-top:.5rem; }
+
+    /* === Firmas Pendientes === */
+    .btn-firmas-pendientes{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 16px; border-radius:12px; border:2px solid #0d6efd;
+      background:#fff; color:#0d6efd; font-weight:600; font-size:.9rem;
+      cursor:pointer; transition:all .2s; position:relative;
+    }
+    .btn-firmas-pendientes:hover{ background:#0d6efd; color:#fff; transform:translateY(-1px); box-shadow:0 4px 12px rgba(13,110,253,0.3); }
+    .btn-firmas-pendientes .badge-pendientes{
+      background:#dc3545; color:#fff; border-radius:50%; min-width:22px; height:22px;
+      display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700;
+    }
+
+    /* Panel de Pendientes */
+    .panel-pendientes-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9000;
+      display:none; align-items:center; justify-content:center;
+    }
+    .panel-pendientes-overlay.show{ display:flex; }
+    .panel-pendientes{
+      background:#fff; border-radius:20px; max-width:600px; width:95%;
+      max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      padding:24px; position:relative;
+    }
+    .panel-pendientes .btn-cerrar{
+      position:absolute; top:12px; right:16px; background:none; border:none;
+      font-size:1.5rem; cursor:pointer; color:#6c757d; line-height:1;
+    }
+    .panel-pendientes .item-pendiente{
+      border:1px solid #e9ecef; border-radius:12px; padding:16px; margin-bottom:12px;
+      transition:all .2s;
+    }
+    .panel-pendientes .item-pendiente:hover{ box-shadow:0 4px 12px rgba(0,0,0,.08); }
+    .panel-pendientes .item-pendiente .producto-nombre{ font-weight:700; font-size:1.05rem; color:#212529; }
+    .panel-pendientes .item-pendiente .item-meta{ font-size:.85rem; color:#6c757d; margin-top:4px; }
+    .panel-pendientes .item-actions{ display:flex; gap:8px; margin-top:12px; }
+    .panel-pendientes .btn-aceptar{
+      flex:1; padding:10px; border:none; border-radius:10px; background:#198754; color:#fff;
+      font-weight:600; cursor:pointer; transition:.2s; font-size:.9rem;
+    }
+    .panel-pendientes .btn-aceptar:hover{ background:#157347; }
+    .panel-pendientes .btn-rechazar{
+      flex:1; padding:10px; border:2px solid #dc3545; border-radius:10px; background:#fff; color:#dc3545;
+      font-weight:600; cursor:pointer; transition:.2s; font-size:.9rem;
+    }
+    .panel-pendientes .btn-rechazar:hover{ background:#dc3545; color:#fff; }
+
+    /* Modal Firma */
+    .firma-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9500;
+      display:none; align-items:center; justify-content:center;
+    }
+    .firma-overlay.show{ display:flex; }
+    .firma-modal{
+      background:#fff; border-radius:20px; max-width:500px; width:95%;
+      padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+    .firma-modal canvas{
+      border:2px dashed #cbd5e1; border-radius:10px; background:#fff;
+      touch-action:none; width:100%; height:180px;
+    }
+
+    /* Modal Rechazo */
+    .rechazo-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9500;
+      display:none; align-items:center; justify-content:center;
+    }
+    .rechazo-overlay.show{ display:flex; }
+    .rechazo-modal{
+      background:#fff; border-radius:20px; max-width:450px; width:95%;
+      padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    /* Estado badges */
+    .estado-confirmado{ color:#198754; font-weight:600; }
+    .estado-rechazado{ color:#dc3545; font-weight:600; }
+    .estado-pendiente{ color:#ffc107; font-weight:600; }
+
+    /* ── Responsive móvil ── */
+    @media (max-width: 767px) {
+      .epp-unified-card{ height:auto; min-height:320px; }
+      .epp-card-content{ max-height:55%; }
+      .epp-card-content.expanded{ max-height:100%; }
+      .firma-modal{ padding:16px; }
+      .firma-modal canvas{ height:140px; }
+      .panel-pendientes{ padding:16px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="epp-wrap mt-3" id="epp-app">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="d-flex align-items-center">
+      <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+        <i class="fas fa-hard-hat text-white"></i>
+      </div>
+      <div>
+        <h5 class="mb-0 text-success">Mis EPPs y Equipos</h5>
+        <small class="text-muted">EPPs, Equipos, Materiales, Herramientas, Productos</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center" style="gap:12px;">
+      <!-- Botón Firmas Pendientes -->
+      <button id="btnFirmasPendientes" class="btn-firmas-pendientes" onclick="togglePanelPendientes()" style="display:none;">
+        <i class="fa-solid fa-file-signature"></i>
+        <span>Firmas Pendientes</span>
+        <span id="contadorPendientes" class="badge-pendientes">0</span>
+      </button>
+      <!-- Campana alertas vencimiento -->
+      <div id="contenedorCampana" class="campana-flotante" style="display: none;" onclick="alternarAlertas()">
+        <span class="icono-campana">🦺</span>
+        <span id="contadorAlertas" class="badge-alerta">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chips de categorías -->
+  <div id="catChips" class="epp-head-card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span class="epp-small-muted">Filtrar por categoría:</span>
+    <div id="catChipsRow" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- Cabecera / DNI (oculto si ya auto-cargas por usuario logueado) -->
+  <div class="epp-head-card" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h5 class="m-0" style="color:#212529;font-size:1.3rem;font-weight:600">Consulta de EPP por DNI</h5>
+      <span class="epp-small-muted">Vista trabajador</span>
+    </div>
+    <div class="epp-big-input mt-2">
+      <input id="dniInputEPP" placeholder="Ingresa tu DNI y presiona Buscar">
+      <button id="btnBuscarEPPPersona">Buscar</button>
+    </div>
+  </div>
+
+  <!-- Datos de persona -->
+  <div id="personaBox" class="epp-section-card d-none" hidden>
+    <div style="background:rgba(255,255,255,0.95);border:1px solid #e9ecef;border-radius:16px;padding:20px;backdrop-filter:blur(10px);box-shadow:0 4px 12px rgba(0,0,0,.08)">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:center">
+        <div>
+          <div style="margin-bottom:8px"><strong style="color:#495057">Nombres:</strong> <span id="p_nombres" style="color:#212529;font-weight:600">—</span></div>
+          <div style="margin-bottom:8px"><strong style="color:#495057">Empresa:</strong> <span id="p_empresa" style="color:#212529">—</span> | <strong style="color:#495057">Cargo:</strong> <span id="p_cargo" style="color:#212529">—</span></div>
+          <div><strong style="color:#495057">DNI:</strong> <span id="p_dni" style="color:#212529">—</span></div>
+        </div>
+        <div style="text-align:right">
+          <span class="epp-small-muted">Información de consulta</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPP Unificados -->
+  <div id="eppBox" class="epp-section-card d-none">
+    <div id="eppGrid" class="epp-flex-row"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="epp-toast" class="epp-toast"></div>
+
+<!-- 📋 MODAL DE ALERTAS -->
+<div id="contenedorAlerta" class="alerta-overlay" style="display: none;" onclick="cerrarAlertaFuera(event)">
+  <div class="alerta-modal-grande" onclick="event.stopPropagation()">
+    <span class="btn-cerrar-alerta" onclick="alternarAlertas()">&times;</span>
+    <div class="alerta-header">
+      <h4 id="nombreTrabajadorAlerta" style="color: #0d6efd; margin: 0; font-size: 1.1rem;"></h4>
+      <p style="font-size: 0.8rem; color: #666; margin: 5px 0 0 0;">⚠️ EPPs pendientes de renovación</p>
+    </div>
+    <div class="alerta-cuerpo-scroll">
+      <table class="tabla-alertas">
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTablaAlertas"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- Panel de Firmas Pendientes -->
+<div id="panelPendientesOverlay" class="panel-pendientes-overlay" onclick="cerrarPanelPendientesFuera(event)">
+  <div class="panel-pendientes" onclick="event.stopPropagation()">
+    <button class="btn-cerrar" onclick="togglePanelPendientes()">&times;</button>
+    <h5 style="color:#0d6efd;font-weight:700;margin-bottom:4px;"><i class="fa-solid fa-file-signature"></i> Firmas Pendientes</h5>
+    <p style="font-size:.85rem;color:#6c757d;margin-bottom:16px;">EPPs asignados que requieren tu confirmaci&oacute;n y firma.</p>
+    <div id="listaPendientes"></div>
+    <div id="sinPendientes" class="d-none" style="text-align:center;padding:32px 0;color:#6c757d;">
+      <i class="fa-solid fa-circle-check" style="font-size:2.5rem;color:#198754;margin-bottom:12px;display:block;"></i>
+      <p style="font-weight:600;">No tienes EPPs pendientes</p>
+      <p style="font-size:.85rem;">Todos tus EPPs han sido confirmados.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Firma Digital -->
+<div id="firmaOverlay" class="firma-overlay">
+  <div class="firma-modal">
+    <h5 style="color:#212529;font-weight:700;margin-bottom:4px;"><i class="fa-solid fa-pen-nib"></i> Firma Digital</h5>
+    <p id="firmaProductoLabel" style="font-size:.9rem;color:#6c757d;margin-bottom:12px;"></p>
+    <canvas id="sigPadWorker"></canvas>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="limpiarFirmaWorker()" style="flex:1;padding:8px;border:1px solid #dee2e6;border-radius:10px;background:#fff;cursor:pointer;font-weight:500;">Limpiar</button>
+      <button onclick="cancelarFirma()" style="flex:1;padding:8px;border:1px solid #dee2e6;border-radius:10px;background:#fff;cursor:pointer;font-weight:500;">Cancelar</button>
+      <button id="btnConfirmarFirma" onclick="enviarFirma()" style="flex:2;padding:8px;border:none;border-radius:10px;background:#198754;color:#fff;cursor:pointer;font-weight:600;">Confirmar y Firmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Rechazo -->
+<div id="rechazoOverlay" class="rechazo-overlay">
+  <div class="rechazo-modal">
+    <h5 style="color:#dc3545;font-weight:700;margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Rechazar EPP</h5>
+    <p id="rechazoProductoLabel" style="font-size:.9rem;color:#6c757d;margin-bottom:12px;"></p>
+    <label style="font-weight:600;font-size:.9rem;display:block;margin-bottom:6px;">Motivo del rechazo:</label>
+    <select id="selectMotivoRechazo" style="width:100%;padding:10px;border:1px solid #dee2e6;border-radius:10px;font-size:.95rem;margin-bottom:8px;">
+      <option value="">-- Selecciona un motivo --</option>
+      <option value="Talla incorrecta">Talla incorrecta</option>
+      <option value="Producto da&ntilde;ado">Producto da&ntilde;ado</option>
+      <option value="No solicitado">No solicitado</option>
+      <option value="Producto equivocado">Producto equivocado</option>
+      <option value="Otro">Otro</option>
+    </select>
+    <input id="inputMotivoOtro" type="text" placeholder="Especifica el motivo..." style="width:100%;padding:10px;border:1px solid #dee2e6;border-radius:10px;font-size:.95rem;margin-bottom:12px;display:none;"/>
+    <div style="display:flex;gap:8px;">
+      <button onclick="cancelarRechazo()" style="flex:1;padding:10px;border:1px solid #dee2e6;border-radius:10px;background:#fff;cursor:pointer;font-weight:500;">Cancelar</button>
+      <button id="btnConfirmarRechazo" onclick="enviarRechazo()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#dc3545;color:#fff;cursor:pointer;font-weight:600;">Confirmar Rechazo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /** ===== Config ===== **/
+  const PLACEHOLDER_IMG='https://lh5.googleusercontent.com/d/1n38-t1dDdj56TqOjv8c4SAAcUQcA0U72';
+
+  /** ===== Toast ===== **/
+  function eppToast(msg,type='info',ms=1800){
+    const el=document.getElementById('epp-toast');
+    if(!el) return;
+    el.textContent=msg||'';
+    el.className='epp-toast '+type;
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(el.__t);
+    el.__t=setTimeout(()=> el.classList.remove('show'), ms);
+  }
+
+  /** ===== GAS tolerant runner ===== **/
+  const FN_ALIASES = {
+    getPersonaByDni: ['getPersona'],
+    getInit: ['getInitEPP','getInitMinimal'],
+    getHistorialByDni: ['getHistorialByDniEPP','getHistorialByDniFull'],
+    searchStockPaged: ['searchStockPagedEPP','searchStock']
+  };
+  function gasCall(fn, argsObj){
+    return new Promise((resolve,reject)=>{
+      if(!(window.google && google.script && google.script.run)){
+        reject('google.script.run no está disponible en este contexto.');
+        return;
+      }
+      const runner = google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(err=> reject(err?.message || err));
+      const callTry = (name)=>{
+        if (runner[name] && typeof runner[name] === 'function'){
+          const args = Array.isArray(argsObj) ? argsObj : (argsObj===undefined ? [] : [argsObj]);
+          runner[name](...args); return true;
+        }
+        return false;
+      };
+      if (callTry(fn)) return;
+      for (const alt of (FN_ALIASES[fn] || [])) if (callTry(alt)) return;
+      reject(`No existe función GAS '${fn}'. Verifica que esté en .gs y desplegada.`);
+    });
+  }
+
+  /** ===== Estado ===== **/
+  const state = {
+    persona:null,
+    matriz:null,
+    matrizGrid:null,
+    historial:[],
+    productMeta:new Map(),
+    catFilter: 'Todos',
+    catSet: new Set(['EPP','Equipos','Herramientas','Materiales','Productos','Otros'])
+  };
+
+  /** ===== Reglas (MATRIZ) ===== **/
+  function buildReglasIdx(matriz, matrizGrid){
+    const reglasIdx = new Map();
+    const previstoIdx = new Set();
+    (matriz || []).forEach(r=>{
+      const pb=(r['Producto base']||r.ProductoBase||r.PRODUCTO_BASE||'').toString().trim();
+      const cg=(r.Cargo||r.CARGO||'').toString().trim();
+      if (!pb || !cg) return;
+      reglasIdx.set(`${pb}||${cg}`,{
+        DEVOLVIBLE: String(r.Devolvible||r.DEVOLVIBLE||'No'),
+        VIDA_UTIL_DIAS: Number(r['Vida útil (días)']||r.VidaUtilDias||r.VIDA_UTIL_DIAS||0),
+        FREC_INSP: String(r['Frec. inspección']||r.FrecInspeccion||r.FREC_INSP_DIAS||'').trim(),
+        REQ_CAP_TEMA: String(r['Req. capacitación']||r.ReqCapacitacion||r.REQ_CAPACITACION||'').trim()
+      });
+    });
+    if (matrizGrid && matrizGrid.byProduct){
+      const byP = matrizGrid.byProduct;
+      Object.keys(byP).forEach(pb=>{
+        const rec = byP[pb]||{};
+        (rec.previstoCargos||[]).forEach(cg=> previstoIdx.add(`${pb}||${cg}`));
+        const hasMeta = String(rec.REQ_CAP_TEMA||rec.FREC_INSP||'').trim().length>0 || Number(rec.VIDA_UTIL_DIAS||0)>0;
+        if (hasMeta){
+          reglasIdx.set(`${pb}||*`,{
+            DEVOLVIBLE:'No',
+            VIDA_UTIL_DIAS:Number(rec.VIDA_UTIL_DIAS||0),
+            FREC_INSP:String(rec.FREC_INSP||'').trim(),
+            REQ_CAP_TEMA:String(rec.REQ_CAP_TEMA||'').trim()
+          });
+        }
+      });
+    }
+    return { reglasIdx, previstoIdx };
+  }
+  function getReglasLocal(pb, cargo, reglasIdx){
+    const k1 = `${String(pb||'').trim()}||${String(cargo||'').trim()}`;
+    const k2 = `${String(pb||'').trim()}||*`;
+    return reglasIdx.get(k1) || reglasIdx.get(k2) || { DEVOLVIBLE:'No', VIDA_UTIL_DIAS:0, FREC_INSP:'', REQ_CAP_TEMA:'' };
+  }
+
+  /** ===== Meta de producto ===== **/
+  async function getProductMeta(pb){
+    if (state.productMeta.has(pb)) return state.productMeta.get(pb);
+    try{
+      const res = await gasCall('searchStockPaged', { term: pb, limit:0 });
+      const rows = res?.rows || [];
+      const samePB = rows.filter(r => (r.PRODUCTO||'') === pb);
+      const pick = (arr, key) => (arr.find(r=>r[key]) || rows.find(r=>r[key]) || {})[key] || '';
+      const file = pick(samePB, 'FILE');
+      const img  = pick(samePB, 'IMG');
+      const categoria = pick(samePB, 'CATEGORIA');
+      const meta = {file, img, categoria};
+      state.productMeta.set(pb, meta);
+      if (categoria) state.catSet.add(String(categoria).trim());
+      return meta;
+    }catch(_){
+      const meta = {file:'', img:'', categoria:''};
+      state.productMeta.set(pb, meta);
+      return meta;
+    }
+  }
+
+  /** ===== Chips ===== **/
+  function renderCatChips(){
+    const row = document.getElementById('catChipsRow');
+    if(!row) return;
+    const cats = ['Todos', ...Array.from(state.catSet).filter(Boolean).sort((a,b)=>a.localeCompare(b))];
+    row.innerHTML = cats.map(c => `
+      <button type="button" class="epp-chip ${state.catFilter===c?'active':''}" data-cat="${c}">
+        ${c}
+      </button>
+    `).join('');
+    row.querySelectorAll('.epp-chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        row.querySelectorAll('.epp-chip').forEach(x=>x.classList.remove('active'));
+        btn.classList.add('active');
+        state.catFilter = btn.dataset.cat || 'Todos';
+        renderUnifiedEPP();
+      });
+    });
+  }
+
+  /** ===== Skeletons ===== **/
+  function renderSkeletonGrid(targetId, count=8){
+    const grid = document.getElementById(targetId);
+    if(!grid) return;
+    grid.innerHTML = '';
+    for(let i=0;i<count;i++){
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="epp-unified-card">
+          <div class="epp-card-media epp-skeleton"></div>
+          <div class="epp-card-content">
+            <div class="epp-card-header">
+              <div class="epp-skeleton" style="height:20px;width:70%"></div>
+              <div class="epp-skeleton" style="height:18px;width:25%"></div>
+            </div>
+            <div class="epp-card-info">
+              <div class="epp-skeleton" style="height:14px;width:90%;margin-bottom:6px"></div>
+              <div class="epp-skeleton" style="height:14px;width:80%;margin-bottom:6px"></div>
+              <div class="epp-skeleton" style="height:14px;width:85%"></div>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+  }
+
+  /** ===== Últimas entregas ===== **/
+  function groupLastEntrega(hist){
+    const toDate = (s)=>{
+      if (!s) return null;
+      const parts = String(s).split('-').map(Number);
+      if (parts.length===3 && parts.every(n=>!isNaN(n))){
+        const [Y,M,D]=parts; return new Date(Y, (M||1)-1, D||1);
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const last = new Map();
+    for (const x of (hist||[])){
+      if (String(x.OPERACION||'').toLowerCase() !== 'entrega') continue;
+      const pb = x.PRODUCTO || ''; if(!pb) continue;
+      const d = toDate(x.FECHA);   if(!d) continue;
+      const cur = last.get(pb);
+      if (!cur || d > cur.__d){
+        last.set(pb, { ...x, __d:d });
+      }
+    }
+    return last;
+  }
+
+  /** ===== Render EPP Unificado ===== **/
+  async function renderUnifiedEPP(){
+    const box  = document.getElementById('eppBox');
+    const grid = document.getElementById('eppGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (!state.persona || !state.matrizGrid){
+      if (box) box.classList.add('d-none');
+      return;
+    }
+
+    const cargo = state.persona.CARGO || '';
+    const byP   = state.matrizGrid.byProduct || {};
+    const { reglasIdx } = buildReglasIdx(state.matriz, state.matrizGrid);
+    const lastMap = groupLastEntrega(state.historial);
+
+    const previstosSet  = new Set(Object.keys(byP).filter(pb => (byP[pb].previstoCargos||[]).includes(cargo)));
+    const entregadosSet = new Set(lastMap.keys());
+    const allProducts   = new Set([...previstosSet, ...entregadosSet]);
+
+    if (!allProducts.size){
+      if (box) box.classList.add('d-none');
+      return;
+    }
+    if (box) box.classList.remove('d-none');
+
+    renderSkeletonGrid('eppGrid', Math.min(allProducts.size, 8));
+    grid.innerHTML = '';
+
+    const pad = (n)=> String(n).padStart(2,'0');
+    const fmt = (d)=> `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    const addDays = (d,n)=>{ const dt=new Date(d.getTime()); dt.setDate(dt.getDate()+n); return dt; };
+
+    const catWanted = String(state.catFilter || 'Todos').toLowerCase();
+
+    // Resolver metas en paralelo y filtrar por categoría
+    const productsArr = [...allProducts].sort((a,b)=>a.localeCompare(b));
+    const metas = await Promise.all(productsArr.map(pb => getProductMeta(pb)));
+    const productsToRender = productsArr
+      .map((pb, i) => ({ pb, meta: metas[i] || {file:'', img:'', categoria:''} }))
+      .filter(({ meta }) => {
+        const cat = String(meta.categoria || '').toLowerCase();
+        return (catWanted === 'todos') || (cat === catWanted);
+      });
+
+    // (Re)pintar chips por si aparecieron nuevas categorías
+    renderCatChips();
+
+    for (const { pb, meta } of productsToRender){
+      const isPrevisto   = previstosSet.has(pb);
+      const lastEntrega  = lastMap.get(pb) || null;
+      const reglas       = getReglasLocal(pb, cargo, reglasIdx);
+      const vida         = Number(reglas.VIDA_UTIL_DIAS || 0);
+      const dev          = String(reglas.DEVOLVIBLE || '').toLowerCase().startsWith('s');
+
+      let proximoCambio = null;
+      if (lastEntrega && vida > 0){
+        proximoCambio = addDays(lastEntrega.__d, vida);
+      }
+
+      const badges = [];
+      if (isPrevisto)   badges.push('<span class="epp-badge epp-badge-previsto">Previsto</span>');
+      if (lastEntrega)  badges.push('<span class="epp-badge epp-badge-entregado">Entregado</span>');
+      if (dev)          badges.push('<span class="epp-badge epp-badge-devolvible">Devolvible</span>');
+      if (proximoCambio)badges.push('<span class="epp-badge epp-badge-proximo">Próximo cambio</span>');
+
+      const infoRows = [];
+      if (lastEntrega){
+        infoRows.push(`<div class="epp-info-row">📅 <strong>Última entrega:</strong> ${fmt(lastEntrega.__d)}</div>`);
+        if (lastEntrega.VARIANTE) infoRows.push(`<div class="epp-info-row">🏷️ <strong>Variante:</strong> ${lastEntrega.VARIANTE}</div>`);
+      }
+      if (proximoCambio)          infoRows.push(`<div class="epp-info-row">🔄 <strong>Próximo cambio:</strong> ${fmt(proximoCambio)}</div>`);
+      if (reglas.REQ_CAP_TEMA)    infoRows.push(`<div class="epp-info-row">🎓 <strong>Capacitación:</strong> ${reglas.REQ_CAP_TEMA}</div>`);
+      if (reglas.FREC_INSP)       infoRows.push(`<div class="epp-info-row">🔍 <strong>Inspección cada:</strong> ${reglas.FREC_INSP} días</div>`);
+      if (vida > 0)               infoRows.push(`<div class="epp-info-row">⏱️ <strong>Vida útil:</strong> ${vida} días</div>`);
+
+      const img  = meta.img  || PLACEHOLDER_IMG;
+      const file = meta.file || '';
+
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="epp-unified-card">
+          <div class="epp-card-media">
+            <img src="${img}" onerror="this.src='${PLACEHOLDER_IMG}'" alt="${pb}">
+          </div>
+          <div class="epp-card-content">
+            <div class="epp-card-header">
+              <h6 class="epp-card-title">${pb}</h6>
+              ${file ? `<a class="epp-btn-sm" href="${file}" target="_blank" rel="noopener" title="Archivo adjunto"><i class="fa-solid fa-file"></i></a>` : ``}
+            </div>
+            <div class="epp-status-badges">
+              ${badges.join('')}
+            </div>
+            <div class="epp-card-info">
+              ${infoRows.join('')}
+            </div>
+            <span class="ver-mas-btn" onclick="toggleVerMasEPP(this)">Ver más</span>
+          </div>
+        </div>
+      `);
+    }
+
+    if (!productsToRender.length){
+      grid.innerHTML = `<div class="epp-small-muted" style="padding:8px 4px">No hay productos en esta categoría.</div>`;
+    }
+  }
+
+  function toggleVerMasEPP(el){
+    const content = el.closest('.epp-card-content');
+    content.classList.toggle('expanded');
+    const expanded = content.classList.contains('expanded');
+    el.textContent = expanded ? 'Ver menos' : 'Ver más';
+    el.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  /** ===== Buscar por DNI ===== **/
+  async function buscar(dniForzado){
+    const input = document.getElementById('dniInputEPP');
+    const dni = (dniForzado || (input?.value || '')).trim();
+    if(!dni){ eppToast('Ingresa tu DNI','warn'); return; }
+
+    try{
+      document.getElementById('personaBox')?.classList.remove('d-none');
+      document.getElementById('eppBox')?.classList.remove('d-none');
+      renderSkeletonGrid('eppGrid', 8);
+
+      const p = await gasCall('getPersonaByDni', dni);
+      if(!p){
+        document.getElementById('personaBox')?.classList.add('d-none');
+        document.getElementById('eppBox')?.classList.add('d-none');
+        eppToast('No se encontró persona con ese DNI','warn');
+        return;
+      }
+      state.persona = p;
+      document.getElementById('p_nombres') && (document.getElementById('p_nombres').textContent = p.NOMBRES||'—');
+      document.getElementById('p_empresa') && (document.getElementById('p_empresa').textContent = p.EMPRESA||'—');
+      document.getElementById('p_cargo')   && (document.getElementById('p_cargo').textContent   = p.CARGO||'—');
+      document.getElementById('p_dni')     && (document.getElementById('p_dni').textContent     = p.DNI||'—');
+
+      state.catFilter = 'Todos';
+
+      const [init, hist] = await Promise.all([
+        gasCall('getInit', ''),
+        gasCall('getHistorialByDni', [dni, 0])
+      ]);
+
+      state.matriz     = init?.matriz || [];
+      state.matrizGrid = init?.matrizGrid || null;
+      state.historial  = hist || [];
+
+      ejecutarChequeoAlertas(dni, p.NOMBRES); 
+
+      await renderUnifiedEPP();
+      eppToast('Datos actualizados','ok');
+    }catch(e){
+      eppToast(String(e),'err',3000);
+    }
+  }
+
+  /** ===== Wireup + Autocarga ===== **/
+  (function wireEPP(){
+    const byId = (id)=> document.getElementById(id);
+
+    function getLoggedDni(){
+      try{
+        const raw = localStorage.getItem('userName');
+        if(!raw) return '';
+        const obj = JSON.parse(raw);
+        return (obj?.usuario || '').toString().trim();
+      }catch(_){ return ''; }
+    }
+
+    function bindOnce(){
+      const btn = byId('btnBuscarEPPPersona');
+      const input = byId('dniInputEPP');
+
+      if (btn && !btn.__eppBound){
+        btn.addEventListener('click', ()=> buscar());
+        btn.__eppBound = true;
+      }
+      if (input && !input.__eppBound){
+        input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') buscar(); });
+        input.__eppBound = true;
+      }
+
+      const dni = getLoggedDni();
+      if (dni){
+        if (input) input.value = dni;
+        buscar(dni);
+      }
+    }
+
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', bindOnce);
+    } else {
+      bindOnce();
+    }
+
+    window.__eppAutoBuscar = function(dniOpt){
+      const input = byId('dniInputEPP');
+      const dni = (dniOpt || getLoggedDni() || '').trim();
+      if (!dni) return;
+      if (input) input.value = dni;
+      buscar(dni);
+    };
+  })();
+
+  
+  //reset
+  /** ===== Reinicio completo del módulo EPP ===== **/
+function resetEPPModule() {
+  // Limpiar estado interno
+  state.persona = null;
+  state.matriz = null;
+  state.matrizGrid = null;
+  state.historial = [];
+  state.productMeta = new Map();
+  state.catFilter = 'Todos';
+
+  // Limpiar DOM
+  const grid = document.getElementById('eppGrid');
+  const box = document.getElementById('eppBox');
+  const personaBox = document.getElementById('personaBox');
+  if (grid) grid.innerHTML = '';
+  if (box) box.classList.add('d-none');
+  if (personaBox) personaBox.classList.add('d-none');
+
+  // Limpiar input
+  const input = document.getElementById('dniInputEPP');
+  if (input) input.value = '';
+
+  // Ocultar campana y firmas pendientes
+  const campana = document.getElementById('contenedorCampana');
+  const firmas = document.getElementById('btnFirmasPendientes');
+  if (campana) campana.style.display = 'none';
+  if (firmas) firmas.style.display = 'none';
+}
+
+/** ===== Inicializar EPP tras login ===== **/
+function initEPPAfterLogin(userObj) {
+  try {
+    if (!userObj || !userObj.usuario) return;
+    const dni = String(userObj.usuario).trim();
+    if (!dni) return;
+    // Asegurar persistencia local y autoiniciar
+    localStorage.setItem('userName', JSON.stringify(userObj));
+    if (window.__eppAutoBuscar) {
+      // Un pequeño retraso asegura que el DOM esté listo
+      setTimeout(() => window.__eppAutoBuscar(dni), 200);
+    }
+  } catch (e) {
+    console.warn('initEPPAfterLogin error:', e);
+  }
+}
+
+// 1. Esta función le pide al servidor los datos filtrados por DNI
+function ejecutarChequeoAlertas(dni, nombre) {
+  if (!dni) return;
+
+  document.getElementById('nombreTrabajadorAlerta').innerText = "👤 " + (nombre || "");
+  // Ocultar campana antes de empezar para limpiar estados previos
+  document.getElementById('contenedorCampana').style.display = 'none';
+
+  google.script.run
+    .withSuccessHandler(function(alertas) {
+      if (alertas && alertas.length > 0) {
+        document.getElementById('contadorAlertas').innerText = alertas.length;
+        const tabla = document.getElementById('cuerpoTablaAlertas');
+        tabla.innerHTML = ''; 
+
+        alertas.forEach(function(item) {
+          let fila = `
+            <tr class="${item.clase}">
+              <td>${item.producto}</td>
+              <td>${item.fecha}</td>
+              <td><span class="badge-estado ${item.badge}">${item.estado}</span></td>
+            </tr>
+          `;
+          tabla.innerHTML += fila;
+        });
+
+        document.getElementById('contenedorCampana').style.display = 'flex';
+      }
+    })
+    .obtenerAlertasVencimientos(dni);
+}
+
+// 2. Función para abrir/cerrar el modal de la campana
+function alternarAlertas() {
+  const modal = document.getElementById('contenedorAlerta');
+  const body = document.body;
+
+  if (modal.style.display === 'none' || modal.style.display === '') {
+    modal.style.display = 'flex';
+    body.style.overflow = 'hidden'; 
+  } else {
+    modal.style.display = 'none';
+    body.style.overflow = 'auto';   
+  }
+}
+
+// Función para cerrar si hacen click fuera del cuadro
+function cerrarAlertaFuera(event) {
+  alternarAlertas();
+}
+// resetEPPModule() ya definido arriba — NO duplicar
+
+/* ===== FIRMAS PENDIENTES - FLUJO TRABAJADOR ===== */
+let pendientesData = [];
+let currentPendienteId = null;
+let sigPadWorkerCtx = null;
+let sigPadWorkerDown = false;
+let sigPadWorkerLast = null;
+
+// Cargar pendientes al buscar
+function cargarPendientes(dni){
+  if(!dni) return;
+  gasCall('obtenerEntregasPendientes', dni)
+    .then(function(items){
+      pendientesData = items || [];
+      const btn = document.getElementById('btnFirmasPendientes');
+      const badge = document.getElementById('contadorPendientes');
+      if(pendientesData.length > 0){
+        btn.style.display = 'inline-flex';
+        badge.textContent = pendientesData.length;
+      } else {
+        btn.style.display = 'none';
+      }
+    })
+    .catch(function(){ pendientesData = []; });
+}
+
+function togglePanelPendientes(){
+  const overlay = document.getElementById('panelPendientesOverlay');
+  if(overlay.classList.contains('show')){
+    overlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
+  } else {
+    renderListaPendientes();
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function cerrarPanelPendientesFuera(e){
+  togglePanelPendientes();
+}
+
+function renderListaPendientes(){
+  const lista = document.getElementById('listaPendientes');
+  const sinItems = document.getElementById('sinPendientes');
+
+  if(!pendientesData.length){
+    lista.innerHTML = '';
+    sinItems.classList.remove('d-none');
+    return;
+  }
+
+  sinItems.classList.add('d-none');
+  lista.innerHTML = pendientesData.map(function(item){
+    return '<div class="item-pendiente" id="pend_' + item.ID_REG + '">' +
+      '<div class="producto-nombre">' + (item.PRODUCTO || '') + (item.VARIANTE ? ' <span style="color:#6c757d;font-weight:400;">(' + item.VARIANTE + ')</span>' : '') + '</div>' +
+      '<div class="item-meta">' +
+        '<i class="fa-solid fa-calendar"></i> ' + (item.FECHA || '') +
+        ' &nbsp;|&nbsp; <i class="fa-solid fa-warehouse"></i> ' + (item.ALMACEN || '') +
+        ' &nbsp;|&nbsp; <i class="fa-solid fa-boxes-stacked"></i> Cant: ' + (item.CANTIDAD || 0) +
+        (item.DEVOLVIBLE && item.DEVOLVIBLE.toLowerCase().startsWith('s') ? ' &nbsp;|&nbsp; <span style="color:#e65100;">Devolvible</span>' : '') +
+      '</div>' +
+      (item.OBS ? '<div class="item-meta"><i class="fa-solid fa-comment"></i> ' + item.OBS + '</div>' : '') +
+      '<div class="item-meta"><i class="fa-solid fa-user"></i> Entregado por: ' + (item.USUARIO || '---') + '</div>' +
+      '<div class="item-actions">' +
+        '<button class="btn-aceptar" onclick="abrirFirma(\'' + item.ID_REG + '\',\'' + (item.PRODUCTO || '').replace(/'/g, "\\'") + '\',\'' + (item.VARIANTE || '').replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-check"></i> Aceptar y Firmar</button>' +
+        '<button class="btn-rechazar" onclick="abrirRechazo(\'' + item.ID_REG + '\',\'' + (item.PRODUCTO || '').replace(/'/g, "\\'") + '\',\'' + (item.VARIANTE || '').replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-xmark"></i> Rechazar</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* --- FIRMA --- */
+function initSigPadWorker(){
+  var c = document.getElementById('sigPadWorker');
+  if(!c) return;
+  sigPadWorkerCtx = c.getContext('2d', { willReadFrequently:true });
+  function resize(){
+    var dpr = window.devicePixelRatio || 1;
+    var cssW = c.parentElement.clientWidth - 10 || 460;
+    var cssH = 180;
+    c.width = Math.floor(cssW * dpr);
+    c.height = Math.floor(cssH * dpr);
+    c.style.width = cssW + 'px';
+    c.style.height = cssH + 'px';
+    sigPadWorkerCtx.setTransform(dpr,0,0,dpr,0,0);
+    sigPadWorkerCtx.lineWidth = 2;
+    sigPadWorkerCtx.lineCap = 'round';
+    sigPadWorkerCtx.lineJoin = 'round';
+  }
+  resize();
+
+  function pos(e){
+    var r = c.getBoundingClientRect();
+    var t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  function start(e){ sigPadWorkerDown=true; sigPadWorkerLast=pos(e); e.preventDefault(); }
+  function move(e){
+    if(!sigPadWorkerDown || !sigPadWorkerLast) return;
+    var p=pos(e);
+    sigPadWorkerCtx.beginPath();
+    sigPadWorkerCtx.moveTo(sigPadWorkerLast.x, sigPadWorkerLast.y);
+    sigPadWorkerCtx.lineTo(p.x, p.y);
+    sigPadWorkerCtx.stroke();
+    sigPadWorkerLast=p;
+    e.preventDefault();
+  }
+  function end(){ sigPadWorkerDown=false; sigPadWorkerLast=null; }
+
+  c.addEventListener('pointerdown', start);
+  c.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', end);
+  c.addEventListener('touchstart', start, {passive:false});
+  c.addEventListener('touchmove', move, {passive:false});
+  c.addEventListener('touchend', end);
+}
+
+function limpiarFirmaWorker(){
+  var c = document.getElementById('sigPadWorker');
+  if(c && sigPadWorkerCtx) sigPadWorkerCtx.clearRect(0,0,c.width,c.height);
+}
+
+function getSigDataWorker(){
+  var c = document.getElementById('sigPadWorker');
+  if(!c) return null;
+  var ctx = c.getContext('2d');
+  var img = ctx.getImageData(0,0,c.width,c.height).data;
+  for(var i=3; i<img.length; i+=4){ if(img[i]!==0) return c.toDataURL('image/png'); }
+  return null;
+}
+
+function abrirFirma(idReg, producto, variante){
+  currentPendienteId = idReg;
+  document.getElementById('firmaProductoLabel').textContent = 'Confirmar recepci\u00f3n de: ' + producto + (variante ? ' (' + variante + ')' : '');
+  document.getElementById('firmaOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  // Inicializar pad si es la primera vez
+  if(!sigPadWorkerCtx) initSigPadWorker();
+  limpiarFirmaWorker();
+}
+
+function cancelarFirma(){
+  document.getElementById('firmaOverlay').classList.remove('show');
+  currentPendienteId = null;
+  limpiarFirmaWorker();
+}
+
+function enviarFirma(){
+  var sigData = getSigDataWorker();
+  if(!sigData){
+    eppToast('Debes firmar antes de confirmar', 'warn');
+    return;
+  }
+  if(!currentPendienteId) return;
+
+  var btn = document.getElementById('btnConfirmarFirma');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+
+  gasCall('confirmarEntregaEpp', [currentPendienteId, sigData])
+    .then(function(res){
+      if(res && res.ok){
+        eppToast('EPP confirmado correctamente', 'ok', 2500);
+        // Quitar de la lista local
+        pendientesData = pendientesData.filter(function(x){ return x.ID_REG !== currentPendienteId; });
+        renderListaPendientes();
+        // Actualizar badge
+        var badge = document.getElementById('contadorPendientes');
+        badge.textContent = pendientesData.length;
+        if(pendientesData.length === 0){
+          document.getElementById('btnFirmasPendientes').style.display = 'none';
+        }
+        // Cerrar modal firma
+        document.getElementById('firmaOverlay').classList.remove('show');
+        currentPendienteId = null;
+        limpiarFirmaWorker();
+        // Refrescar vista de EPPs
+        var dniLogin = '';
+        try{ dniLogin = JSON.parse(localStorage.getItem('userName')).usuario; }catch(e){}
+        if(dniLogin) buscar(dniLogin);
+      } else {
+        eppToast(res?.message || 'Error al confirmar', 'err', 3000);
+      }
+    })
+    .catch(function(e){
+      eppToast(String(e), 'err', 3000);
+    })
+    .finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Confirmar y Firmar';
+    });
+}
+
+/* --- RECHAZO --- */
+function abrirRechazo(idReg, producto, variante){
+  currentPendienteId = idReg;
+  document.getElementById('rechazoProductoLabel').textContent = 'Rechazar: ' + producto + (variante ? ' (' + variante + ')' : '');
+  document.getElementById('selectMotivoRechazo').value = '';
+  document.getElementById('inputMotivoOtro').value = '';
+  document.getElementById('inputMotivoOtro').style.display = 'none';
+  document.getElementById('rechazoOverlay').classList.add('show');
+}
+
+// Mostrar/ocultar input "Otro"
+document.addEventListener('DOMContentLoaded', function(){
+  var sel = document.getElementById('selectMotivoRechazo');
+  if(sel){
+    sel.addEventListener('change', function(){
+      document.getElementById('inputMotivoOtro').style.display = sel.value === 'Otro' ? 'block' : 'none';
+    });
+  }
+});
+
+function cancelarRechazo(){
+  document.getElementById('rechazoOverlay').classList.remove('show');
+  currentPendienteId = null;
+}
+
+function enviarRechazo(){
+  var sel = document.getElementById('selectMotivoRechazo');
+  var motivo = sel.value;
+  if(motivo === 'Otro'){
+    motivo = document.getElementById('inputMotivoOtro').value.trim();
+  }
+  if(!motivo){
+    eppToast('Selecciona un motivo de rechazo', 'warn');
+    return;
+  }
+  if(!currentPendienteId) return;
+
+  var btn = document.getElementById('btnConfirmarRechazo');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+
+  gasCall('rechazarEntregaEpp', [currentPendienteId, motivo])
+    .then(function(res){
+      if(res && res.ok){
+        eppToast('EPP rechazado. Se notific\u00f3 al administrador.', 'warn', 3000);
+        // Quitar de la lista local
+        pendientesData = pendientesData.filter(function(x){ return x.ID_REG !== currentPendienteId; });
+        renderListaPendientes();
+        var badge = document.getElementById('contadorPendientes');
+        badge.textContent = pendientesData.length;
+        if(pendientesData.length === 0){
+          document.getElementById('btnFirmasPendientes').style.display = 'none';
+        }
+        document.getElementById('rechazoOverlay').classList.remove('show');
+        currentPendienteId = null;
+      } else {
+        eppToast(res?.message || 'Error al rechazar', 'err', 3000);
+      }
+    })
+    .catch(function(e){
+      eppToast(String(e), 'err', 3000);
+    })
+    .finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Confirmar Rechazo';
+    });
+}
+
+/* ===== Hook: cargar pendientes al buscar EPPs ===== */
+var _originalBuscar = buscar;
+buscar = async function(dniForzado){
+  await _originalBuscar(dniForzado);
+  // Cargar pendientes después de buscar
+  var dniLogin = '';
+  try{ dniLogin = dniForzado || JSON.parse(localStorage.getItem('userName')).usuario; }catch(e){}
+  if(dniLogin) cargarPendientes(dniLogin);
+};
+</script>
+
+</body>
+</html>

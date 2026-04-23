@@ -1,0 +1,1261 @@
+<style>
+  :root {
+    --passo-primary: #198754;
+    --passo-secondary: #6c757d;
+    --passo-light: #f8f9fa;
+    --passo-border: #dee2e6;
+  }
+
+  /* HEADER */
+  .passo-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .passo-header .icon-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--passo-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.2);
+  }
+  .passo-header .icon-circle i { color: white; font-size: 1.5rem; }
+  .passo-header h5 { color: var(--passo-primary); font-weight: 700; margin-bottom: 0.25rem; }
+  .passo-header small { color: var(--passo-secondary); display: block; }
+
+  /* TABS */
+  #passoTabs { border-bottom: 2px solid var(--passo-border); gap: 0; }
+  #passoTabs .nav-link {
+    color: var(--passo-secondary);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  #passoTabs .nav-link:hover { color: var(--passo-primary); border-bottom-color: var(--passo-primary); }
+  #passoTabs .nav-link.active { color: var(--passo-primary); border-bottom-color: var(--passo-primary); background-color: transparent; }
+  #passoTabs .nav-link i { margin-right: 0.5rem; }
+
+  .passo-tab-content {
+    background: white;
+    border-radius: 0 0 8px 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .passo-tab-pane { }
+
+  /* TABLA PASSO */
+  .passo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    margin: 0;
+    table-layout: fixed !important;
+  }
+  .passo-table th,
+  .passo-table td {
+    border: 1px solid var(--passo-border);
+    padding: 6px 4px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .passo-table thead th {
+    background: #343a40;
+    color: white;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  /* FILA GERENCIA */
+  .fila-gerencia {
+    background: linear-gradient(90deg, #e3f2fd 0%, #e3f2fd 100%);
+    font-weight: 700;
+    color: #004085;
+  }
+  .fila-gerencia td {
+    padding: 0.75rem 0.5rem;
+    border-top: 2px solid var(--passo-primary);
+    border-bottom: 2px solid var(--passo-primary);
+  }
+  .fila-gerencia .icon-gerencia { font-size: 1.2rem; margin-right: 0.5rem; }
+
+  /* FILA ACTIVIDAD */
+  .fila-actividad { background-color: white; }
+  .fila-actividad:hover { background-color: #f9f9f9; }
+  .fila-actividad td { padding: 8px 4px; }
+  
+  /* Columnas específicas con ancho fijo */
+  .col-actividad { 
+    text-align: left; 
+    width: 280px !important; 
+    max-width: 280px !important; 
+    min-width: 280px !important;
+    white-space: normal; 
+    word-break: break-word; 
+    overflow-wrap: break-word; 
+  }
+  .col-supervisor { 
+    text-align: left; 
+    width: 130px !important;
+    max-width: 130px !important;
+    min-width: 130px !important;
+  }
+  .col-frecuencia { 
+    width: 100px !important;
+    max-width: 100px !important;
+    min-width: 100px !important;
+    font-weight: 600; 
+    color: #495057; 
+  }
+
+  /* CELDAS MESES */
+  .celda-mes { 
+    font-weight: 700; 
+    font-size: 0.7rem; 
+    padding: 4px 3px; 
+    width: 45px !important; 
+    min-width: 45px !important;
+    max-width: 45px !important;
+  }
+  
+  /* 🔥 NUEVOS ESTILOS PARA P Y E */
+  .celda-prog { 
+    background-color: #E3F2FD !important; 
+    color: #1565C0 !important; 
+  }
+  .celda-cumple { 
+    background-color: #2E7D32 !important; 
+    color: #FFFFFF !important; 
+  }
+  
+  /* 🔥 ESTILOS PARA PORCENTAJES (solo texto con fondo gris) */
+  .celda-porcentaje { 
+    background-color: #F5F5F5 !important; 
+    font-weight: 700 !important;
+  }
+  .celda-porcentaje-rojo { color: #D32F2F !important; }      /* 1-50% */
+  .celda-porcentaje-naranja { color: #F57C00 !important; }   /* 51-80% */
+  .celda-porcentaje-verde { color: #388E3C !important; }     /* 81-99% */
+  
+  .celda-parcial { background-color: #fff3cd !important; color: #856404; }
+  .celda-falta { background-color: #f8d7da !important; color: #721c24; }
+  .celda-vacia { background-color: #f8f9fa !important; color: #adb5bd; }
+
+  /* BADGE FRECUENCIA */
+  .badge-frec { 
+    padding: 0.35rem 0.5rem; 
+    border-radius: 3px; 
+    font-size: 0.65rem; 
+    font-weight: 700; 
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .badge-diario { background-color: #f8d7da; color: #721c24; }
+  .badge-semanal { background-color: #d4edda; color: #155724; }
+  .badge-2semanas { background-color: #cfe2ff; color: #084298; }
+  .badge-mensual { background-color: #fff3cd; color: #856404; }
+  .badge-trimestral { background-color: #d1ecf1; color: #0c5460; }
+  .badge-semestral { background-color: #e7d4f5; color: #5a1d7d; }
+  .badge-anual { background-color: #cce5ff; color: #004085; }
+
+  /* BOTONES */
+  .btn-xs { 
+    padding: 2px 6px; 
+    font-size: 0.65rem; 
+    border-radius: 3px; 
+  }
+
+  /* Columna ACCIÓN en reuniones */
+  .passo-table td[style*="width:120px"] button {
+    padding: 2px 6px;
+    font-size: 0.65rem;
+  }
+
+  /* MODAL */
+  #modalReunion {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+  }
+  #modalReunion::backdrop { background: rgba(0, 0, 0, 0.5); }
+  .modal-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--passo-border);
+    padding-bottom: 1rem;
+  }
+  .modal-header-custom h6 { margin: 0; color: var(--passo-primary); font-weight: 700; }
+  .btn-close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--passo-secondary); }
+  .btn-close-modal:hover { color: #000; }
+  .meses-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+  .meses-grid .form-check-input:checked { background-color: var(--passo-primary); border-color: var(--passo-primary); }
+  .modal-buttons { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .modal-buttons button { flex: 1; padding: 0.6rem 1rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+  .btn-guardar-passo { background-color: var(--passo-primary); color: white; }
+  .btn-guardar-passo:hover { background-color: #157347; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3); }
+  .btn-cancelar-passo { background-color: var(--passo-light); color: #212529; border: 1px solid var(--passo-border); }
+  .btn-cancelar-passo:hover { background-color: #e9ecef; }
+
+  /* DEBUG */
+  .debug-passo { background: #fff3cd; border: 1px solid #ffc107; padding: .5rem .8rem; border-radius: .3rem; font-size: .72rem; margin-bottom: 1rem; color: #664d03; }
+
+  /* Wrapper con scroll horizontal si es necesario */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .passo-table { font-size: 0.7rem; }
+    .col-actividad { min-width: 150px; }
+  }
+  @media (max-width: 768px) {
+    .passo-table { font-size: 0.65rem; }
+    .col-actividad { min-width: 120px; }
+    .celda-mes { min-width: 35px; }
+    #modalReunion { width: 95%; padding: 1.5rem; }
+    .meses-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+.passo-table tbody td[rowspan] {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.3 !important;
+  padding: 8px 6px !important;
+  vertical-align: middle !important;
+  max-height: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Badge de frecuencia con advertencia */
+.badge-frec.mal-distribuido {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffc107;
+}
+
+.badge-frec.mal-distribuido::before {
+  content: "⚠️ ";
+}
+</style>
+
+
+<!-- LOADING -->
+<div id="loadingPASSO" class="text-center my-5">
+  <div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div>
+  <p class="mt-2 text-muted">Cargando Programa Anual SSO...</p>
+</div>
+
+<div id="contenidoPASSO" style="display:none;">
+  <!-- HEADER -->
+  <div class="passo-header">
+    <div class="icon-circle">
+      <i class="fas fa-calendar-check"></i>
+    </div>
+    <div class="flex-grow-1">
+      <h5 id="passoTitleYear" style="margin-bottom:0.15rem;">Programa Anual SSO 2026</h5>
+      <div class="d-flex align-items-center gap-2">
+        <small>PASSO - Inspecciones, Capacitaciones, Reuniones, Entrenamientos</small>
+        <button onclick="abrirSimuladorAlertas()" title="Simular Alertas de Inspección" style="width:22px;height:22px;padding:0;border-radius:50%;border:1.5px solid #ffc107;background:transparent;color:#ffc107;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+          <i class="fa-solid fa-bell" style="font-size:.7rem;"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <ul class="nav nav-tabs mb-0" id="passoTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabInsp" type="button" role="tab">
+        <i class="fas fa-clipboard-check"></i> Inspecciones
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCap" type="button" role="tab">
+        <i class="fas fa-chalkboard-teacher"></i> Capacitaciones
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabNoProg" type="button" role="tab">
+        <i class="fas fa-exclamation-circle"></i> Actividades no programadas
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReun" type="button" role="tab">
+        <i class="fas fa-users"></i> Reuniones
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabEntr" type="button" role="tab">
+        <i class="fas fa-running"></i> Entrenamientos
+      </button>
+    </li>
+  </ul>
+
+  <!-- TAB CONTENT -->
+  <div class="tab-content passo-tab-content">
+    <!-- DEBUG (solo visible si hay errores o 0 datos) -->
+    <div id="debugPasso" class="debug-passo" style="display:none;"></div>
+
+    <!-- INSPECCIONES -->
+    <div class="tab-pane fade show active passo-tab-pane" id="tabInsp" role="tabpanel">
+      <div id="contInsp" class="table-responsive mt-0"></div>
+    </div>
+
+    <!-- CAPACITACIONES (solo las de la Matriz) -->
+    <div class="tab-pane fade passo-tab-pane" id="tabCap" role="tabpanel">
+      <div id="contCap" class="table-responsive mt-0"></div>
+    </div>
+
+    <!-- ACTIVIDADES NO PROGRAMADAS (evaluaciones en B DATOS fuera de la Matriz) -->
+    <div class="tab-pane fade passo-tab-pane" id="tabNoProg" role="tabpanel">
+      <div id="contNoProg" class="table-responsive mt-0"></div>
+    </div>
+
+    <!-- REUNIONES -->
+    <div class="tab-pane fade passo-tab-pane" id="tabReun" role="tabpanel">
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-success btn-sm" onclick="abrirModalReunion()">
+          <i class="fas fa-plus me-1"></i> Nueva Reunion
+        </button>
+      </div>
+      <div id="contReun" class="table-responsive mt-0"></div>
+    </div>
+
+    <!-- ENTRENAMIENTOS -->
+    <div class="tab-pane fade passo-tab-pane" id="tabEntr" role="tabpanel">
+      <div id="contEntr" class="table-responsive mt-0"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REUNIONES -->
+<dialog id="modalReunion">
+  <div class="modal-header-custom">
+    <h6 id="modalReunionTitulo">Nueva Reunion</h6>
+    <button type="button" class="btn-close-modal" onclick="document.getElementById('modalReunion').close()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <form id="formReunion">
+    <input type="hidden" id="reunionId">
+    <div class="mb-3">
+      <label class="form-label" style="font-weight:600;font-size:.9rem;">Tema *</label>
+      <input type="text" id="reunionTema" class="form-control form-control-sm" placeholder="Ej: Reunion de Seguridad">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" style="font-weight:600;font-size:.9rem;">Responsable *</label>
+      <input type="text" id="reunionResponsable" class="form-control form-control-sm" placeholder="Ej: Juan Perez">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" style="font-weight:600;font-size:.9rem;">Gerencia</label>
+      <input type="text" id="reunionGerencia" class="form-control form-control-sm" placeholder="Ej: Gerencia de Operaciones">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" style="font-weight:600;font-size:.9rem;">Area</label>
+      <input type="text" id="reunionArea" class="form-control form-control-sm" placeholder="Ej: Operaciones">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" style="font-weight:600;font-size:.9rem;">Meses Programados *</label>
+      <div class="d-flex gap-1 flex-wrap mb-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:.7rem;" onclick="presetMeses('todos')">Todos</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:.7rem;" onclick="presetMeses('trim')">Trim.</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:.7rem;" onclick="presetMeses('sem')">Sem.</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:.7rem;" onclick="presetMeses('ninguno')">Ninguno</button>
+      </div>
+      <div class="meses-grid" id="mesesCheckboxes">
+        <label class="form-check-label"><input type="checkbox" value="1" class="form-check-input chkMesProg"> Ene</label>
+        <label class="form-check-label"><input type="checkbox" value="2" class="form-check-input chkMesProg"> Feb</label>
+        <label class="form-check-label"><input type="checkbox" value="3" class="form-check-input chkMesProg"> Mar</label>
+        <label class="form-check-label"><input type="checkbox" value="4" class="form-check-input chkMesProg"> Abr</label>
+        <label class="form-check-label"><input type="checkbox" value="5" class="form-check-input chkMesProg"> May</label>
+        <label class="form-check-label"><input type="checkbox" value="6" class="form-check-input chkMesProg"> Jun</label>
+        <label class="form-check-label"><input type="checkbox" value="7" class="form-check-input chkMesProg"> Jul</label>
+        <label class="form-check-label"><input type="checkbox" value="8" class="form-check-input chkMesProg"> Ago</label>
+        <label class="form-check-label"><input type="checkbox" value="9" class="form-check-input chkMesProg"> Sep</label>
+        <label class="form-check-label"><input type="checkbox" value="10" class="form-check-input chkMesProg"> Oct</label>
+        <label class="form-check-label"><input type="checkbox" value="11" class="form-check-input chkMesProg"> Nov</label>
+        <label class="form-check-label"><input type="checkbox" value="12" class="form-check-input chkMesProg"> Dic</label>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button type="button" class="btn-guardar-passo" onclick="guardarReunion()">Guardar</button>
+      <button type="button" class="btn-cancelar-passo" onclick="document.getElementById('modalReunion').close()">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+var MESES_PASSO = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+var datosPassoGlobal = null;
+var _passoYaCargado = false;
+var _passoRefreshInterval = null;
+
+// Cargar PASSO solo cuando el tab se activa (lazy load) + iniciar auto-refresh
+var _passoTabLink = document.getElementById('v-pills-passo-tab');
+if (_passoTabLink) {
+  _passoTabLink.addEventListener('shown.bs.tab', function() {
+    if (!_passoYaCargado) {
+      cargarPASSO();
+    } else {
+      // Ya cargado — solo asegurar visibilidad del contenedor
+      document.getElementById('contenidoPASSO').style.display = 'block';
+      document.getElementById('loadingPASSO').style.display = 'none';
+    }
+    // Iniciar auto-refresh cada 5 minutos mientras el tab esté activo
+    if (!_passoRefreshInterval) {
+      _passoRefreshInterval = setInterval(function() {
+        if (_passoYaCargado) cargarPASSO();
+      }, 5 * 60 * 1000);
+    }
+  });
+  _passoTabLink.addEventListener('hide.bs.tab', function() {
+    // Detener auto-refresh cuando el tab se oculta
+    if (_passoRefreshInterval) {
+      clearInterval(_passoRefreshInterval);
+      _passoRefreshInterval = null;
+    }
+  });
+}
+
+
+function cargarPASSO() {
+  document.getElementById('loadingPASSO').style.display = 'block';
+  document.getElementById('contenidoPASSO').style.display = 'none';
+  google.script.run
+    .withSuccessHandler(renderPASSO)
+    .withFailureHandler(function(e) {
+      document.getElementById('loadingPASSO').innerHTML =
+        '<div class="alert alert-danger mt-3"><i class="fas fa-exclamation-triangle me-2"></i>Error al cargar PASSO: ' + e.message + '</div>' +
+        '<button class="btn btn-outline-success btn-sm mt-2" onclick="cargarPASSO()"><i class="fas fa-redo me-1"></i>Reintentar</button>';
+    })
+    .obtenerDatosPASSOCompleto();
+}
+
+function renderPASSO(datos) {
+  datosPassoGlobal = datos;
+  _passoYaCargado = true;
+  document.getElementById('loadingPASSO').style.display = 'none';
+  document.getElementById('contenidoPASSO').style.display = 'block';
+
+  // Titulo con año
+  document.getElementById('passoTitleYear').textContent = 'Programa Anual SSO ' + (datos.anio || new Date().getFullYear());
+
+  // Debug info
+  if (datos.debug) {
+    var dbg = datos.debug;
+    var hasErr = dbg.inspError || dbg.capError;
+    var allZero = dbg.inspCount === 0 && dbg.capCount === 0 && dbg.entrCount === 0;
+    if (hasErr || allZero) {
+      var el = document.getElementById('debugPasso');
+      el.style.display = 'block';
+      el.innerHTML = '<b>Debug PASSO:</b> Insp=' + dbg.inspCount + ' | Cap=' + dbg.capCount + ' | Reun=' + dbg.reunCount + ' | Entr=' + dbg.entrCount +
+        (dbg.inspError ? '<br><span class="text-danger">ErrInsp: ' + dbg.inspError + '</span>' : '') +
+        (dbg.capError ? '<br><span class="text-danger">ErrCap: ' + dbg.capError + '</span>' : '') +
+        (dbg.inspDebug ? '<br>InspDebug: ' + dbg.inspDebug : '') +
+        (dbg.capDebug ? '<br>CapDebug: ' + dbg.capDebug : '') +
+        (dbg.entrDebug ? '<br>EntrDebug: ' + dbg.entrDebug : '');
+    }
+  }
+
+  renderInspecciones(datos.inspecciones || []);
+  renderCursos(datos.capacitaciones || [], 'contCap');
+  renderCursos(datos.actividadesNoProgramadas || [], 'contNoProg');
+  renderReuniones(datos.reuniones || []);
+  renderCursos(datos.entrenamientos || [], 'contEntr');
+
+  // Asegurar que el primer tab interno (Inspecciones) esté visible
+  var firstPane = document.getElementById('tabInsp');
+  var firstTab = document.querySelector('#passoTabs .nav-link');
+  if (firstPane && !firstPane.classList.contains('active')) {
+    // Restaurar estado de todos los inner tabs
+    document.querySelectorAll('#contenidoPASSO .tab-content > .tab-pane').forEach(function(p) {
+      p.classList.remove('show', 'active');
+    });
+    document.querySelectorAll('#passoTabs .nav-link').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    firstPane.classList.add('show', 'active');
+    if (firstTab) firstTab.classList.add('active');
+  }
+}
+
+// =============================================
+// CELDA MES - Capacitaciones / Reuniones
+// =============================================
+function celdaMesCap(p, e) {
+  if (p && e) return '<td class="celda-mes celda-cumple"><b>E</b></td>';  // ✅ Solo "E"
+  if (p) return '<td class="celda-mes celda-prog"><b>P</b></td>';
+  if (e) return '<td class="celda-mes celda-cumple"><b>E</b></td>';
+  return '<td class="celda-mes celda-vacia">-</td>';
+}
+
+// =============================================
+// RENDER INSPECCIONES - NUEVA ESTRUCTURA
+// =============================================
+function renderInspecciones(actividades) {
+  var cont = document.getElementById('contInsp');
+  if (!actividades || actividades.length === 0) {
+    cont.innerHTML = '<div class="alert alert-info mt-3"><i class="fas fa-info-circle me-2"></i>No hay inspecciones programadas.</div>';
+    return;
+  }
+
+  // 🔥 ORDENAR POR GERENCIA → ÁREA
+  actividades.sort(function(a, b) {
+    if (a.gerencia !== b.gerencia) return (a.gerencia || '').localeCompare(b.gerencia || '');
+    return (a.area || '').localeCompare(b.area || '');
+  });
+
+  var html = '<table class="passo-table"><colgroup>' +
+      '<col style="width:180px;min-width:180px;max-width:180px;">' +  // GERENCIA
+      '<col style="width:120px;min-width:120px;max-width:120px;">' +  // ÁREA
+      '<col style="width:250px;min-width:250px;max-width:250px;">' +  // ACTIVIDAD
+      '<col style="width:130px;min-width:130px;max-width:130px;">' +  // RESPONSABLE
+      '<col style="width:100px;min-width:100px;max-width:100px;">';   // FRECUENCIA
+
+  MESES_PASSO.forEach(function() {
+    html += '<col style="width:45px;min-width:45px;max-width:45px;">';
+  });
+
+  html += '</colgroup><thead><tr>';
+  html += '<th style="width:180px;">GERENCIA</th>';
+  html += '<th style="width:120px;">ÁREA</th>';
+  html += '<th style="width:250px;">ACTIVIDAD</th>';
+  html += '<th style="width:130px;">RESPONSABLE</th>';
+  html += '<th style="width:100px;">FRECUENCIA</th>';
+  
+  MESES_PASSO.forEach(function(m) { 
+    html += '<th class="celda-mes" style="width:45px;">' + m + '</th>'; 
+  });
+  
+  html += '</tr></thead><tbody>';
+
+  // 🔥 AGRUPAR POR GERENCIA Y ÁREA CON ROWSPAN
+  var i = 0;
+  while (i < actividades.length) {
+    var ger = actividades[i].gerencia || 'SIN GERENCIA';
+    var area = actividades[i].area || 'SIN ÁREA';
+    var span = 1;
+    var j = i + 1;
+    
+    while (j < actividades.length &&
+           (actividades[j].gerencia || 'SIN GERENCIA') === ger &&
+           (actividades[j].area || 'SIN ÁREA') === area) {
+      span++;
+      j++;
+    }
+
+    for (var k = i; k < i + span; k++) {
+      var act = actividades[k];
+      html += '<tr class="fila-actividad">';
+
+      // 🔥 ROWSPAN PARA GERENCIA Y ÁREA
+      if (k === i) {
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:180px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ger + '</td>';
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + area + '</td>';
+      }
+
+      html += '<td class="col-actividad" style="width:250px;max-width:250px;"><strong>' + (act.nombre || '') + '</strong>';
+      if (act.codigo) html += '<br><small class="text-muted">' + act.codigo + '</small>';
+      html += '</td>';
+      
+      html += '<td class="col-supervisor" style="width:130px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (act.responsable || '') + '</td>';
+      html += '<td class="col-frecuencia" style="width:100px;max-width:100px;"><span class="badge-frec badge-' + (act.frecClase || 'mensual') + '">' + (act.frecuencia || '') + '</span></td>';
+
+      // 🔥 RENDERIZAR MESES CON P/E
+      act.meses.forEach(function(m) {
+        var p = m.programado || 0;
+        var e = m.ejecutado || 0;
+        
+        if (p === 0 && e === 0) {
+          html += '<td class="celda-mes celda-vacia">-</td>';
+        } else if (p > 1) {
+          // Alta frecuencia: mostrar números
+          if (e >= p) html += '<td class="celda-mes celda-cumple">' + e + '/' + p + '</td>';
+          else if (e > 0) html += '<td class="celda-mes celda-parcial">' + e + '/' + p + '</td>';
+          else html += '<td class="celda-mes celda-prog">' + p + '</td>';
+        } else {
+          // Baja frecuencia: P o E
+          if (p === 1 && e > 0) html += '<td class="celda-mes celda-cumple"><b>E</b></td>';
+          else if (p === 1) html += '<td class="celda-mes celda-prog"><b>P</b></td>';
+          else html += '<td class="celda-mes celda-vacia">-</td>';
+        }
+      });
+
+      html += '</tr>';
+    }
+    i += span;
+  }
+
+  html += '</tbody></table>';
+  cont.innerHTML = html;
+}
+
+
+// =============================================
+// 🔥 FUNCIÓN AUXILIAR PARA OBTENER CLASE DE COLOR DE PORCENTAJE
+// =============================================
+function getColorPorcentaje(valor) {
+  if (valor >= 1 && valor <= 50) return 'celda-porcentaje-rojo';
+  if (valor >= 51 && valor <= 80) return 'celda-porcentaje-naranja';
+  if (valor >= 81 && valor <= 99) return 'celda-porcentaje-verde';
+  return '';
+}
+
+
+// =============================================
+// RENDER CAPACITACIONES / ENTRENAMIENTOS
+// =============================================
+function renderCursos(actividades, containerId) {
+  var cont = document.getElementById(containerId);
+  if (!actividades || actividades.length === 0) {
+    var esNoProg = containerId === 'contNoProg';
+    cont.innerHTML = esNoProg
+      ? '<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i>No hay actividades fuera del plan.</div>'
+      : '<div class="alert alert-info mt-3"><i class="fas fa-info-circle me-2"></i>No hay actividades programadas.</div>';
+    return;
+  }
+
+  actividades.sort(function(a, b) {
+    if (a.gerencia !== b.gerencia) return (a.gerencia || '').localeCompare(b.gerencia || '');
+    return (a.area || '').localeCompare(b.area || '');
+  });
+
+  var html = '<table class="passo-table"><colgroup>' +
+      '<col style="width:140px;min-width:140px;max-width:140px;">' +
+      '<col style="width:120px;min-width:120px;max-width:120px;">' +
+      '<col style="width:280px;min-width:280px;max-width:280px;">' +
+      '<col style="width:130px;min-width:130px;max-width:130px;">' +
+      '<col style="width:100px;min-width:100px;max-width:100px;">';
+
+  MESES_PASSO.forEach(function() {
+    html += '<col style="width:45px;min-width:45px;max-width:45px;">';
+  });
+
+  html += '</colgroup><thead><tr>';
+  html += '<th style="width:140px;">GERENCIA</th>';
+  html += '<th style="width:120px;">AREA</th>';
+  var esNoProg = containerId === 'contNoProg';
+  html += '<th style="width:280px;">' + (esNoProg ? 'TEMA' : 'CAPACITACIÓN') + '</th>';
+  html += '<th style="width:130px;">RESPONSABLE</th>';
+  html += '<th style="width:100px;">FRECUENCIA</th>';
+  
+  MESES_PASSO.forEach(function(m) { 
+    html += '<th class="celda-mes" style="width:45px;">' + m + '</th>'; 
+  });
+  
+  html += '</tr></thead><tbody>';
+
+  var i = 0;
+  while (i < actividades.length) {
+    var ger = actividades[i].gerencia || '';
+    var area = actividades[i].area || '';
+    var span = 1;
+    var j = i + 1;
+    while (j < actividades.length &&
+           actividades[j].gerencia === ger &&
+           actividades[j].area === area) {
+      span++;
+      j++;
+    }
+
+    for (var k = i; k < i + span; k++) {
+      var f = actividades[k];
+      html += '<tr class="fila-actividad">';
+
+      if (k === i) {
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:140px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ger + '</td>';
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + area + '</td>';
+      }
+
+      html += '<td class="col-actividad" style="width:280px;max-width:280px;"><strong>' + (f.capacitacion || f.nombre || '') + '</strong></td>';
+      html += '<td class="col-supervisor" style="width:130px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (f.responsable || '') + '</td>';
+      
+      // 🔥 FRECUENCIA CON BADGE DE COLOR
+      var frecLower = (f.frecuencia || '').toLowerCase().trim();
+      var frecClass = 'badge-mensual'; // default
+
+      if (frecLower.includes('diario')) frecClass = 'badge-diario';
+      else if (frecLower.includes('semanal') && !frecLower.includes('2')) frecClass = 'badge-semanal';
+      else if (frecLower.includes('2') && frecLower.includes('semana')) frecClass = 'badge-2semanas';
+      else if (frecLower.includes('quincenal')) frecClass = 'badge-2semanas';
+      else if (frecLower.includes('mensual')) frecClass = 'badge-mensual';
+      else if (frecLower.includes('trimestral')) frecClass = 'badge-trimestral';
+      else if (frecLower.includes('semestral')) frecClass = 'badge-semestral';
+      else if (frecLower.includes('anual')) frecClass = 'badge-anual';
+
+      html += '<td class="col-frecuencia" style="width:100px;max-width:100px;"><span class="badge-frec ' + frecClass + '">' + (f.frecuencia || '') + '</span></td>';
+
+      // 🔥 LÓGICA FINAL CON COLORES APLICADOS
+      f.meses.forEach(function(valor) {
+        if (valor === 100) {
+          html += '<td class="celda-mes celda-cumple" style="width:45px;"><b>E</b></td>';
+        } else if (valor > 0 && valor < 100) {
+          var colorClass = getColorPorcentaje(valor);
+          html += '<td class="celda-mes celda-porcentaje ' + colorClass + '" style="width:45px;"><b>' + valor + '%</b></td>';
+        } else if (valor === -1) {
+          html += '<td class="celda-mes celda-prog" style="width:45px;"><b>P</b></td>';
+        } else {
+          html += '<td class="celda-mes celda-vacia" style="width:45px;">-</td>';
+        }
+      });
+
+      html += '</tr>';
+    }
+    i += span;
+  }
+
+  html += '</tbody></table>';
+  cont.innerHTML = html;
+}
+
+
+
+
+// =============================================
+// RENDER REUNIONES (FORMATO P/E SIMPLE)
+// =============================================
+function renderReuniones(reuniones) {
+  var cont = document.getElementById('contReun');
+  if (!reuniones || reuniones.length === 0) {
+    cont.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No hay reuniones programadas. Agrega una nueva.</div>';
+    return;
+  }
+
+  reuniones.sort(function(a, b) {
+    if (a.gerencia !== b.gerencia) return (a.gerencia || '').localeCompare(b.gerencia || '');
+    return (a.area || '').localeCompare(b.area || '');
+  });
+
+  var html = '<table class="passo-table"><colgroup>' +
+      '<col style="width:140px;min-width:140px;max-width:140px;">' +
+      '<col style="width:120px;min-width:120px;max-width:120px;">' +
+      '<col style="width:280px;min-width:280px;max-width:280px;">' +
+      '<col style="width:130px;min-width:130px;max-width:130px;">' +
+      '<col style="width:100px;min-width:100px;max-width:100px;">';
+
+  MESES_PASSO.forEach(function() {
+    html += '<col style="width:45px;min-width:45px;max-width:45px;">';
+  });
+
+  html += '<col style="width:120px;min-width:120px;max-width:120px;">';
+  html += '</colgroup><thead><tr>';
+  html += '<th style="width:140px;">GERENCIA</th>';
+  html += '<th style="width:120px;">AREA</th>';
+  html += '<th style="width:280px;">TEMA</th>';
+  html += '<th style="width:130px;">RESPONSABLE</th>';
+  html += '<th style="width:100px;">FRECUENCIA</th>';
+  
+  MESES_PASSO.forEach(function(m) { 
+    html += '<th class="celda-mes" style="width:45px;">' + m + '</th>'; 
+  });
+  
+  html += '<th style="width:120px;">ACCIÓN</th></tr></thead><tbody>';
+
+  var i = 0;
+  while (i < reuniones.length) {
+    var ger = reuniones[i].gerencia || 'SIN ASIGNAR';
+    var area = reuniones[i].area || 'SIN ASIGNAR';
+    var span = 1;
+    var j = i + 1;
+    while (j < reuniones.length &&
+           (reuniones[j].gerencia || 'SIN ASIGNAR') === ger &&
+           (reuniones[j].area || 'SIN ASIGNAR') === area) {
+      span++;
+      j++;
+    }
+
+    for (var k = i; k < i + span; k++) {
+      var act = reuniones[k];
+      html += '<tr class="fila-actividad">';
+
+      if (k === i) {
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:140px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ger + '</td>';
+        html += '<td rowspan="' + span + '" class="fw-bold align-middle" style="text-align:left;width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + area + '</td>';
+      }
+
+      html += '<td class="col-actividad" style="width:280px;max-width:280px;"><strong>' + (act.nombre || '') + '</strong></td>';
+      html += '<td class="col-supervisor" style="width:130px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (act.responsable || '') + '</td>';
+      
+      var todosMesesUnicos = [];
+      act.meses.forEach(function(mesObj, idx) {
+        if (mesObj.programado || mesObj.ejecutado) {
+          todosMesesUnicos.push(idx + 1);
+        }
+      });
+      
+      todosMesesUnicos = todosMesesUnicos.filter(function(v, i, a) { return a.indexOf(v) === i; }).sort(function(a, b) { return a - b; });
+      
+      var cantMeses = todosMesesUnicos.length;
+      var frecTexto = '';
+      var mesesEsperados = 0;
+      
+      if (cantMeses === 1) {
+        frecTexto = 'ANUAL';
+        mesesEsperados = 12;
+      } else if (cantMeses === 2) {
+        frecTexto = 'SEMESTRAL';
+        mesesEsperados = 6;
+      } else if (cantMeses === 3) {
+        frecTexto = 'CUATRIMESTRAL';
+        mesesEsperados = 4;
+      } else if (cantMeses === 4) {
+        frecTexto = 'TRIMESTRAL';
+        mesesEsperados = 3;
+      } else if (cantMeses === 6) {
+        frecTexto = 'BIMESTRAL';
+        mesesEsperados = 2;
+      } else if (cantMeses === 12) {
+        frecTexto = 'MENSUAL';
+        mesesEsperados = 1;
+      } else {
+        frecTexto = cantMeses + ' VECES';
+      }
+
+      var malDistribuido = false;
+      if (cantMeses >= 2 && mesesEsperados > 0) {
+        var distancias = [];
+        
+        for (var m = 0; m < todosMesesUnicos.length - 1; m++) {
+          distancias.push(todosMesesUnicos[m + 1] - todosMesesUnicos[m]);
+        }
+        
+        distancias.push(12 - todosMesesUnicos[todosMesesUnicos.length - 1] + todosMesesUnicos[0]);
+        
+        var tolerancia = 1;
+        for (var d = 0; d < distancias.length; d++) {
+          var diferencia = Math.abs(distancias[d] - mesesEsperados);
+          if (diferencia > tolerancia) {
+            malDistribuido = true;
+            break;
+          }
+        }
+      }
+
+      var frecLower = frecTexto.toLowerCase();
+      var frecClass = 'badge-mensual';
+      if (frecLower.includes('trimestral')) frecClass = 'badge-trimestral';
+      else if (frecLower.includes('semestral')) frecClass = 'badge-semestral';
+      else if (frecLower.includes('anual')) frecClass = 'badge-anual';
+      else if (frecLower.includes('bimestral')) frecClass = 'badge-2semanas';
+      else if (frecLower.includes('cuatrimestral')) frecClass = 'badge-trimestral';
+
+      var malDistribuidoClass = malDistribuido ? ' mal-distribuido' : '';
+
+      html += '<td class="col-frecuencia" style="width:100px;max-width:100px;"><span class="badge-frec ' + frecClass + malDistribuidoClass + '">' + frecTexto + '</span></td>';
+
+      // 🔥 RENDERIZAR MESES CON FORMATO P/E SIMPLE
+      act.meses.forEach(function(m) {
+        html += celdaMesCap(m.programado, m.ejecutado);
+      });
+
+      html += '<td style="width:120px;white-space:nowrap;">';
+      html += '<button class="btn btn-outline-success btn-xs me-1" title="Marcar ejecutada" onclick="marcarEjecutadaUI(\'' + act.id + '\')"><i class="fas fa-check"></i></button>';
+      html += '<button class="btn btn-outline-primary btn-xs me-1" title="Editar" onclick="abrirModalReunion(\'' + act.id + '\')"><i class="fas fa-edit"></i></button>';
+      html += '<button class="btn btn-outline-danger btn-xs" title="Eliminar" onclick="eliminarReunionUI(\'' + act.id + '\')"><i class="fas fa-trash"></i></button>';
+      html += '</td></tr>';
+    }
+    i += span;
+  }
+
+  html += '</tbody></table>';
+  cont.innerHTML = html;
+}
+
+
+
+
+// =============================================
+// REUNIONES CRUD UI
+// =============================================
+function presetMeses(tipo) {
+  var checks = document.querySelectorAll('.chkMesProg');
+  checks.forEach(function(c) { c.checked = false; });
+  var m = [];
+  if (tipo === 'todos') m = [1,2,3,4,5,6,7,8,9,10,11,12];
+  else if (tipo === 'trim') m = [1,4,7,10];
+  else if (tipo === 'sem') m = [1,7];
+  checks.forEach(function(c) { if (m.indexOf(parseInt(c.value)) >= 0) c.checked = true; });
+}
+
+function getMesesSel() {
+  return Array.from(document.querySelectorAll('.chkMesProg:checked')).map(function(c) { return c.value; }).join(',');
+}
+
+function setMesesSel(str) {
+  var m = String(str || '').split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+  document.querySelectorAll('.chkMesProg').forEach(function(c) { c.checked = m.indexOf(c.value) >= 0; });
+}
+
+function abrirModalReunion(idEditar) {
+  document.getElementById('reunionId').value = '';
+  document.getElementById('reunionTema').value = '';
+  document.getElementById('reunionResponsable').value = '';
+  document.getElementById('reunionGerencia').value = '';
+  document.getElementById('reunionArea').value = '';
+  setMesesSel('');
+
+  if (idEditar && datosPassoGlobal) {
+    var raw = (datosPassoGlobal.reunionesRaw || []).find(function(r) { return r.id === idEditar; });
+    if (raw) {
+      document.getElementById('modalReunionTitulo').textContent = 'Editar Reunion';
+      document.getElementById('reunionId').value = raw.id;
+      document.getElementById('reunionTema').value = raw.tema;
+      document.getElementById('reunionResponsable').value = raw.responsable;
+      document.getElementById('reunionGerencia').value = raw.gerencia;
+      document.getElementById('reunionArea').value = raw.area;
+      setMesesSel(raw.mesesProgramados);
+    }
+  } else {
+    document.getElementById('modalReunionTitulo').textContent = 'Nueva Reunion';
+  }
+  document.getElementById('modalReunion').showModal();
+}
+
+function guardarReunion() {
+  var id = document.getElementById('reunionId').value;
+  var tema = document.getElementById('reunionTema').value.trim();
+  var resp = document.getElementById('reunionResponsable').value.trim();
+  var ger = document.getElementById('reunionGerencia').value.trim();
+  var area = document.getElementById('reunionArea').value.trim();
+  var meses = getMesesSel();
+
+  if (!tema || !meses) {
+    Swal.fire({ icon: 'warning', title: 'Campos obligatorios', text: 'Tema y al menos un mes son requeridos.', timer: 2000, showConfirmButton: false });
+    return;
+  }
+
+  document.getElementById('modalReunion').close();
+  var cb = function() { Swal.fire({ icon: 'success', title: 'Guardada', timer: 1200, showConfirmButton: false }); cargarPASSO(); };
+
+  if (id) {
+    var raw = (datosPassoGlobal.reunionesRaw || []).find(function(r) { return r.id === id; });
+    google.script.run.withSuccessHandler(cb).actualizarReunion([id, tema, resp, ger, area, meses, raw ? raw.mesesEjecutados : '', raw ? raw.anio : new Date().getFullYear()]);
+  } else {
+    google.script.run.withSuccessHandler(cb).agregarReunion([tema, resp, ger, area, meses]);
+  }
+}
+
+function eliminarReunionUI(id) {
+  Swal.fire({ title: 'Eliminar reunion', text: 'Estas seguro?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Si, eliminar', confirmButtonColor: '#dc3545' }).then(function(r) {
+    if (r.isConfirmed) {
+      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Eliminada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).eliminarReunion(id);
+    }
+  });
+}
+
+function marcarEjecutadaUI(id) {
+  var reunion = (datosPassoGlobal.reuniones || []).find(function(r) { return r.id === id; });
+  if (!reunion) return;
+
+  var mP = String(reunion.mesesProgramados || '').split(',').filter(function(s) { return s.trim(); });
+  var mE = String(reunion.mesesEjecutados || '').split(',').filter(function(s) { return s.trim(); });
+  var nombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var pendientes = mP.filter(function(m) { return mE.indexOf(m.trim()) < 0; });
+
+  if (pendientes.length === 0) {
+    Swal.fire({ icon: 'info', title: 'Completada', text: 'Todos los meses ya ejecutados.', timer: 2000, showConfirmButton: false });
+    return;
+  }
+
+  var opts = {};
+  pendientes.forEach(function(m) { opts[m.trim()] = nombres[parseInt(m)] || 'Mes ' + m; });
+
+  Swal.fire({ title: 'Marcar ejecutada', input: 'select', inputOptions: opts, inputPlaceholder: 'Mes...', showCancelButton: true, confirmButtonText: 'Confirmar', confirmButtonColor: '#28a745' }).then(function(r) {
+    if (r.isConfirmed && r.value) {
+      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Ejecutada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).marcarReunionEjecutada(id, parseInt(r.value));
+    }
+  });
+}
+
+function resetPASSOModule() {
+  datosPassoGlobal = null;
+  _passoYaCargado = false;
+  if (_passoRefreshInterval) { clearInterval(_passoRefreshInterval); _passoRefreshInterval = null; }
+  ['contInsp','contCap','contReun','contEntr'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  var loading = document.getElementById('loadingPASSO');
+  if (loading) loading.innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+}
+</script>
+
+<!-- ── Overlay Simulador de Alertas (CSS puro, sin Bootstrap Modal JS) ── -->
+<div id="simOverlay" onclick="if(event.target===this)cerrarSimModal()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1055;overflow-y:auto;padding:1.5rem 1rem;">
+  <div style="background:#fff;border-radius:.5rem;width:100%;max-width:1140px;margin:auto;display:flex;flex-direction:column;max-height:90vh;">
+
+    <!-- header -->
+    <div style="padding:.6rem 1rem;border-bottom:1px solid #dee2e6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <h6 style="margin:0;font-weight:700;">
+        <i class="fa-solid fa-radar me-2 text-warning"></i>Simulación de Alertas
+        <small class="text-muted fw-normal ms-2" id="simFecha"></small>
+      </h6>
+      <button onclick="cerrarSimModal()"
+              style="border:none;background:none;font-size:1.4rem;line-height:1;cursor:pointer;color:#6c757d;padding:.1rem .4rem;"
+              title="Cerrar">&times;</button>
+    </div>
+
+    <!-- body scrollable -->
+    <div style="overflow-y:auto;flex:1;min-height:0;">
+
+      <!-- Resumen superior -->
+      <div id="simResumen" class="d-flex flex-wrap gap-3 p-3 border-bottom bg-light" style="font-size:.82rem"></div>
+
+      <!-- Tabs internas -->
+      <ul class="nav nav-tabs px-3 pt-2" id="simTabs">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#simVencidos">
+            <i class="fa-solid fa-circle-exclamation text-danger me-1"></i>Vencidos <span id="badgeVenc" class="badge bg-danger ms-1">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#simProximos">
+            <i class="fa-solid fa-clock text-warning me-1"></i>Próximos (≤3 días) <span id="badgeProx" class="badge bg-warning text-dark ms-1">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#simTurnos">
+            <i class="fa-solid fa-users text-info me-1"></i>Turno hoy
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#simPush">
+            <i class="fa-solid fa-bell text-primary me-1"></i>Push a enviar
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#simPasso">
+            <i class="fa-solid fa-graduation-cap text-success me-1"></i>PASSO <span id="badgePasso" class="badge bg-success ms-1">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#simTelegram">
+            <i class="fa-brands fa-telegram text-info me-1"></i>Mensaje Telegram
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content p-3">
+        <div class="tab-pane fade show active" id="simVencidos">
+          <div id="simTablaVencidos"></div>
+        </div>
+        <div class="tab-pane fade" id="simProximos">
+          <div id="simTablaProximos"></div>
+        </div>
+        <div class="tab-pane fade" id="simTurnos">
+          <div id="simTablaTurnos"></div>
+        </div>
+        <div class="tab-pane fade" id="simPush">
+          <div id="simTablaPush"></div>
+        </div>
+        <div class="tab-pane fade" id="simPasso">
+          <div id="simTablaPasso"></div>
+        </div>
+        <div class="tab-pane fade" id="simTelegram">
+          <pre id="simMsgTelegram" class="bg-dark text-light rounded p-3" style="font-size:.8rem;white-space:pre-wrap;max-height:420px;overflow-y:auto"></pre>
+        </div>
+      </div>
+    </div><!-- /body -->
+
+    <!-- footer -->
+    <div style="padding:.5rem 1rem;border-top:1px solid #dee2e6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <small class="text-muted"><i class="fa-solid fa-circle-info me-1"></i>Solo diagnóstico — no se envía ninguna notificación</small>
+      <button class="btn btn-secondary btn-sm" onclick="cerrarSimModal()">Cerrar</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function cerrarSimModal() {
+  document.getElementById('simOverlay').style.display = 'none';
+}
+
+function abrirSimuladorAlertas() {
+  document.getElementById('simOverlay').style.display = 'block';
+
+  document.getElementById('simResumen').innerHTML =
+    '<div class="spinner-border spinner-border-sm text-warning me-2"></div><span class="text-muted">Calculando...</span>';
+  ['simTablaVencidos','simTablaProximos','simTablaTurnos','simTablaPush','simTablaPasso'].forEach(function(id) {
+    document.getElementById(id).innerHTML = '<div class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm"></div></div>';
+  });
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res || !res.ok) {
+        document.getElementById('simResumen').innerHTML = '<span class="text-danger">Error: ' + (res ? res.error : 'sin respuesta') + '</span>';
+        return;
+      }
+      _renderSimulador(res);
+    })
+    .withFailureHandler(function(e) {
+      document.getElementById('simResumen').innerHTML = '<span class="text-danger">Error: ' + e.message + '</span>';
+    })
+    .simularAlertasInspeccion();
+}
+
+function _renderSimulador(r) {
+  document.getElementById('simFecha').textContent = r.fecha;
+
+  // ── Resumen ──────────────────────────────────────────────────────────
+  var alDia = r.totalEquipos - (r.vencidos.length + r.proximos.length + r.alDia);
+  document.getElementById('simResumen').innerHTML =
+    _simPill('fa-warehouse', r.totalEquipos, 'Equipos totales', '#6c757d') +
+    _simPill('fa-circle-exclamation', r.vencidos.length, 'Vencidos', '#dc3545') +
+    _simPill('fa-clock', r.proximos.length, 'Próximos ≤3d', '#fd7e14') +
+    _simPill('fa-circle-check', r.alDia, 'Al día', '#198754') +
+    _simPill('fa-users', r.dnisEnTurno, 'En turno hoy', '#0d6efd') +
+    _simPill('fa-bell', Object.keys(r.pushPorTrabajador).length, 'Recibirían push', '#6f42c1');
+
+  document.getElementById('badgeVenc').textContent = r.vencidos.length;
+  document.getElementById('badgeProx').textContent = r.proximos.length;
+
+  // ── Tabla vencidos ───────────────────────────────────────────────────
+  document.getElementById('simTablaVencidos').innerHTML =
+    r.vencidos.length === 0
+    ? '<div class="alert alert-success"><i class="fa-solid fa-circle-check me-2"></i>Sin inspecciones vencidas.</div>'
+    : _simTablaEquipos(r.vencidos, true);
+
+  // ── Tabla próximos ───────────────────────────────────────────────────
+  document.getElementById('simTablaProximos').innerHTML =
+    r.proximos.length === 0
+    ? '<div class="alert alert-info"><i class="fa-solid fa-circle-info me-2"></i>Sin inspecciones próximas a vencer en los próximos 3 días.</div>'
+    : _simTablaEquipos(r.proximos, false);
+
+  // ── Turno hoy ────────────────────────────────────────────────────────
+  var turnos = r.trabajadoresHoy;
+  var zonas  = Object.keys(turnos);
+  var htmlTurno = '';
+  if (zonas.length === 0) {
+    htmlTurno = '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation me-2"></i>Sin trabajadores en turno registrados hoy en BD_Detalle.</div>';
+  } else {
+    htmlTurno = '<table class="table table-sm table-bordered" style="font-size:.82rem"><thead class="table-dark"><tr><th>Zona / Área</th><th>Trabajador</th><th>Turno</th><th>DNI</th></tr></thead><tbody>';
+    zonas.forEach(function(zona) {
+      turnos[zona].forEach(function(w, idx) {
+        htmlTurno += '<tr>' +
+          (idx === 0 ? '<td rowspan="' + turnos[zona].length + '" class="fw-bold align-middle">' + zona + '</td>' : '') +
+          '<td>' + w.nombre + '</td><td>' + (w.turno || '-') + '</td><td class="text-muted">' + (w.dni || '-') + '</td></tr>';
+      });
+    });
+    htmlTurno += '</tbody></table>';
+  }
+  document.getElementById('simTablaTurnos').innerHTML = htmlTurno;
+
+  // ── Push por trabajador (filtrado por zona) ────────────────────────────
+  var push = r.pushPorTrabajador;
+  var keys = Object.keys(push);
+  var htmlPush = '';
+  if (keys.length === 0) {
+    htmlPush = '<div class="alert alert-info"><i class="fa-solid fa-bell-slash me-2"></i>Ningún trabajador en turno recibiría push (sin vencidos o sin turno registrado).</div>';
+  } else {
+    htmlPush = '<div class="alert alert-light border mb-2" style="font-size:.78rem"><i class="fa-solid fa-filter me-1 text-primary"></i><strong>Filtrado por zona:</strong> cada trabajador solo ve alertas de su posta. El administrador ve todas.</div>';
+    htmlPush += '<table class="table table-sm table-bordered" style="font-size:.82rem"><thead class="table-dark"><tr><th>Trabajador</th><th>Equipos pendientes (inspecciones)</th></tr></thead><tbody>';
+    keys.forEach(function(nombre) {
+      htmlPush += '<tr><td class="fw-semibold" style="white-space:nowrap">' + nombre + '</td><td>' + push[nombre].join('<br>') + '</td></tr>';
+    });
+    htmlPush += '</tbody></table>';
+  }
+  // Agregar PASSO pendientes al push si hay
+  var passoPush = r.passoPorTrabajador || {};
+  var passoKeys = Object.keys(passoPush);
+  if (passoKeys.length > 0) {
+    htmlPush += '<h6 class="mt-3"><i class="fa-solid fa-graduation-cap text-success me-1"></i>Capacitaciones pendientes (PASSO)</h6>';
+    htmlPush += '<table class="table table-sm table-bordered" style="font-size:.82rem"><thead class="table-success"><tr><th>Trabajador</th><th>Capacitaciones pendientes</th></tr></thead><tbody>';
+    passoKeys.forEach(function(nombre) {
+      var caps = passoPush[nombre].map(function(c) { return c.capacitacion + ' <span class="badge bg-secondary">' + c.frecuencia + '</span>'; });
+      htmlPush += '<tr><td class="fw-semibold" style="white-space:nowrap">' + nombre + '</td><td>' + caps.join('<br>') + '</td></tr>';
+    });
+    htmlPush += '</tbody></table>';
+  }
+  document.getElementById('simTablaPush').innerHTML = htmlPush;
+
+  // ── PASSO — Resumen de capacitaciones pendientes (vista admin) ──────
+  var passoRes = r.passoResumen || [];
+  document.getElementById('badgePasso').textContent = passoRes.length;
+  var htmlPasso = '';
+  if (passoRes.length === 0) {
+    htmlPasso = '<div class="alert alert-success"><i class="fa-solid fa-circle-check me-2"></i>Todas las capacitaciones del mes están al día.</div>';
+  } else {
+    htmlPasso = '<div class="alert alert-warning border mb-2" style="font-size:.82rem"><i class="fa-solid fa-triangle-exclamation me-1"></i><strong>' + passoRes.length + ' capacitación(es)</strong> con trabajadores pendientes este mes.</div>';
+    passoRes.forEach(function(cap) {
+      var pct = Math.round((cap.completaron / cap.total) * 100);
+      var barColor = pct >= 80 ? '#198754' : pct >= 50 ? '#fd7e14' : '#dc3545';
+      htmlPasso += '<div class="card mb-2"><div class="card-body p-2" style="font-size:.82rem">';
+      htmlPasso += '<div class="d-flex justify-content-between align-items-center mb-1">';
+      htmlPasso += '<strong><i class="fa-solid fa-book me-1"></i>' + cap.capacitacion + '</strong>';
+      htmlPasso += '<span class="badge bg-secondary">' + cap.frecuencia + '</span></div>';
+      htmlPasso += '<div class="progress mb-1" style="height:6px"><div class="progress-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
+      htmlPasso += '<small class="text-muted">' + cap.completaron + '/' + cap.total + ' completaron (' + pct + '%) — <strong class="text-danger">' + cap.faltan + ' falta(n)</strong></small>';
+      htmlPasso += '<div class="mt-1" style="font-size:.75rem;color:#6c757d">';
+      htmlPasso += '<i class="fa-solid fa-user-xmark text-danger me-1"></i>Faltan: ' + cap.faltanNombres.join(', ');
+      htmlPasso += '</div></div></div>';
+    });
+  }
+  document.getElementById('simTablaPasso').innerHTML = htmlPasso;
+
+  // ── Telegram preview ─────────────────────────────────────────────────
+  document.getElementById('simMsgTelegram').textContent = r.telegramPreview;
+}
+
+function _simPill(icon, val, label, color) {
+  return '<div class="d-flex flex-column align-items-center px-3 py-1 rounded" style="background:' + color + '18;border:1px solid ' + color + '44;min-width:90px">' +
+    '<span style="font-size:1.1rem;color:' + color + '"><i class="fa-solid fa-' + icon + '"></i></span>' +
+    '<span class="fw-bold" style="color:' + color + ';font-size:1rem">' + val + '</span>' +
+    '<span style="font-size:.7rem;color:#6c757d;text-align:center">' + label + '</span></div>';
+}
+
+function _simTablaEquipos(items, mostrarVencido) {
+  var html = '<table class="table table-sm table-bordered table-hover" style="font-size:.82rem"><thead class="table-dark"><tr>' +
+    '<th>Equipo</th><th>Código</th><th>Área</th><th>Tipo</th><th>Última insp.</th>' +
+    (mostrarVencido ? '<th>Días vencido</th>' : '<th>Vence en</th>') +
+    '<th>Cargo responsable</th></tr></thead><tbody>';
+  items.forEach(function(it) {
+    var urgClass = mostrarVencido
+      ? (it.diasVencido === 0 ? 'table-warning' : it.diasVencido <= 2 ? 'table-orange' : 'table-danger')
+      : 'table-warning';
+    var diasLabel = mostrarVencido
+      ? (it.diasVencido === 0 ? '<span class="badge bg-warning text-dark">HOY</span>'
+        : '<span class="badge bg-danger">+' + it.diasVencido + ' días</span>')
+      : '<span class="badge bg-warning text-dark">' + Math.abs(it.diasVencido) + ' días</span>';
+    html += '<tr class="' + urgClass + '">' +
+      '<td class="fw-semibold">' + it.equipo + '</td>' +
+      '<td class="text-muted">' + it.codigo + '</td>' +
+      '<td>' + it.area + '</td>' +
+      '<td><span class="badge bg-secondary">' + it.tipo + '</span></td>' +
+      '<td>' + it.ultimaFecha + '</td>' +
+      '<td>' + diasLabel + '</td>' +
+      '<td class="text-muted" style="font-size:.75rem">' + (it.cargo || '—') + '</td></tr>';
+  });
+  return html + '</tbody></table>';
+}
+
+// Cerrar overlay con tecla ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('simOverlay').style.display !== 'none') {
+    cerrarSimModal();
+  }
+});
+</script>

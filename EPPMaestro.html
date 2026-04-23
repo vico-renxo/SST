@@ -1,0 +1,667 @@
+<style>
+  /* ========== MAESTRO EPP ========== */
+  .scroll-horizontal{overflow-x:auto;overflow-y:hidden;border-radius:8px;border:1px solid var(--gray-border,#dee2e6);background:#fff}
+  .tabla-horizontal{display:inline-flex;font-size:11px;min-width:100%}
+  .columna-trabajador{display:flex;flex-direction:column;background:#fff;border-right:2px solid var(--gray-border,#dee2e6);position:sticky;left:0;z-index:10}
+  .header-trabajador{background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:10px;text-align:center;font-weight:600;border-bottom:2px solid var(--gray-border,#dee2e6);height:72px;display:flex;align-items:center;justify-content:center}
+  .celda-trabajador{padding:8px 12px;border-bottom:1px solid var(--gray-border,#dee2e6);height:40px;display:flex;flex-direction:column;justify-content:center;min-width:200px}
+  .celda-trabajador:hover{background:#f8f9fa}
+  .nombre-trabajador{font-weight:600;font-size:11px;color:#111827}
+  .cargo-trabajador{font-size:10px;color:#6c757d}
+  .columna-epp{display:flex;flex-direction:column;border-right:1px solid var(--gray-border,#dee2e6);min-width:75px}
+  .header-epp{background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:6px;text-align:center;font-weight:600;border-bottom:2px solid var(--gray-border,#dee2e6);height:72px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .header-epp:hover{background:#e2e6ea}
+  .header-epp-img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-border,#dee2e6);background:#fff;transition:opacity .3s}
+  .celda-epp{padding:8px;border-bottom:1px solid var(--gray-border,#dee2e6);text-align:center;height:40px;display:flex;align-items:center;justify-content:center}
+  .celda-epp:hover{background:#f8f9fa}
+  .semaforo{width:22px;height:22px;border-radius:50%;display:inline-block;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .2s}
+  .semaforo:hover{transform:scale(1.3)}
+  .st-OK{background:#198754;border:2px solid #146c43}
+  .st-NOTIF{background:#ffc107;border:2px solid #e0a800}
+  .st-ENTR{background:#dc3545;border:2px solid #b02a37}
+  .sin-asignar{background:#e9ecef;border:2px solid #ced4da}
+  .fila-oculta{display:none!important}
+  .kpi-card{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:#fff;border:1px solid var(--gray-border,#dee2e6)}
+  .kpi-card.verde{border-left:4px solid #198754}
+  .kpi-card.naranja{border-left:4px solid #ffc107}
+  .kpi-card.rojo{border-left:4px solid #dc3545}
+  .kpi-value{font-size:20px;font-weight:700;line-height:1}
+  .kpi-label{font-size:10px;color:#6c757d;text-transform:uppercase;font-weight:600}
+  .tooltip-epp{position:fixed;background:#fff;color:#111;padding:14px;border-radius:10px;font-size:12px;z-index:10000;pointer-events:none;opacity:0;transition:opacity .2s;box-shadow:0 6px 20px rgba(0,0,0,.15);max-width:280px;border:1px solid #dee2e6}
+  .tooltip-epp.show{opacity:1}
+  .tooltip-header{font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #dee2e6}
+  .tooltip-row{margin:4px 0;display:flex;justify-content:space-between;gap:10px}
+  .tooltip-label{color:#6c757d;font-size:11px}
+  .tooltip-value{font-weight:600}
+  .modal-imagen{display:none;position:fixed;z-index:10001;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.7)}
+  .modal-imagen-content{position:relative;margin:5% auto;width:90%;max-width:500px;background:#fff;border-radius:10px;padding:20px}
+  .modal-close{position:absolute;top:12px;right:15px;font-size:24px;font-weight:bold;color:#6c757d;cursor:pointer}
+  .modal-close:hover{color:#dc3545}
+  .modal-imagen-img{width:100%;border-radius:8px;margin-bottom:10px}
+  /* Chips categoría */
+  .maestro-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .maestro-chip{ padding:.15rem .7rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:.85rem; white-space:nowrap; transition:background .15s,color .15s,border-color .15s; }
+  .maestro-chip:hover{ background:#f1f5f9; }
+  .maestro-chip.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
+  /* Lista de compras */
+  .compra-prioridad{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+  .compra-prioridad.vencido{background:#f8d7da;color:#842029}
+  .compra-prioridad.porvencer{background:#fff3cd;color:#664d03}
+</style>
+
+<!-- ENCABEZADO -->
+<div class="d-flex align-items-center mt-3 mb-2">
+  <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;background:#6f42c1">
+    <i class="fas fa-hard-hat text-white"></i>
+  </div>
+  <div>
+    <h5 class="mb-0" style="color:#6f42c1">Maestro EPP</h5>
+    <small class="text-muted">Control de equipos de protección personal</small>
+  </div>
+</div>
+
+<div class="container-fluid px-0">
+
+  <!-- TABS (custom, no usa tab-pane para evitar conflicto con index.html) -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link active" href="#" id="maestroTabGeneral" onclick="switchMaestroTab('general');return false;">
+        <i class="fas fa-th"></i> Vista General
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" id="maestroTabCompras" onclick="switchMaestroTab('compras');return false;">
+        <i class="fas fa-shopping-cart"></i> Lista de Compras
+        <span id="badgeCompras" class="badge bg-danger ms-1" style="display:none">0</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- PANELES (sin tab-pane para evitar conflicto global) -->
+
+    <!-- ==================== PANEL: VISTA GENERAL ==================== -->
+    <div id="maestroPanelGeneral" style="min-height:300px">
+
+      <!-- TOOLBAR -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div class="d-flex align-items-center gap-1">
+          <input type="text" id="txtBusqueda" class="form-control form-control-sm"
+                 placeholder="Buscar trabajador..." onkeyup="filtrarTablaHorizontal()"
+                 style="max-width:220px;border:1px solid #6c757d">
+          <button class="btn btn-outline-secondary btn-sm" onclick="forzarRecargaMaestro()">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="d-flex align-items-center gap-2" id="kpisContainer">
+          <small class="text-muted">Cargando...</small>
+        </div>
+
+        <!-- Leyenda compacta -->
+        <div class="d-flex align-items-center gap-2" style="font-size:11px">
+          <span><span class="semaforo st-OK" style="width:14px;height:14px;vertical-align:middle"></span> Vigente</span>
+          <span><span class="semaforo st-NOTIF" style="width:14px;height:14px;vertical-align:middle"></span> Por vencer</span>
+          <span><span class="semaforo st-ENTR" style="width:14px;height:14px;vertical-align:middle"></span> Vencido</span>
+          <span><span class="semaforo sin-asignar" style="width:14px;height:14px;vertical-align:middle"></span> Sin dato</span>
+        </div>
+      </div>
+
+      <!-- Chips categoría -->
+      <div class="d-flex align-items-center gap-2 mb-2" style="font-size:12px">
+        <span class="text-muted fw-bold" style="white-space:nowrap">Filtrar por categoría:</span>
+        <div id="chipCatsMaestro" class="maestro-chips">
+          <span class="maestro-chip active" data-cat="Todos">Todos</span>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="scroll-horizontal">
+        <div class="tabla-horizontal" id="tablaHorizontal">
+          <div class="text-center py-4 text-muted w-100">
+            <div class="spinner-border spinner-border-sm text-primary"></div><br>
+            Haz clic en <b>Maestro General EPP</b> para cargar
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== PANEL: LISTA DE COMPRAS ==================== -->
+    <div id="maestroPanelCompras" style="min-height:300px;display:none">
+
+      <!-- Filtro de días -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <label class="form-label mb-0 fw-bold" style="font-size:13px">Incluir próximos:</label>
+          <select id="filtroComprasDias" class="form-select form-select-sm" style="width:auto;border:1px solid #6c757d" onchange="renderizarListaCompras()">
+            <option value="0">Solo vencidos</option>
+            <option value="15">+ por vencer en 15 días</option>
+            <option value="30" selected>+ por vencer en 30 días</option>
+            <option value="60">+ por vencer en 60 días</option>
+            <option value="90">+ por vencer en 90 días</option>
+          </select>
+        </div>
+        <div class="d-flex gap-1">
+          <button class="btn btn-outline-dark btn-sm" onclick="imprimirProveedor()">
+            <i class="fas fa-print"></i> Imprimir Proveedor
+          </button>
+          <button class="btn btn-outline-dark btn-sm" onclick="imprimirRegistro()">
+            <i class="fas fa-clipboard-list"></i> Imprimir Registro
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumen -->
+      <div id="comprasResumen" class="mb-3"></div>
+
+      <!-- Tabla editable -->
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle" id="tablaCompras" style="font-size:12px">
+          <thead class="table-light">
+            <tr>
+              <th style="width:30px">#</th>
+              <th>Producto</th>
+              <th style="width:100px">Talla/Var.</th>
+              <th style="width:80px" class="text-center">Cantidad</th>
+              <th style="width:110px" class="text-center">Prioridad</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyCompras">
+            <tr><td colspan="5" class="text-center text-muted py-3">Carga los datos desde Vista General primero</td></tr>
+          </tbody>
+          <tfoot id="tfootCompras"></tfoot>
+        </table>
+      </div>
+
+      <!-- Detalle por trabajador (colapsable) -->
+      <div class="mt-3">
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detalleComprasTrabajadores">
+          <i class="fas fa-users"></i> Ver detalle por trabajador
+        </button>
+        <div class="collapse mt-2" id="detalleComprasTrabajadores">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered" id="tablaDetalleTrabajadores" style="font-size:11px">
+              <thead class="table-light">
+                <tr><th>Producto / Talla</th><th>Trabajador</th><th>Estado</th><th class="text-center">Cant</th></tr>
+              </thead>
+              <tbody id="tbodyDetalle"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip-epp" id="tooltipEPP"></div>
+
+<!-- MODAL IMAGEN -->
+<div class="modal-imagen" id="modalImagen">
+  <div class="modal-imagen-content">
+    <span class="modal-close" onclick="cerrarModalImagen()">&times;</span>
+    <img class="modal-imagen-img" id="modalImg" src="" alt="EPP">
+    <div id="modalTitle" style="font-size:16px;font-weight:600"></div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   MAESTRO EPP — Script principal
+   ================================================================ */
+var cargarDatosMaestro, forzarRecargaMaestro, filtrarTablaHorizontal, mostrarTooltip, ocultarTooltip,
+    abrirModalImagen, cerrarModalImagen, renderizarListaCompras,
+    imprimirProveedor, imprimirRegistro, switchMaestroTab;
+
+(function(){
+'use strict';
+
+let datosCompletos = [];
+let trabajadoresUnicos = [];
+let eppsUnicos = [];
+const productMeta = new Map();
+const categoriasEPP = {};
+const PLACEHOLDER = 'https://lh5.googleusercontent.com/d/1n38-t1dDdj56TqOjv8c4SAAcUQcA0U72';
+
+// ========== switch tabs custom ==========
+function _switchMaestroTab(tab){
+  const isGeneral = (tab === 'general');
+  document.getElementById('maestroPanelGeneral').style.display = isGeneral ? '' : 'none';
+  document.getElementById('maestroPanelCompras').style.display = isGeneral ? 'none' : '';
+  document.getElementById('maestroTabGeneral').classList.toggle('active', isGeneral);
+  document.getElementById('maestroTabCompras').classList.toggle('active', !isGeneral);
+  if(!isGeneral && datosCompletos.length) _renderizarListaCompras();
+}
+
+// ========== helpers ==========
+function esc(t){ return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+// ========== chips categoría ==========
+function _fillChipsMaestro(){
+  const box=document.getElementById('chipCatsMaestro');
+  if(!box) return;
+  // Recoger categorías únicas desde categoriasEPP map (lowercase values), capitalizar para display
+  const catsSet=new Set();
+  Object.values(categoriasEPP).forEach(c=>{
+    if(c) catsSet.add(c);
+  });
+  const cats=Array.from(catsSet).sort();
+  // Capitalizar primera letra para display
+  const capitalize=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const all=['Todos',...cats.map(c=>capitalize(c))];
+  box.innerHTML=all.map(c=>'<span class="maestro-chip" data-cat="'+c+'">'+esc(c)+'</span>').join('');
+  // Event listeners
+  box.querySelectorAll('.maestro-chip').forEach(el=>{
+    el.addEventListener('click',function(){
+      box.querySelectorAll('.maestro-chip').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      _filtrarTablaHorizontal();
+    });
+  });
+  // Activar "Todos" por defecto
+  const first=box.querySelector('.maestro-chip');
+  if(first) first.classList.add('active');
+}
+
+// ========== product images ==========
+async function getProductMeta(pb){
+  if(productMeta.has(pb)) return productMeta.get(pb);
+  try{
+    const res=await new Promise((ok,ko)=>{
+      google.script.run.withSuccessHandler(ok).withFailureHandler(ko)
+        .searchStockPaged({term:pb,limit:0});
+    });
+    const rows=res?.rows||[];
+    const samePB=rows.filter(r=>(r.PRODUCTO||'')===pb);
+    const pick=(arr,k)=>(arr.find(r=>r[k])||rows.find(r=>r[k])||{})[k]||'';
+    const img=pick(samePB,'IMG'); const cat=pick(samePB,'CATEGORIA');
+    if(cat) categoriasEPP[pb]=cat.toLowerCase();
+    const m={img:img||PLACEHOLDER}; productMeta.set(pb,m); return m;
+  }catch(e){ const m={img:PLACEHOLDER}; productMeta.set(pb,m); return m; }
+}
+
+// ========== CARGAR DATOS ==========
+let _maestroCargado = false;
+
+function _cargarDatosMaestro(){
+  // Si ya se cargó, no recargar (el DOM persiste en memoria)
+  if(_maestroCargado && datosCompletos.length) return;
+  _fetchMaestro();
+}
+
+function _forzarRecargaMaestro(){
+  // Forzar recarga desde el botón refresh
+  _maestroCargado = false;
+  _fetchMaestro();
+}
+
+function _fetchMaestro(){
+  const contenedor=document.getElementById('tablaHorizontal');
+  if(!contenedor) return;
+  contenedor.innerHTML='<div class="text-center py-4 w-100"><div class="spinner-border spinner-border-sm text-primary"></div><br>Cargando datos...</div>';
+
+  google.script.run
+    .withSuccessHandler(function(data){
+      datosCompletos=data||[];
+      _maestroCargado = true;
+      if(!datosCompletos.length){
+        contenedor.innerHTML='<div class="text-center py-4 text-muted w-100">No hay entregas registradas</div>';
+        return;
+      }
+      procesarDatos();
+    })
+    .withFailureHandler(function(err){
+      contenedor.innerHTML='<div class="text-center py-4 text-danger w-100"><b>Error:</b> '+(err.message||err)+'</div>';
+    })
+    .obtenerMaestroCompleto();
+}
+
+// ========== PROCESAR ==========
+async function procesarDatos(){
+  const mapT=new Map();
+  datosCompletos.forEach(r=>{
+    if(r.trabajador && !mapT.has(r.trabajador)){
+      mapT.set(r.trabajador,{nombre:r.trabajador, cargo:r.cargo||'Sin cargo'});
+    }
+  });
+  trabajadoresUnicos=Array.from(mapT.values()).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  const setE=new Set();
+  datosCompletos.forEach(r=>{ if(r.producto) setE.add(r.producto); });
+  eppsUnicos=Array.from(setE).sort();
+
+  renderizarKPIs();
+  renderizarTabla();
+  _renderizarListaCompras();
+
+  // Badge
+  const badge=document.getElementById('badgeCompras');
+  const nurg=datosCompletos.filter(r=>r.estado==='VENCIDO'||r.estado==='POR VENCER').length;
+  if(badge){ badge.textContent=nurg; badge.style.display=nurg>0?'inline-block':'none'; }
+
+  // Imágenes y categorías en background
+  await Promise.all(eppsUnicos.map(async epp=>{
+    await getProductMeta(epp);
+    // Actualizar imagen
+    const h=document.querySelector('.columna-epp[data-producto="'+epp.toLowerCase()+'"] .header-epp-img');
+    if(h){ const m=productMeta.get(epp)||{}; if(m.img && m.img!==PLACEHOLDER){ h.src=m.img; h.style.opacity='0'; setTimeout(()=>{h.style.transition='opacity .3s';h.style.opacity='1';},10); }}
+    // Actualizar data-categoria en la columna (no existía al renderizar la tabla)
+    const col=document.querySelector('.columna-epp[data-producto="'+epp.toLowerCase()+'"]');
+    if(col){ col.setAttribute('data-categoria', categoriasEPP[epp]||''); }
+  }));
+
+  // Llenar chips después de cargar categorías
+  _fillChipsMaestro();
+}
+
+// ========== KPIs ==========
+function renderizarKPIs(){
+  const v=datosCompletos.filter(r=>r.estado==='VIGENTE').length;
+  const p=datosCompletos.filter(r=>r.estado==='POR VENCER').length;
+  const x=datosCompletos.filter(r=>r.estado==='VENCIDO').length;
+  document.getElementById('kpisContainer').innerHTML=
+    '<div class="kpi-card verde"><div><div class="kpi-value">'+v+'</div><div class="kpi-label">Vigentes</div></div></div>'+
+    '<div class="kpi-card naranja"><div><div class="kpi-value">'+p+'</div><div class="kpi-label">Por vencer</div></div></div>'+
+    '<div class="kpi-card rojo"><div><div class="kpi-value">'+x+'</div><div class="kpi-label">Vencidos</div></div></div>';
+}
+
+// ========== TABLA SEMÁFOROS ==========
+function renderizarTabla(){
+  const c=document.getElementById('tablaHorizontal');
+  let h='';
+  // Col trabajadores
+  h+='<div class="columna-trabajador">';
+  h+='<div class="header-trabajador"><i class="fas fa-users me-1"></i> PERSONAL</div>';
+  trabajadoresUnicos.forEach(t=>{
+    h+='<div class="celda-trabajador" data-trabajador="'+(t.nombre||'').toLowerCase()+'"><div class="nombre-trabajador">'+esc(t.nombre)+'</div><div class="cargo-trabajador">'+esc(t.cargo)+'</div></div>';
+  });
+  h+='</div>';
+
+  // Cols EPPs
+  eppsUnicos.forEach(epp=>{
+    const meta=productMeta.get(epp)||{img:PLACEHOLDER};
+    const cat=categoriasEPP[epp]||'';
+    h+='<div class="columna-epp" data-producto="'+epp.toLowerCase()+'" data-categoria="'+cat+'">';
+    h+='<div class="header-epp" onclick="abrirModalImagen(\''+esc(epp).replace(/'/g,"\\'")+'\',\''+meta.img+'\')"><img src="'+meta.img+'" class="header-epp-img" alt="'+esc(epp)+'" onerror="this.src=\''+PLACEHOLDER+'\'"></div>';
+    trabajadoresUnicos.forEach(t=>{
+      const reg=datosCompletos.find(r=>r.trabajador===t.nombre && r.producto===epp);
+      if(reg){
+        const td=JSON.stringify({epp:epp,trabajador:t.nombre,fecha:reg.fecha||'',variante:reg.variante||'',vencimiento:reg.vencimiento||'',estado:reg.estado||'',dias:reg.diasRestantes||0}).replace(/'/g,"&#39;");
+        h+='<div class="celda-epp"><span class="semaforo '+(reg.clase||'sin-asignar')+'" data-tooltip=\''+td+'\' onmouseover="mostrarTooltip(event,this)" onmouseout="ocultarTooltip()"></span></div>';
+      }else{
+        h+='<div class="celda-epp"><span class="semaforo sin-asignar"></span></div>';
+      }
+    });
+    h+='</div>';
+  });
+  c.innerHTML=h;
+}
+
+// ========== FILTRO TABLA ==========
+function _filtrarTablaHorizontal(){
+  const busq=(document.getElementById('txtBusqueda').value||'').toLowerCase().trim();
+  // Leer categoría activa desde chip
+  const activeChip=document.querySelector('#chipCatsMaestro .maestro-chip.active');
+  const catF=(activeChip?activeChip.dataset.cat:'Todos').toLowerCase();
+  const visibles=new Set();
+  document.querySelectorAll('.celda-trabajador').forEach((cel,i)=>{
+    const ok=!busq||(cel.getAttribute('data-trabajador')||'').includes(busq);
+    cel.classList.toggle('fila-oculta',!ok);
+    if(ok) visibles.add(i);
+  });
+  document.querySelectorAll('.columna-epp').forEach(col=>{
+    const cat=col.getAttribute('data-categoria')||'';
+    let show=true;
+    if(catF!=='todos') show=cat===catF;
+    col.style.display=show?'flex':'none';
+    if(show) col.querySelectorAll('.celda-epp').forEach((cel,i)=>cel.classList.toggle('fila-oculta',!visibles.has(i)));
+  });
+}
+
+// ========== TOOLTIP ==========
+function _mostrarTooltip(ev,el){
+  const tip=document.getElementById('tooltipEPP');
+  const ds=el.getAttribute('data-tooltip');
+  if(!ds) return;
+  try{
+    const d=JSON.parse(ds.replace(/&#39;/g,"'"));
+    const dias=d.dias||0;
+    const dtxt=dias>0?'<span style="background:#198754;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px">'+dias+' días restantes</span>'
+                     :'<span style="background:#dc3545;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px">'+Math.abs(dias)+' días de retraso</span>';
+    tip.innerHTML='<div class="tooltip-header">'+esc(d.epp)+'</div>'+
+      '<div class="tooltip-row"><span class="tooltip-label">Trabajador:</span><span class="tooltip-value">'+esc(d.trabajador)+'</span></div>'+
+      '<div class="tooltip-row"><span class="tooltip-label">Entrega:</span><span class="tooltip-value">'+(d.fecha||'N/A')+'</span></div>'+
+      '<div class="tooltip-row"><span class="tooltip-label">Variante:</span><span class="tooltip-value">'+esc(d.variante||'N/A')+'</span></div>'+
+      '<div class="tooltip-row"><span class="tooltip-label">Vencimiento:</span><span class="tooltip-value">'+(d.vencimiento||'N/A')+'</span></div>'+
+      '<div class="tooltip-row"><span class="tooltip-label">Estado:</span><span class="tooltip-value">'+(d.estado||'N/A')+'</span></div>'+
+      '<div style="text-align:center;margin-top:6px">'+dtxt+'</div>';
+    tip.style.left=(ev.pageX+12)+'px'; tip.style.top=(ev.pageY-12)+'px';
+    tip.classList.add('show');
+  }catch(e){}
+}
+function _ocultarTooltip(){ const t=document.getElementById('tooltipEPP'); if(t) t.classList.remove('show'); }
+
+// ========== MODAL IMAGEN ==========
+function _abrirModalImagen(n,img){
+  document.getElementById('modalImg').src=img;
+  document.getElementById('modalTitle').textContent=n;
+  document.getElementById('modalImagen').style.display='block';
+}
+function _cerrarModalImagen(){ document.getElementById('modalImagen').style.display='none'; }
+window.onclick=function(e){ if(e.target===document.getElementById('modalImagen')) _cerrarModalImagen(); };
+
+// ========================================================================
+//  LISTA DE COMPRAS
+// ========================================================================
+let listaComprasData = []; // {producto, variante, cantidad, prioridad, diasMin, detalle:[{trabajador,dias,estado}]}
+
+function _renderizarListaCompras(){
+  const diasMax = Number(document.getElementById('filtroComprasDias')?.value ?? 30);
+
+  // Filtrar registros urgentes
+  const urgentes = datosCompletos.filter(r => {
+    if(r.estado==='VENCIDO') return true;
+    if(r.estado==='POR VENCER' && diasMax > 0) return r.diasRestantes <= diasMax;
+    if(diasMax > 0 && r.diasRestantes > 0 && r.diasRestantes <= diasMax) return true;
+    return false;
+  });
+
+  // Agrupar por producto+variante
+  const mapa = new Map();
+  urgentes.forEach(r => {
+    const key = (r.producto||'') + '||' + (r.variante||'');
+    if(!mapa.has(key)) mapa.set(key, {producto:r.producto, variante:r.variante||'', cantidad:0, diasMin:Infinity, detalle:[]});
+    const g = mapa.get(key);
+    g.cantidad++;
+    if(r.diasRestantes < g.diasMin) g.diasMin = r.diasRestantes;
+    g.detalle.push({trabajador:r.trabajador, dias:r.diasRestantes, estado:r.estado});
+  });
+
+  // Ordenar alfabéticamente por producto, luego por variante
+  listaComprasData = Array.from(mapa.values()).sort((a,b) => {
+    const cmp = (a.producto||'').localeCompare(b.producto||'');
+    return cmp !== 0 ? cmp : (a.variante||'').localeCompare(b.variante||'');
+  });
+
+  // Resumen
+  const totalItems = listaComprasData.reduce((s,i) => s + i.cantidad, 0);
+  const totalProds = listaComprasData.length;
+  const trabAfectados = new Set(urgentes.map(r=>r.trabajador)).size;
+  const resDiv = document.getElementById('comprasResumen');
+  if(resDiv){
+    if(totalItems === 0){
+      resDiv.innerHTML='<div class="alert alert-success py-2 mb-0"><i class="fas fa-check-circle me-1"></i> No hay productos vencidos o por vencer en el rango seleccionado.</div>';
+    } else {
+      resDiv.innerHTML='<div class="d-flex gap-3 flex-wrap" style="font-size:13px">'+
+        '<div class="border rounded px-3 py-2"><b>'+totalProds+'</b> productos</div>'+
+        '<div class="border rounded px-3 py-2"><b>'+totalItems+'</b> unidades</div>'+
+        '<div class="border rounded px-3 py-2"><b>'+trabAfectados+'</b> trabajadores afectados</div>'+
+      '</div>';
+    }
+  }
+
+  // Tabla principal
+  const tbody = document.getElementById('tbodyCompras');
+  const tfoot = document.getElementById('tfootCompras');
+  if(!tbody) return;
+
+  if(listaComprasData.length === 0){
+    tbody.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3">Sin productos para comprar</td></tr>';
+    if(tfoot) tfoot.innerHTML='';
+    return;
+  }
+
+  let html='';
+  listaComprasData.forEach((item, idx) => {
+    const esVencido = item.diasMin < 0;
+    const prioTxt = esVencido ? 'VENCIDO' : (item.diasMin + ' días');
+    const prioCls = esVencido ? 'vencido' : 'porvencer';
+    html += '<tr>'+
+      '<td class="text-center">'+(idx+1)+'</td>'+
+      '<td><b>'+esc(item.producto)+'</b></td>'+
+      '<td>'+esc(item.variante||'Estándar')+'</td>'+
+      '<td class="text-center"><input type="number" class="form-control form-control-sm text-center compra-cant-input" value="'+item.cantidad+'" min="0" data-idx="'+idx+'" onchange="actualizarCantCompra(this)" style="width:70px;margin:0 auto"></td>'+
+      '<td class="text-center"><span class="compra-prioridad '+prioCls+'">'+prioTxt+'</span></td>'+
+    '</tr>';
+  });
+  tbody.innerHTML=html;
+
+  // Total footer
+  if(tfoot) tfoot.innerHTML='<tr class="table-light fw-bold"><td></td><td>TOTAL</td><td></td><td class="text-center" id="comprasTotal">'+totalItems+'</td><td></td></tr>';
+
+  // Tabla detalle trabajadores
+  const tbDet = document.getElementById('tbodyDetalle');
+  if(tbDet){
+    let dh='';
+    listaComprasData.forEach(item => {
+      const key = esc(item.producto) + (item.variante ? ' - ' + esc(item.variante) : '');
+      dh += '<tr class="table-secondary"><td colspan="4"><b>'+key+'</b> ('+item.cantidad+' uds)</td></tr>';
+      item.detalle.sort((a,b)=>(a.trabajador||'').localeCompare(b.trabajador||'')).forEach(d => {
+        const esV = d.dias < 0;
+        const estTxt = esV ? '<span class="badge bg-danger">Vencido '+Math.abs(d.dias)+' días</span>' : '<span class="badge bg-warning text-dark">Vence en '+d.dias+' días</span>';
+        dh += '<tr><td></td><td>'+esc(d.trabajador)+'</td><td>'+estTxt+'</td><td class="text-center">1</td></tr>';
+      });
+    });
+    tbDet.innerHTML=dh;
+  }
+}
+
+// Editar cantidad
+window.actualizarCantCompra = function(input){
+  const idx=Number(input.dataset.idx);
+  const val=Math.max(0,parseInt(input.value)||0);
+  if(listaComprasData[idx]) listaComprasData[idx].cantidad=val;
+  // Recalcular total
+  const total=listaComprasData.reduce((s,i)=>s+i.cantidad,0);
+  const el=document.getElementById('comprasTotal');
+  if(el) el.textContent=total;
+};
+
+// ========== IMPRIMIR PROVEEDOR ==========
+function _imprimirProveedor(){
+  if(!listaComprasData.length){ Swal.fire('Sin datos','No hay productos en la lista','info'); return; }
+  const items=listaComprasData.filter(i=>i.cantidad>0);
+  if(!items.length){ Swal.fire('Cantidades en 0','Ajusta las cantidades','info'); return; }
+  const total=items.reduce((s,i)=>s+i.cantidad,0);
+  const fecha=new Date().toLocaleDateString('es-PE');
+
+  let html='<html><head><title>Orden de Compra EPP</title><style>';
+  html+='body{font-family:Arial,sans-serif;margin:20px;font-size:12px}';
+  html+='h2{text-align:center;margin-bottom:5px}';
+  html+='.fecha{text-align:center;color:#666;margin-bottom:15px}';
+  html+='table{width:100%;border-collapse:collapse;margin-top:10px}';
+  html+='th,td{border:1px solid #333;padding:6px 10px}';
+  html+='th{background:#2c3e50;color:#fff;text-align:left}';
+  html+='td.num{text-align:center}';
+  html+='.total-row{background:#f0f0f0;font-weight:bold}';
+  html+='@media print{body{margin:10px}}';
+  html+='</style></head><body>';
+  html+='<h2>ORDEN DE COMPRA - EPP / UNIFORMES</h2>';
+  html+='<div class="fecha">Fecha: '+fecha+'</div>';
+  html+='<table><thead><tr><th style="width:40px">#</th><th>Descripción</th><th style="width:100px">Talla</th><th style="width:80px;text-align:center">Cantidad</th></tr></thead><tbody>';
+  items.forEach((item,i)=>{
+    html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(item.producto)+'</td><td>'+esc(item.variante||'Estándar')+'</td><td class="num">'+item.cantidad+'</td></tr>';
+  });
+  html+='<tr class="total-row"><td></td><td colspan="2" style="text-align:right">TOTAL</td><td class="num">'+total+'</td></tr>';
+  html+='</tbody></table>';
+  html+='</body></html>';
+
+  const w=window.open('','_blank','width=700,height=500');
+  w.document.write(html); w.document.close();
+  setTimeout(()=>w.print(),300);
+}
+
+// ========== IMPRIMIR REGISTRO INTERNO ==========
+function _imprimirRegistro(){
+  if(!listaComprasData.length){ Swal.fire('Sin datos','No hay productos en la lista','info'); return; }
+  const items=listaComprasData.filter(i=>i.cantidad>0);
+  if(!items.length){ Swal.fire('Cantidades en 0','Ajusta las cantidades','info'); return; }
+  const total=items.reduce((s,i)=>s+i.cantidad,0);
+  const fecha=new Date().toLocaleDateString('es-PE');
+
+  let html='<html><head><title>Registro Interno - Reposición EPP</title><style>';
+  html+='body{font-family:Arial,sans-serif;margin:20px;font-size:11px}';
+  html+='h2{text-align:center;margin-bottom:5px}';
+  html+='.fecha{text-align:center;color:#666;margin-bottom:15px}';
+  html+='table{width:100%;border-collapse:collapse}';
+  html+='th,td{border:1px solid #999;padding:5px 8px}';
+  html+='th{background:#34495e;color:#fff;text-align:left;font-size:11px}';
+  html+='.group{background:#ecf0f1;font-weight:bold}';
+  html+='.vencido{color:#c0392b;font-weight:bold}';
+  html+='.porvencer{color:#d35400}';
+  html+='.total-row{background:#2c3e50;color:#fff;font-weight:bold}';
+  html+='@media print{body{margin:10px}}';
+  html+='</style></head><body>';
+  html+='<h2>REGISTRO INTERNO - REPOSICIÓN EPP</h2>';
+  html+='<div class="fecha">Fecha: '+fecha+'</div>';
+  html+='<table><thead><tr><th style="width:30px">#</th><th>Producto / Talla</th><th>Trabajador</th><th>Estado</th><th style="width:60px;text-align:center">Cant</th></tr></thead><tbody>';
+
+  let n=0;
+  items.forEach(item=>{
+    const key=esc(item.producto)+(item.variante?' - '+esc(item.variante):'');
+    html+='<tr class="group"><td></td><td colspan="3">'+key.toUpperCase()+'</td><td style="text-align:center">'+item.cantidad+'</td></tr>';
+    item.detalle.sort((a,b)=>(a.trabajador||'').localeCompare(b.trabajador||'')).forEach(d=>{
+      n++;
+      const esV=d.dias<0;
+      const cls=esV?'vencido':'porvencer';
+      const txt=esV?'Vencido '+Math.abs(d.dias)+' días':'Vence en '+d.dias+' días';
+      html+='<tr><td style="text-align:center">'+n+'</td><td></td><td>'+esc(d.trabajador)+'</td><td class="'+cls+'">'+txt+'</td><td style="text-align:center">1</td></tr>';
+    });
+  });
+  html+='<tr class="total-row"><td></td><td colspan="3" style="text-align:right">TOTAL GENERAL</td><td style="text-align:center">'+total+'</td></tr>';
+  html+='</tbody></table>';
+  html+='</body></html>';
+
+  const w=window.open('','_blank','width=700,height=500');
+  w.document.write(html); w.document.close();
+  setTimeout(()=>w.print(),300);
+}
+
+// ========== ASIGNAR GLOBALES ==========
+cargarDatosMaestro=_cargarDatosMaestro;
+forzarRecargaMaestro=_forzarRecargaMaestro;
+filtrarTablaHorizontal=_filtrarTablaHorizontal;
+mostrarTooltip=_mostrarTooltip;
+ocultarTooltip=_ocultarTooltip;
+abrirModalImagen=_abrirModalImagen;
+cerrarModalImagen=_cerrarModalImagen;
+renderizarListaCompras=_renderizarListaCompras;
+imprimirProveedor=_imprimirProveedor;
+imprimirRegistro=_imprimirRegistro;
+switchMaestroTab=_switchMaestroTab;
+
+window.cargarDatosMaestro=_cargarDatosMaestro;
+window.forzarRecargaMaestro=_forzarRecargaMaestro;
+window.filtrarTablaHorizontal=_filtrarTablaHorizontal;
+window.mostrarTooltip=_mostrarTooltip;
+window.ocultarTooltip=_ocultarTooltip;
+window.abrirModalImagen=_abrirModalImagen;
+window.cerrarModalImagen=_cerrarModalImagen;
+window.renderizarListaCompras=_renderizarListaCompras;
+window.imprimirProveedor=_imprimirProveedor;
+window.imprimirRegistro=_imprimirRegistro;
+window.switchMaestroTab=_switchMaestroTab;
+
+})();
+</script>

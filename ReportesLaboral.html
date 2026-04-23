@@ -1,0 +1,817 @@
+<style>
+/* ── ReportesLaboral — Tablero Ejecutivo ── */
+#rl-wrapper { font-family:'Inter',system-ui,sans-serif; background:#f0f4f8; min-height:100vh; padding:1.5rem; }
+
+/* Header */
+.rl-header {
+  background: linear-gradient(135deg,#1e3a5f 0%,#2563eb 60%,#0ea5e9 100%);
+  border-radius:18px; padding:1.6rem 2rem; margin-bottom:1.5rem;
+  color:#fff; display:flex; align-items:center; gap:1.2rem;
+  box-shadow:0 8px 32px rgba(37,99,235,.35);
+}
+.rl-header .rl-icon { font-size:2.8rem; opacity:.9; }
+.rl-header h2 { margin:0; font-size:1.6rem; font-weight:700; }
+.rl-header p  { margin:0; opacity:.8; font-size:.9rem; }
+.rl-btn-refresh {
+  margin-left:auto; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3);
+  color:#fff; border-radius:10px; padding:.45rem 1rem; font-size:.85rem; cursor:pointer;
+  transition:all .2s;
+}
+.rl-btn-refresh:hover { background:rgba(255,255,255,.28); }
+
+/* KPI Cards */
+.rl-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.rl-kpi {
+  background:#fff; border-radius:14px; padding:1.1rem 1.3rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.07); border-left:4px solid #2563eb;
+  display:flex; flex-direction:column; gap:.3rem;
+}
+.rl-kpi.green  { border-color:#10b981; }
+.rl-kpi.orange { border-color:#f59e0b; }
+.rl-kpi.red    { border-color:#ef4444; }
+.rl-kpi.purple { border-color:#8b5cf6; }
+.rl-kpi.teal   { border-color:#14b8a6; }
+.rl-kpi .rl-kpi-label { font-size:.72rem; color:#6b7280; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.rl-kpi .rl-kpi-val   { font-size:2rem; font-weight:800; color:#1e293b; line-height:1; }
+.rl-kpi .rl-kpi-sub   { font-size:.75rem; color:#94a3b8; }
+.rl-kpi .rl-kpi-icon  { font-size:1.4rem; align-self:flex-end; margin-top:-.3rem; opacity:.6; }
+
+/* Tab Nav */
+.rl-tabs { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+.rl-tab-btn {
+  background:#fff; border:2px solid #e2e8f0; color:#64748b; border-radius:10px;
+  padding:.45rem 1.1rem; font-size:.82rem; font-weight:600; cursor:pointer; transition:all .2s;
+}
+.rl-tab-btn:hover  { border-color:#2563eb; color:#2563eb; }
+.rl-tab-btn.active { background:#2563eb; border-color:#2563eb; color:#fff; box-shadow:0 4px 12px rgba(37,99,235,.3); }
+
+/* Panels */
+.rl-panel { display:none; }
+.rl-panel.active { display:block; }
+
+/* Cards base */
+.rl-card {
+  background:#fff; border-radius:14px; padding:1.4rem;
+  box-shadow:0 2px 14px rgba(0,0,0,.07); margin-bottom:1.2rem;
+}
+.rl-card-title { font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+.rl-card-title i { color:#2563eb; }
+
+/* Progress bar */
+.rl-progress-wrap { background:#f1f5f9; border-radius:50px; height:10px; overflow:hidden; }
+.rl-progress-bar  { height:100%; border-radius:50px; transition:width .5s; }
+
+/* Tabla general */
+.rl-table-wrap { overflow-x:auto; }
+.rl-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+.rl-table th { background:#f8fafc; color:#374151; font-weight:700; padding:.7rem .9rem; text-align:left; border-bottom:2px solid #e5e7eb; white-space:nowrap; }
+.rl-table td { padding:.65rem .9rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+.rl-table tbody tr:hover { background:#f8fafc; }
+
+/* Badge estado */
+.rl-badge { display:inline-flex; align-items:center; gap:.28rem; padding:.22rem .65rem; border-radius:20px; font-size:.73rem; font-weight:700; white-space:nowrap; }
+.rl-badge.ap { background:#d1fae5; color:#065f46; }
+.rl-badge.rp { background:#fee2e2; color:#991b1b; }
+.rl-badge.pd { background:#fef3c7; color:#92400e; }
+.rl-badge.cd { background:#ede9fe; color:#5b21b6; }
+.rl-badge.nd { background:#f1f5f9; color:#64748b; }
+
+/* Barra por tema */
+.rl-topic-bar { display:flex; align-items:center; gap:.7rem; margin-bottom:.65rem; font-size:.8rem; }
+.rl-topic-bar .rl-topic-name { flex:0 0 200px; color:#374151; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rl-topic-bar .rl-topic-track { flex:1; background:#f1f5f9; border-radius:50px; height:14px; overflow:hidden; display:flex; }
+.rl-topic-bar .rl-seg-ap { background:#10b981; height:100%; }
+.rl-topic-bar .rl-seg-rp { background:#ef4444; height:100%; }
+.rl-topic-bar .rl-seg-cd { background:#8b5cf6; height:100%; }
+.rl-topic-bar .rl-seg-pd { background:#fbbf24; height:100%; }
+.rl-topic-bar .rl-topic-pct { flex:0 0 40px; text-align:right; font-weight:700; color:#1e293b; }
+
+/* Trabajador card (Por Trabajador panel) */
+.rl-worker-card {
+  background:linear-gradient(135deg,#1e3a5f,#2563eb); color:#fff;
+  border-radius:14px; padding:1.3rem 1.5rem; margin-bottom:1.2rem;
+  display:flex; gap:1.2rem; align-items:center;
+}
+.rl-worker-avatar {
+  width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.2);
+  display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0;
+}
+.rl-worker-info h4 { margin:0 0 .2rem; font-size:1.1rem; font-weight:700; }
+.rl-worker-info p  { margin:0; opacity:.8; font-size:.82rem; }
+.rl-pct-big { margin-left:auto; text-align:center; flex-shrink:0; }
+.rl-pct-big .rl-pct-num { font-size:1.4rem; font-weight:800; line-height:1.2; }
+.rl-pct-big .rl-pct-lbl { font-size:.7rem; opacity:.75; }
+
+/* Detalle temas trabajador */
+.rl-detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:.7rem; }
+.rl-detail-item {
+  border-radius:10px; padding:.75rem 1rem; border-left:4px solid #e5e7eb;
+  background:#f8fafc; font-size:.8rem; display:flex; justify-content:space-between; align-items:center;
+}
+.rl-detail-item.ap { border-color:#10b981; background:#f0fdf4; }
+.rl-detail-item.rp { border-color:#ef4444; background:#fef2f2; }
+.rl-detail-item.pd { border-color:#f59e0b; background:#fffbeb; }
+.rl-detail-item.cd { border-color:#8b5cf6; background:#f5f3ff; }
+.rl-detail-item .rl-di-name { font-weight:600; color:#1e293b; flex:1; margin-right:.5rem; }
+
+/* Vacunas grid */
+.rl-vac-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.9rem; }
+.rl-vac-card {
+  border-radius:12px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06);
+  padding:1rem; text-align:center; border-top:4px solid #10b981;
+}
+.rl-vac-card.danger { border-color:#ef4444; }
+.rl-vac-card .rl-vac-name { font-size:.75rem; font-weight:700; color:#374151; margin-bottom:.6rem; }
+.rl-vac-card .rl-vac-pct  { font-size:1.9rem; font-weight:800; color:#1e293b; }
+.rl-vac-card .rl-vac-sub  { font-size:.7rem; color:#6b7280; margin-top:.2rem; }
+.rl-vac-donut { position:relative; width:80px; height:80px; margin:0 auto .5rem; }
+.rl-vac-donut svg { transform:rotate(-90deg); }
+.rl-vac-donut .rl-vac-pct-inner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.95rem; color:#1e293b; }
+
+/* Buscador */
+.rl-search-box { position:relative; max-width:420px; }
+.rl-search-box input { width:100%; border:2px solid #e2e8f0; border-radius:12px; padding:.65rem 1rem .65rem 2.6rem; font-size:.9rem; transition:border .2s; outline:none; }
+.rl-search-box input:focus { border-color:#2563eb; }
+.rl-search-box i { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:#9ca3af; }
+.rl-search-list { max-height:220px; overflow-y:auto; border:1px solid #e5e7eb; border-radius:10px; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.1); display:none; margin-top:.3rem; }
+.rl-search-item { padding:.6rem 1rem; cursor:pointer; font-size:.85rem; border-bottom:1px solid #f1f5f9; }
+.rl-search-item:hover { background:#eff6ff; }
+.rl-search-item .rl-si-dni  { font-size:.72rem; color:#9ca3af; }
+
+/* Loading */
+.rl-spinner { display:flex; align-items:center; justify-content:center; padding:3rem; gap:1rem; color:#6b7280; flex-direction:column; }
+.rl-spinner-circle { width:44px; height:44px; border:4px solid #e2e8f0; border-top:4px solid #2563eb; border-radius:50%; animation:rl-spin .8s linear infinite; }
+@keyframes rl-spin { to{ transform:rotate(360deg); } }
+
+/* Leyenda */
+.rl-legend { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; font-size:.75rem; }
+.rl-legend-item { display:flex; align-items:center; gap:.35rem; color:#374151; font-weight:600; }
+.rl-legend-dot  { width:12px; height:12px; border-radius:3px; }
+
+/* Incumplidores ranking */
+.rl-rank-item { display:flex; align-items:center; gap:.9rem; padding:.7rem 0; border-bottom:1px solid #f1f5f9; }
+.rl-rank-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; color:#fff; flex-shrink:0; }
+.rl-rank-info { flex:1; }
+.rl-rank-info .rl-ri-name { font-size:.85rem; font-weight:700; color:#1e293b; }
+.rl-rank-info .rl-ri-sub  { font-size:.72rem; color:#9ca3af; }
+.rl-rank-pct { text-align:right; }
+.rl-rank-pct .rl-rp-num { font-size:1.1rem; font-weight:800; }
+.rl-rank-pct .rl-rp-lbl { font-size:.68rem; color:#9ca3af; }
+
+/* Responsive */
+@media(max-width:600px){
+  .rl-header { flex-direction:column; text-align:center; }
+  .rl-btn-refresh { margin-left:0; }
+  .rl-topic-bar .rl-topic-name { flex:0 0 130px; }
+  .rl-kpi-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+
+<div id="rl-wrapper">
+
+  <!-- HEADER -->
+  <div class="rl-header">
+    <div class="rl-icon"><i class="fas fa-chart-line"></i></div>
+    <div>
+      <h2>Tablero Ejecutivo Laboral</h2>
+      <p>Capacitaciones &bull; Vacunas &bull; Cumplimiento por trabajador</p>
+    </div>
+    <button class="rl-btn-refresh" onclick="rlCargarDatos()">
+      <i class="fas fa-sync-alt me-1"></i> Actualizar
+    </button>
+  </div>
+
+  <!-- KPI GRID -->
+  <div id="rl-kpi-grid" class="rl-kpi-grid">
+    <div class="rl-kpi">
+      <div class="rl-kpi-label">Trabajadores Activos</div>
+      <div class="rl-kpi-val" id="rl-k-workers">—</div>
+      <div class="rl-kpi-sub">Con condición ACTIVO</div>
+      <div class="rl-kpi-icon"><i class="fas fa-users" style="color:#2563eb"></i></div>
+    </div>
+    <div class="rl-kpi green">
+      <div class="rl-kpi-label">Cumplimiento</div>
+      <div class="rl-kpi-val" id="rl-k-pct">—</div>
+      <div class="rl-kpi-sub" id="rl-k-pct-sub">Temas aprobados / asignados</div>
+      <div class="rl-kpi-icon"><i class="fas fa-check-circle" style="color:#10b981"></i></div>
+    </div>
+    <div class="rl-kpi orange">
+      <div class="rl-kpi-label">Incumplidores</div>
+      <div class="rl-kpi-val" id="rl-k-inc">—</div>
+      <div class="rl-kpi-sub">Trabajadores con temas pendientes/reprobados</div>
+      <div class="rl-kpi-icon"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i></div>
+    </div>
+    <div class="rl-kpi purple">
+      <div class="rl-kpi-label">Cursos Programados</div>
+      <div class="rl-kpi-val" id="rl-k-cursos">—</div>
+      <div class="rl-kpi-sub">Temas en la Matriz</div>
+      <div class="rl-kpi-icon"><i class="fas fa-book-open" style="color:#8b5cf6"></i></div>
+    </div>
+    <div class="rl-kpi teal">
+      <div class="rl-kpi-label">Total Asignaciones</div>
+      <div class="rl-kpi-val" id="rl-k-asig">—</div>
+      <div class="rl-kpi-sub" id="rl-k-asig-sub">Temas x Trabajador acumulados</div>
+      <div class="rl-kpi-icon"><i class="fas fa-tasks" style="color:#14b8a6"></i></div>
+    </div>
+    <div class="rl-kpi red">
+      <div class="rl-kpi-label">Sin Vacunas Completas</div>
+      <div class="rl-kpi-val" id="rl-k-vac">—</div>
+      <div class="rl-kpi-sub">Trabajadores con vacunas incompletas</div>
+      <div class="rl-kpi-icon"><i class="fas fa-syringe" style="color:#ef4444"></i></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="rl-tabs">
+    <button class="rl-tab-btn active" onclick="rlTab(this,'rl-p-general')"><i class="fas fa-tachometer-alt me-1"></i>Resumen</button>
+    <button class="rl-tab-btn" onclick="rlTab(this,'rl-p-temas')"><i class="fas fa-book me-1"></i>Por Capacitación</button>
+    <button class="rl-tab-btn" onclick="rlTab(this,'rl-p-incump')"><i class="fas fa-user-times me-1"></i>Incumplidores</button>
+    <button class="rl-tab-btn" onclick="rlTab(this,'rl-p-vacunas')"><i class="fas fa-syringe me-1"></i>Vacunas</button>
+    <button class="rl-tab-btn" onclick="rlTab(this,'rl-p-worker')"><i class="fas fa-id-card me-1"></i>Por Trabajador</button>
+  </div>
+
+  <!-- SPINNER GLOBAL -->
+  <div id="rl-spinner" class="rl-spinner">
+    <div class="rl-spinner-circle"></div>
+    <div style="font-size:.9rem;font-weight:600">Cargando datos...</div>
+  </div>
+
+  <!-- PANEL: RESUMEN GENERAL -->
+  <div id="rl-p-general" class="rl-panel" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem" class="rl-two-col">
+
+      <!-- Cumplimiento global barra -->
+      <div class="rl-card">
+        <div class="rl-card-title"><i class="fas fa-chart-pie"></i>Cumplimiento Global</div>
+        <div style="text-align:center;margin-bottom:1rem">
+          <div style="font-size:3.5rem;font-weight:800;color:#1e293b" id="rl-big-pct">0%</div>
+          <div style="color:#6b7280;font-size:.85rem" id="rl-big-pct-sub"></div>
+        </div>
+        <div class="rl-progress-wrap">
+          <div class="rl-progress-bar" id="rl-global-bar" style="background:linear-gradient(90deg,#10b981,#34d399);width:0%"></div>
+        </div>
+        <div class="rl-legend" style="margin-top:1rem">
+          <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#10b981"></div>Aprobado</div>
+          <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#ef4444"></div>Reprobado</div>
+          <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#8b5cf6"></div>Caducado</div>
+          <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#fbbf24"></div>Pendiente</div>
+        </div>
+      </div>
+
+      <!-- Top incumplidores -->
+      <div class="rl-card">
+        <div class="rl-card-title"><i class="fas fa-exclamation-circle"></i>Top Incumplidores</div>
+        <div id="rl-top-inc-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Barras por tema (resumen) -->
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-bars"></i>Cumplimiento por Capacitación</div>
+      <div class="rl-legend">
+        <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#10b981"></div>Aprobado</div>
+        <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#ef4444"></div>Reprobado</div>
+        <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#8b5cf6"></div>Caducado</div>
+        <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#fbbf24"></div>Pendiente</div>
+      </div>
+      <div id="rl-temas-bars"></div>
+    </div>
+  </div>
+
+  <!-- PANEL: POR CAPACITACIÓN -->
+  <div id="rl-p-temas" class="rl-panel" style="display:none">
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-table"></i>Detalle por Capacitación</div>
+      <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap">
+        <input type="text" id="rl-temas-search" placeholder="Buscar tema..." oninput="rlFiltrarTemas()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none;flex:1;min-width:180px;max-width:320px">
+        <select id="rl-temas-order" onchange="rlFiltrarTemas()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none">
+          <option value="pct-asc">Menor cumplimiento primero</option>
+          <option value="pct-desc">Mayor cumplimiento primero</option>
+          <option value="alfa">Alfabético</option>
+        </select>
+      </div>
+      <div class="rl-table-wrap">
+        <table class="rl-table" id="rl-temas-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tema / Capacitación (B DATOS col E)</th>
+              <th title="Total personal ACTIVO en PERSONAL">Total Activos</th>
+              <th title="Trabajadores que tienen al menos 1 registro en B DATOS">Asistieron</th>
+              <th>Aprobados</th>
+              <th>Reprobados</th>
+              <th>Caducados</th>
+              <th>Pendientes</th>
+              <th>% Cumplimiento</th>
+              <th>Barra</th>
+            </tr>
+          </thead>
+          <tbody id="rl-temas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: INCUMPLIDORES -->
+  <div id="rl-p-incump" class="rl-panel" style="display:none">
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-user-times"></i>Trabajadores que No Cumplen</div>
+      <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+        <input type="text" id="rl-inc-search" placeholder="Buscar por nombre o DNI..." oninput="rlFiltrarIncumplidores()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none;flex:1;min-width:180px;max-width:340px">
+        <select id="rl-inc-filter" onchange="rlFiltrarIncumplidores()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none">
+          <option value="all">Todos los incumplidores</option>
+          <option value="reprobado">Con Reprobados</option>
+          <option value="caducado">Con Caducados</option>
+          <option value="pendiente">Sin registro (Pendientes)</option>
+        </select>
+        <span id="rl-inc-count" style="font-size:.8rem;color:#6b7280;font-weight:600"></span>
+      </div>
+      <div class="rl-table-wrap">
+        <table class="rl-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Trabajador</th>
+              <th>DNI</th>
+              <th>Cargo</th>
+              <th>Empresa</th>
+              <th title="Total temas de B DATOS">Total Temas</th>
+              <th>Aprobados</th>
+              <th>Reprobados</th>
+              <th>Caducados</th>
+              <th>Sin Registro</th>
+              <th>% Cumplimiento</th>
+              <th>Temas incumplidos</th>
+            </tr>
+          </thead>
+          <tbody id="rl-inc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: VACUNAS -->
+  <div id="rl-p-vacunas" class="rl-panel" style="display:none">
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-syringe"></i>Estado de Vacunación General</div>
+      <div id="rl-vac-grid" class="rl-vac-grid"></div>
+    </div>
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-table"></i>Trabajadores — Detalle Vacunas</div>
+      <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap">
+        <input type="text" id="rl-vac-search" placeholder="Buscar por nombre o DNI..." oninput="rlFiltrarVacunas()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none;flex:1;min-width:180px;max-width:340px">
+        <select id="rl-vac-filter" onchange="rlFiltrarVacunas()"
+          style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none">
+          <option value="all">Todos</option>
+          <option value="incompleto">Con vacunas faltantes</option>
+          <option value="completo">Vacunación completa</option>
+        </select>
+      </div>
+      <div class="rl-table-wrap">
+        <table class="rl-table" id="rl-vac-table">
+          <thead id="rl-vac-thead"></thead>
+          <tbody id="rl-vac-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: POR TRABAJADOR -->
+  <div id="rl-p-worker" class="rl-panel" style="display:none">
+    <div class="rl-card">
+      <div class="rl-card-title"><i class="fas fa-search"></i>Buscar Trabajador</div>
+      <div class="rl-search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="rl-worker-input" placeholder="Nombre o DNI..." oninput="rlFiltrarWorkers()" autocomplete="off">
+        <div class="rl-search-list" id="rl-worker-list"></div>
+      </div>
+    </div>
+    <div id="rl-worker-detail" style="display:none">
+      <!-- Generado dinámicamente -->
+    </div>
+    <div id="rl-worker-empty" style="text-align:center;padding:2rem;color:#9ca3af;display:none">
+      <i class="fas fa-user-slash" style="font-size:2.5rem;margin-bottom:.7rem;display:block"></i>
+      Selecciona un trabajador para ver su detalle
+    </div>
+  </div>
+
+</div><!-- /#rl-wrapper -->
+
+<style>
+@media(max-width:700px){
+  .rl-two-col { grid-template-columns:1fr !important; }
+}
+</style>
+
+<script>
+(function(){
+  // ── Estado global ─────────────────────────────────────────
+  let rlData = null;
+
+  // ── Inicializar ───────────────────────────────────────────
+  function rlInit() {
+    // Mostrar spinner, ocultar paneles
+    document.getElementById('rl-spinner').style.display = 'flex';
+    document.querySelectorAll('.rl-panel').forEach(p => p.style.display = 'none');
+    rlCargarDatos();
+  }
+
+  window.rlCargarDatos = function() {
+    document.getElementById('rl-spinner').style.display = 'flex';
+    document.querySelectorAll('.rl-panel').forEach(p => p.style.display = 'none');
+    google.script.run
+      .withSuccessHandler(rlOnData)
+      .withFailureHandler(rlOnError)
+      .obtenerDashboardLaboral();
+  };
+
+  function rlOnError(e) {
+    document.getElementById('rl-spinner').innerHTML =
+      `<div style="color:#ef4444;text-align:center"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>Error al cargar datos<br><small style="color:#9ca3af">${e.message||e}</small></div>`;
+  }
+
+  function rlOnData(data) {
+    rlData = data;
+    document.getElementById('rl-spinner').style.display = 'none';
+    rlRenderKPIs();
+    rlRenderGeneral();
+    rlRenderTemas();
+    rlRenderIncumplidores();
+    rlRenderVacunas();
+    // Mostrar panel activo
+    const active = document.querySelector('.rl-panel.active') || document.getElementById('rl-p-general');
+    active.style.display = 'block';
+    active.classList.add('active');
+  }
+
+  // ── KPIs ──────────────────────────────────────────────────
+  function rlRenderKPIs() {
+    const k = rlData.kpis;
+    setText('rl-k-workers', k.totalTrabajadores);
+    setText('rl-k-pct', k.porcentajeCumplimiento + '%');
+    setText('rl-k-pct-sub', k.totalAprobados + ' aprobados / ' + k.totalCeldas + ' (activos × temas)');
+    setText('rl-k-inc', k.totalIncumplidores);
+    setText('rl-k-cursos', k.totalTemas);
+    setText('rl-k-asig', k.totalCeldas);
+    setText('rl-k-asig-sub', 'Total activos × temas (cross-comparación)');
+
+    // Vacunas sin completar
+    const totalVac = rlData.vacunasData.length;
+    const completos = rlData.vacunasData.filter(v => Object.values(v.vacunas).every(x => x.tiene)).length;
+    setText('rl-k-vac', totalVac - completos);
+
+    // Color KPI cumplimiento
+    const pct = k.porcentajeCumplimiento;
+    const kEl = document.querySelector('.rl-kpi.green .rl-kpi-val');
+    if(kEl) kEl.style.color = pct >= 80 ? '#059669' : pct >= 60 ? '#d97706' : '#dc2626';
+  }
+
+  // ── Panel General ─────────────────────────────────────────
+  function rlRenderGeneral() {
+    const k = rlData.kpis;
+    const pct = k.porcentajeCumplimiento;
+
+    setText('rl-big-pct', pct + '%');
+    setText('rl-big-pct-sub', k.totalAprobados + ' aprobados de ' + k.totalCeldas + ' (PERSONAL ACTIVO × temas B DATOS)');
+
+    const bar = document.getElementById('rl-global-bar');
+    bar.style.width = pct + '%';
+    bar.style.background = pct >= 80 ? 'linear-gradient(90deg,#10b981,#34d399)' :
+                           pct >= 60 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' :
+                                       'linear-gradient(90deg,#ef4444,#f87171)';
+
+    // Top 5 incumplidores
+    const inc = rlData.incumplidores.slice(0, 5);
+    const colors = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16'];
+    const html = inc.map((t,i) => `
+      <div class="rl-rank-item">
+        <div class="rl-rank-avatar" style="background:${colors[i]||'#6b7280'}">${rlInitials(t.nombre)}</div>
+        <div class="rl-rank-info">
+          <div class="rl-ri-name">${rlEsc(t.nombre)}</div>
+          <div class="rl-ri-sub">${rlEsc(t.cargo)} &bull; ${t.reprobados+t.caducados} tema(s) incumplido(s)</div>
+          <div style="margin-top:.3rem">
+            ${t.reprobados ? `<span class="rl-badge rp"><i class="fas fa-times-circle"></i>${t.reprobados} reprobado(s)</span> ` : ''}
+            ${t.caducados  ? `<span class="rl-badge cd"><i class="fas fa-hourglass-end"></i>${t.caducados} caducado(s)</span>` : ''}
+          </div>
+        </div>
+        <div class="rl-rank-pct">
+          <div class="rl-rp-num" style="color:${t.porcentaje>=80?'#10b981':t.porcentaje>=60?'#f59e0b':'#ef4444'}">${t.porcentaje}%</div>
+          <div class="rl-rp-lbl">cumplimiento</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('rl-top-inc-list').innerHTML = inc.length ? html : '<div style="color:#9ca3af;text-align:center;padding:1rem"><i class="fas fa-check-circle" style="color:#10b981;font-size:1.5rem"></i><br>Sin incumplidores</div>';
+
+    // Barras por tema — fuente: B DATOS col E
+    const temas = [...rlData.resumenPorTema].sort((a,b) => {
+      const pa = a.total ? a.aprobados/a.total : 0;
+      const pb = b.total ? b.aprobados/b.total : 0;
+      return pa - pb;
+    });
+    const barsHtml = temas.map(t => {
+      const total = t.total || 1;   // denominador = total ACTIVOS
+      const pAp = (t.aprobados  / total * 100).toFixed(1);
+      const pRp = (t.reprobados / total * 100).toFixed(1);
+      const pCd = (t.caducados  / total * 100).toFixed(1);
+      const pPd = (t.pendientes / total * 100).toFixed(1);
+      const pct2 = Math.round(t.aprobados / total * 100);
+      return `
+        <div class="rl-topic-bar">
+          <div class="rl-topic-name" title="${rlEsc(t.tema)}">${rlEsc(t.tema)}</div>
+          <div class="rl-topic-track">
+            <div class="rl-seg-ap" style="width:${pAp}%" title="${t.aprobados} aprobados de ${t.total} activos"></div>
+            <div class="rl-seg-rp" style="width:${pRp}%" title="${t.reprobados} reprobados"></div>
+            <div class="rl-seg-cd" style="width:${pCd}%" title="${t.caducados} caducados"></div>
+            <div class="rl-seg-pd" style="width:${pPd}%" title="${t.pendientes} sin registro"></div>
+          </div>
+          <div class="rl-topic-pct" style="color:${pct2>=80?'#10b981':pct2>=60?'#f59e0b':'#ef4444'}">${pct2}%</div>
+        </div>`;
+    }).join('');
+    document.getElementById('rl-temas-bars').innerHTML = barsHtml || '<div style="color:#9ca3af;padding:1rem">Sin datos en B DATOS</div>';
+  }
+
+  // ── Panel Temas ───────────────────────────────────────────
+  function rlRenderTemas() { rlFiltrarTemas(); }
+  window.rlFiltrarTemas = function() {
+    const q   = (document.getElementById('rl-temas-search').value || '').toLowerCase();
+    const ord = document.getElementById('rl-temas-order').value;
+    let rows = rlData.resumenPorTema.filter(t => t.tema.toLowerCase().includes(q));
+    rows.sort((a,b) => {
+      const pa = a.registros ? a.aprobados/a.registros : 0;
+      const pb = b.registros ? b.aprobados/b.registros : 0;
+      if(ord==='pct-asc')  return pa - pb;
+      if(ord==='pct-desc') return pb - pa;
+      return a.tema.localeCompare(b.tema);
+    });
+    const html = rows.map((t,i) => {
+      const pct2 = t.total ? Math.round(t.aprobados/t.total*100) : 0;
+      const color = pct2>=80?'#10b981':pct2>=60?'#f59e0b':'#ef4444';
+      return `
+        <tr>
+          <td style="color:#9ca3af">${i+1}</td>
+          <td style="font-weight:600;color:#1e293b">${rlEsc(t.tema)}</td>
+          <td style="font-weight:600;color:#3b82f6">${t.total}</td>
+          <td style="color:#6b7280">${t.registros}</td>
+          <td><span class="rl-badge ap">${t.aprobados}</span></td>
+          <td>${t.reprobados ? `<span class="rl-badge rp">${t.reprobados}</span>` : '<span style="color:#9ca3af">0</span>'}</td>
+          <td>${t.caducados  ? `<span class="rl-badge cd">${t.caducados}</span>`  : '<span style="color:#9ca3af">0</span>'}</td>
+          <td>${t.pendientes ? `<span class="rl-badge pd">${t.pendientes}</span>` : '<span style="color:#9ca3af">0</span>'}</td>
+          <td><b style="color:${color}">${pct2}%</b></td>
+          <td style="min-width:120px">
+            <div class="rl-progress-wrap" style="height:8px">
+              <div class="rl-progress-bar" style="width:${pct2}%;background:${color}"></div>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    document.getElementById('rl-temas-tbody').innerHTML = html || '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:1.5rem">Sin resultados</td></tr>';
+  };
+
+  // ── Panel Incumplidores ───────────────────────────────────
+  function rlRenderIncumplidores() { rlFiltrarIncumplidores(); }
+  window.rlFiltrarIncumplidores = function() {
+    const q    = (document.getElementById('rl-inc-search').value || '').toLowerCase();
+    const filt = document.getElementById('rl-inc-filter').value;
+    let rows = rlData.incumplidores.filter(t => {
+      const match = t.nombre.toLowerCase().includes(q) || t.dni.includes(q);
+      if(!match) return false;
+      if(filt==='reprobado') return t.reprobados > 0;
+      if(filt==='caducado')  return t.caducados  > 0;
+      if(filt==='pendiente') return t.pendientes > 0;
+      return true;
+    });
+    setText('rl-inc-count', rows.length + ' trabajador(es)');
+    const html = rows.map((t,i) => {
+      const color = t.porcentaje>=80?'#10b981':t.porcentaje>=60?'#f59e0b':'#ef4444';
+      const temasInc = t.detalle.filter(d => d.estado !== 'Aprobado')
+        .map(d => `<span class="rl-badge ${d.estado==='Reprobado'?'rp':'cd'}" style="margin:1px 2px" title="Fecha: ${rlEsc(d.fecha||'')}">${rlEsc(d.tema)}</span>`).join('');
+      return `
+        <tr>
+          <td style="color:#9ca3af">${i+1}</td>
+          <td style="font-weight:600;color:#1e293b">
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <div style="width:30px;height:30px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:700;flex-shrink:0">${rlInitials(t.nombre)}</div>
+              ${rlEsc(t.nombre)}
+            </div>
+          </td>
+          <td style="color:#6b7280;font-size:.78rem">${rlEsc(t.dni)}</td>
+          <td style="font-size:.78rem">${rlEsc(t.cargo)}</td>
+          <td style="font-size:.78rem">${rlEsc(t.empresa)}</td>
+          <td>${t.temasTotal}</td>
+          <td><span class="rl-badge ap">${t.aprobados}</span></td>
+          <td>${t.reprobados ? `<span class="rl-badge rp">${t.reprobados}</span>` : '—'}</td>
+          <td>${t.caducados  ? `<span class="rl-badge cd">${t.caducados}</span>`  : '—'}</td>
+          <td>${t.pendientes ? `<span class="rl-badge pd">${t.pendientes}</span>` : '—'}</td>
+          <td><b style="color:${color}">${t.porcentaje}%</b></td>
+          <td style="max-width:300px;white-space:normal">${temasInc}</td>
+        </tr>`;
+    }).join('');
+    document.getElementById('rl-inc-tbody').innerHTML = html || '<tr><td colspan="12" style="text-align:center;color:#9ca3af;padding:1.5rem">Sin incumplidores con estos filtros</td></tr>';
+  };
+
+  // ── Panel Vacunas ─────────────────────────────────────────
+  function rlRenderVacunas() {
+    // Donut cards
+    const total = rlData.vacunasData.length || 1;
+    const cardsHtml = rlData.resumenVacunas.map(v => {
+      const pct2 = Math.round(v.conVacuna / total * 100);
+      const r = 32, circ = 2*Math.PI*r;
+      const offset = circ - (pct2/100)*circ;
+      const color = pct2>=80?'#10b981':pct2>=60?'#f59e0b':'#ef4444';
+      return `
+        <div class="rl-vac-card ${pct2<60?'danger':''}">
+          <div class="rl-vac-name">${rlEsc(v.vacuna)}</div>
+          <div class="rl-vac-donut">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="8"/>
+              <circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+                stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+            </svg>
+            <div class="rl-vac-pct-inner" style="color:${color}">${pct2}%</div>
+          </div>
+          <div class="rl-vac-sub">${v.conVacuna} de ${total} trabajadores</div>
+        </div>`;
+    }).join('');
+    document.getElementById('rl-vac-grid').innerHTML = cardsHtml;
+
+    // Tabla cabecera
+    const headers = rlData.vacunasHeaders;
+    document.getElementById('rl-vac-thead').innerHTML = `
+      <tr>
+        <th>#</th><th>DNI</th><th>Nombre</th>
+        ${headers.map(h => `<th style="font-size:.7rem;white-space:nowrap">${rlEsc(h)}</th>`).join('')}
+        <th>Completo</th>
+      </tr>`;
+    rlFiltrarVacunas();
+  }
+
+  window.rlFiltrarVacunas = function() {
+    const q    = (document.getElementById('rl-vac-search').value || '').toLowerCase();
+    const filt = document.getElementById('rl-vac-filter').value;
+    const headers = rlData.vacunasHeaders;
+    let rows = rlData.vacunasData.filter(v => {
+      const match = v.nombre.toLowerCase().includes(q) || v.dni.includes(q);
+      if(!match) return false;
+      const completo = headers.every(h => v.vacunas[h]?.tiene);
+      if(filt==='completo')   return completo;
+      if(filt==='incompleto') return !completo;
+      return true;
+    });
+    const html = rows.map((v,i) => {
+      const completo = headers.every(h => v.vacunas[h]?.tiene);
+      const cells = headers.map(h => {
+        const val = v.vacunas[h];
+        if(val?.tiene) return `<td style="text-align:center"><span style="color:#10b981;font-size:1.1rem" title="${rlEsc(val.valor)}">&#10003;</span></td>`;
+        return `<td style="text-align:center"><span style="color:#e5e7eb;font-size:1.1rem">&#10005;</span></td>`;
+      }).join('');
+      return `
+        <tr>
+          <td style="color:#9ca3af">${i+1}</td>
+          <td style="font-size:.78rem;color:#6b7280">${rlEsc(v.dni)}</td>
+          <td style="font-weight:600;color:#1e293b;white-space:nowrap">${rlEsc(v.nombre)}</td>
+          ${cells}
+          <td style="text-align:center">${completo ? '<span class="rl-badge ap">Sí</span>' : '<span class="rl-badge rp">No</span>'}</td>
+        </tr>`;
+    }).join('');
+    document.getElementById('rl-vac-tbody').innerHTML = html || '<tr><td colspan="20" style="text-align:center;color:#9ca3af;padding:1.5rem">Sin resultados</td></tr>';
+  };
+
+  // ── Panel Por Trabajador ──────────────────────────────────
+  window.rlFiltrarWorkers = function() {
+    const q = (document.getElementById('rl-worker-input').value || '').trim().toLowerCase();
+    const list = document.getElementById('rl-worker-list');
+    if(q.length < 2) { list.style.display='none'; return; }
+    const matches = rlData.cumplimientoPorTrabajador.filter(t =>
+      t.nombre.toLowerCase().includes(q) || t.dni.includes(q)
+    ).slice(0,8);
+    if(!matches.length) { list.style.display='none'; return; }
+    list.innerHTML = matches.map(t => `
+      <div class="rl-search-item" onclick="rlSelectWorker('${rlEsc(t.dni)}')">
+        <div style="font-weight:600;color:#1e293b">${rlEsc(t.nombre)}</div>
+        <div class="rl-si-dni">${rlEsc(t.dni)} &bull; ${rlEsc(t.cargo)}</div>
+      </div>`).join('');
+    list.style.display = 'block';
+  };
+
+  window.rlSelectWorker = function(dni) {
+    document.getElementById('rl-worker-list').style.display = 'none';
+    const t = rlData.cumplimientoPorTrabajador.find(w => w.dni === dni);
+    if(!t) return;
+    document.getElementById('rl-worker-input').value = t.nombre;
+
+    // Vacuna del trabajador
+    const vacTrab = rlData.vacunasData.find(v => v.dni === dni);
+
+    const color = t.porcentaje>=80?'#10b981':t.porcentaje>=60?'#f59e0b':'#ef4444';
+    const badgeMap = {Aprobado:'ap',Reprobado:'rp',Pendiente:'pd',Caducado:'cd'};
+
+    const detalleHtml = t.detalle.length
+      ? `<div class="rl-detail-grid">
+          ${t.detalle.map(d => `
+            <div class="rl-detail-item ${badgeMap[d.estado]||'nd'}">
+              <div style="flex:1">
+                <div class="rl-di-name">${rlEsc(d.tema)}</div>
+                ${d.fecha ? `<div style="font-size:.68rem;color:#9ca3af;margin-top:.15rem"><i class="fas fa-calendar-alt me-1"></i>${rlEsc(d.fecha)}</div>` : ''}
+              </div>
+              <span class="rl-badge ${badgeMap[d.estado]||'nd'}">${d.estado}</span>
+            </div>`).join('')}
+        </div>`
+      : '<div style="color:#9ca3af;padding:1rem">Sin registros en B DATOS para este trabajador</div>';
+
+    const vacHtml = vacTrab
+      ? `<div class="rl-card" style="margin-top:1.2rem">
+          <div class="rl-card-title"><i class="fas fa-syringe"></i>Vacunas</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            ${rlData.vacunasHeaders.map(h => {
+              const val = vacTrab.vacunas[h];
+              const cls = val?.tiene ? 'ap' : 'rp';
+              return `<span class="rl-badge ${cls}">${rlEsc(h)}${val?.tiene && val.valor ? ': '+rlEsc(val.valor) : ''}</span>`;
+            }).join('')}
+          </div>
+        </div>`
+      : `<div class="rl-card" style="margin-top:1.2rem">
+          <div class="rl-card-title"><i class="fas fa-syringe"></i>Vacunas</div>
+          <div style="color:#9ca3af;padding:.5rem">Sin datos en INFO ADICIONAL</div>
+        </div>`;
+
+    document.getElementById('rl-worker-detail').style.display = 'block';
+    document.getElementById('rl-worker-empty').style.display  = 'none';
+    document.getElementById('rl-worker-detail').innerHTML = `
+      <div class="rl-worker-card">
+        <div class="rl-worker-avatar"><i class="fas fa-user"></i></div>
+        <div class="rl-worker-info">
+          <h4>${rlEsc(t.nombre)}</h4>
+          <p><i class="fas fa-id-badge me-1"></i>${rlEsc(t.dni)} &bull; ${rlEsc(t.cargo)}</p>
+          <p><i class="fas fa-building me-1"></i>${rlEsc(t.empresa)}</p>
+          <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
+            <span class="rl-badge ap"><i class="fas fa-check"></i>${t.aprobados} Aprobados</span>
+            ${t.reprobados ? `<span class="rl-badge rp"><i class="fas fa-times"></i>${t.reprobados} Reprobados</span>` : ''}
+            ${t.caducados  ? `<span class="rl-badge cd"><i class="fas fa-hourglass-end"></i>${t.caducados} Caducados</span>` : ''}
+          </div>
+        </div>
+        <div class="rl-pct-big">
+          <div class="rl-pct-num" style="color:#fff">${t.porcentaje}%</div>
+          <div class="rl-pct-lbl">cumplimiento</div>
+          <div style="margin-top:.5rem">
+            <div style="background:rgba(255,255,255,.2);border-radius:50px;height:6px;width:90px;overflow:hidden">
+              <div style="background:#fff;height:100%;border-radius:50px;width:${t.porcentaje}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rl-card">
+        <div class="rl-card-title"><i class="fas fa-graduation-cap"></i>Todos los temas de B DATOS (${t.temasTotal} temas)</div>
+        ${detalleHtml}
+      </div>
+      ${vacHtml}
+    `;
+  };
+
+  // ── Navegación por tabs ───────────────────────────────────
+  window.rlTab = function(btn, panelId) {
+    document.querySelectorAll('.rl-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.rl-panel').forEach(p => { p.style.display='none'; p.classList.remove('active'); });
+    const panel = document.getElementById(panelId);
+    if(panel) { panel.style.display='block'; panel.classList.add('active'); }
+    // Mostrar vacíos en Por Trabajador si no hay selección
+    if(panelId==='rl-p-worker' && rlData) {
+      const det = document.getElementById('rl-worker-detail');
+      if(!det || det.style.display==='none') document.getElementById('rl-worker-empty').style.display='block';
+    }
+  };
+
+  // ── Helpers ───────────────────────────────────────────────
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  }
+  function rlEsc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function rlInitials(name) {
+    const parts = String(name||'').trim().split(' ');
+    return (parts[0]?.[0]||'') + (parts[1]?.[0]||'');
+  }
+
+  // Cerrar dropdown al click fuera
+  document.addEventListener('click', function(e) {
+    const list = document.getElementById('rl-worker-list');
+    if(list && !list.contains(e.target) && e.target.id !== 'rl-worker-input') list.style.display='none';
+  });
+
+  // ── Auto-init cuando el DOM esté listo ───────────────────
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', rlInit);
+  } else {
+    rlInit();
+  }
+
+})();
+</script>

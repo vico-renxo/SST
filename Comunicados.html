@@ -1,0 +1,539 @@
+<style>
+/* ── Comunicados admin panel ── */
+#comunicados-panel { font-size: .85rem; }
+
+.com-card {
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: box-shadow .15s;
+}
+.com-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+.com-badge-tipo {
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  flex-shrink: 0;
+}
+.badge-video  { background: #fff3cd; color: #856404; }
+.badge-imagen { background: #cff4fc; color: #055160; }
+.badge-texto  { background: #d1e7dd; color: #0a3622; }
+
+.com-body { flex: 1; min-width: 0; }
+.com-title { font-weight: 600; font-size: .9rem; line-height: 1.2; margin-bottom: 3px; }
+.com-desc  { color: #6c757d; font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.com-dates { font-size: .75rem; color: #888; margin-top: 4px; }
+
+.com-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px; font-size: .72rem; font-weight: 600; cursor: pointer;
+  border: none; transition: opacity .15s;
+}
+.status-pill.activo   { background: #d1e7dd; color: #0a3622; }
+.status-pill.inactivo { background: #f8d7da; color: #842029; }
+.status-pill:hover { opacity: .75; }
+
+.com-preview-box {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 16/9;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.com-preview-box iframe,
+.com-preview-box img { width: 100%; height: 100%; object-fit: contain; border: 0; }
+.com-preview-texto {
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  border-radius: 10px;
+  min-height: 120px;
+  font-size: .9rem;
+  line-height: 1.6;
+}
+</style>
+
+<div id="comunicados-panel">
+  <div class="mb-3">
+    <h5 class="mb-0 fw-bold">Comunicados y Eventos</h5>
+    <small class="text-muted">Los comunicados activos se muestran a los trabajadores al ingresar</small>
+    <div class="mt-2">
+      <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="abrirFormComunicado()">
+        <i class="fa-solid fa-plus me-1"></i> Nuevo comunicado
+      </button>
+    </div>
+  </div>
+
+  <div id="com-loading" class="text-center py-4" style="display:none">
+    <div class="spinner-border spinner-border-sm text-primary"></div>
+    <span class="ms-2 text-muted">Cargando...</span>
+  </div>
+
+  <div id="com-lista"></div>
+  <div id="com-vacio" class="text-center py-5 text-muted" style="display:none">
+    <i class="fa-solid fa-bullhorn fa-2x mb-2 opacity-25"></i>
+    <p class="mb-0">Sin comunicados creados.<br>Crea el primero con el botón de arriba.</p>
+  </div>
+</div>
+
+<!-- ── Modal formulario ── -->
+<div class="modal fade" id="modalComunicado" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title fw-bold" id="comModalTitulo">Nuevo comunicado</h6>
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formComunicado" onsubmit="return false">
+          <input type="hidden" id="comId">
+          <input type="hidden" id="comFechaCreacion">
+          <input type="hidden" id="comCreadoPor">
+
+          <div class="row g-2 mb-2">
+            <div class="col-12">
+              <label class="form-label mb-1 fw-semibold">Título <span class="text-danger">*</span></label>
+              <input type="text" id="comTitulo" class="form-control form-control-sm" placeholder="Ej: Comunicado importante de seguridad" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label class="form-label mb-1 fw-semibold">Tipo de contenido</label>
+              <select id="comTipo" class="form-select form-select-sm" onchange="actualizarCampoContenido()">
+                <option value="video">Video (YouTube o Drive)</option>
+                <option value="imagen">Imagen (URL o Google Drive)</option>
+                <option value="texto">Texto / HTML</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label mb-1 fw-semibold">Activo desde</label>
+              <input type="date" id="comDesde" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label mb-1 fw-semibold">Activo hasta</label>
+              <input type="date" id="comHasta" class="form-control form-control-sm">
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label mb-1 fw-semibold" id="comContenidoLabel">URL del video (YouTube)</label>
+            <input type="text" id="comContenidoUrl" class="form-control form-control-sm"
+                   placeholder="https://www.youtube.com/watch?v=...">
+            <textarea id="comContenidoTexto" class="form-control form-control-sm" rows="4"
+                      placeholder="Escribe tu comunicado aquí..." style="display:none"></textarea>
+
+            <!-- Subida de imagen local (solo visible cuando tipo=imagen) -->
+            <div id="comImagenUpload" style="display:none" class="mt-2">
+              <div class="d-flex align-items-center gap-2 text-muted" style="font-size:.75rem">
+                <hr class="flex-grow-1 my-0"> <span>ó subir imagen desde tu equipo</span> <hr class="flex-grow-1 my-0">
+              </div>
+              <div id="comDropZone" class="mt-2 rounded border border-2 border-dashed text-center py-3 px-2"
+                   style="cursor:pointer; border-color:#ced4da!important; transition:background .15s;"
+                   onclick="document.getElementById('comImagenFile').click()"
+                   ondragover="comDragOver(event)" ondragleave="comDragLeave(event)" ondrop="comDrop(event)">
+                <i class="fa-solid fa-cloud-arrow-up fa-lg text-muted mb-1"></i>
+                <div style="font-size:.8rem; color:#6c757d;">
+                  Arrastra tu imagen aquí<br>
+                  <span style="font-size:.72rem;">o haz clic para seleccionar</span>
+                </div>
+                <input type="file" id="comImagenFile" accept="image/*" style="display:none" onchange="subirImagenLocal(this.files[0])">
+              </div>
+              <div id="comUploadStatus" class="mt-1 text-muted" style="font-size:.8rem; min-height:1.2rem"></div>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label mb-1 fw-semibold">Descripción / subtítulo</label>
+            <input type="text" id="comDescripcion" class="form-control form-control-sm"
+                   placeholder="Breve descripción que ve el trabajador (opcional)">
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="comActivo" checked>
+            <label class="form-check-label" for="comActivo">Publicar inmediatamente</label>
+          </div>
+
+          <!-- Preview -->
+          <div class="border rounded p-2 bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <small class="fw-semibold text-muted text-uppercase" style="font-size:.7rem; letter-spacing:.5px">
+                <i class="fa-solid fa-eye me-1"></i>Preview
+              </small>
+              <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="actualizarPreview()">
+                <i class="fa-solid fa-rotate me-1"></i>Actualizar
+              </button>
+            </div>
+            <div id="comPreviewArea"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-sm px-4" onclick="guardarComunicadoForm()">
+          <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var _comItems = [];
+
+// ── Cargar lista ─────────────────────────────────────────────────────────
+function cargarComunicados() {
+  document.getElementById('com-loading').style.display = '';
+  document.getElementById('com-lista').innerHTML = '';
+  document.getElementById('com-vacio').style.display = 'none';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      document.getElementById('com-loading').style.display = 'none';
+      if (!res.ok) { mostrarNotificacion('Error al cargar comunicados', 'error'); return; }
+      _comItems = res.items || [];
+      renderComunicados(_comItems);
+    })
+    .withFailureHandler(function(e) {
+      document.getElementById('com-loading').style.display = 'none';
+      mostrarNotificacion('Error: ' + e.message, 'error');
+    })
+    .obtenerComunicados();
+}
+
+function renderComunicados(items) {
+  var lista = document.getElementById('com-lista');
+  var vacio = document.getElementById('com-vacio');
+  if (!items.length) { lista.innerHTML = ''; vacio.style.display = ''; return; }
+  vacio.style.display = 'none';
+
+  lista.innerHTML = items.map(function(c) {
+    var tipoBadge = c.tipo === 'video' ? 'badge-video' : c.tipo === 'imagen' ? 'badge-imagen' : 'badge-texto';
+    var tipoLabel = c.tipo === 'video' ? '<i class="fa-solid fa-video me-1"></i>Video'
+                  : c.tipo === 'imagen' ? '<i class="fa-regular fa-image me-1"></i>Imagen'
+                  : '<i class="fa-regular fa-file-lines me-1"></i>Texto';
+    var estadoClass = c.activo ? 'activo' : 'inactivo';
+    var estadoLabel = c.activo ? '<i class="fa-solid fa-circle" style="font-size:.45rem"></i> Activo' : '<i class="fa-regular fa-circle" style="font-size:.45rem"></i> Inactivo';
+    var fechas = [];
+    if (c.fechaDesde) fechas.push('Desde ' + _fmtFecha(c.fechaDesde));
+    if (c.fechaHasta) fechas.push('hasta ' + _fmtFecha(c.fechaHasta));
+    return '<div class="com-card">' +
+      '<span class="com-badge-tipo ' + tipoBadge + '">' + tipoLabel + '</span>' +
+      '<div class="com-body">' +
+        '<div class="com-title">' + _escHtml(c.titulo) + '</div>' +
+        (c.descripcion ? '<div class="com-desc">' + _escHtml(c.descripcion) + '</div>' : '') +
+        (fechas.length ? '<div class="com-dates"><i class="fa-regular fa-calendar me-1"></i>' + fechas.join(' ') + '</div>' : '') +
+      '</div>' +
+      '<div class="com-actions">' +
+        '<button class="status-pill ' + estadoClass + '" onclick="toggleComActivo(\'' + c.id + '\',' + (!c.activo) + ')" title="Click para cambiar estado">' + estadoLabel + '</button>' +
+        '<button class="btn btn-outline-primary btn-sm py-0 px-2" onclick="editarComunicado(\'' + c.id + '\')" title="Editar"><i class="fa-solid fa-pen"></i></button>' +
+        '<button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="confirmarEliminarComunicado(\'' + c.id + '\')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _fmtFecha(s) {
+  if (!s) return '';
+  var p = s.split('-');
+  if (p.length !== 3) return s;
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+function _escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Abrir formulario (nuevo) ─────────────────────────────────────────────
+function abrirFormComunicado() {
+  document.getElementById('comId').value = '';
+  document.getElementById('comFechaCreacion').value = '';
+  document.getElementById('comTitulo').value = '';
+  document.getElementById('comTipo').value = 'video';
+  document.getElementById('comContenidoUrl').value = '';
+  document.getElementById('comContenidoTexto').value = '';
+  document.getElementById('comDescripcion').value = '';
+  document.getElementById('comDesde').value = new Date().toISOString().slice(0,10);
+  document.getElementById('comHasta').value = '';
+  document.getElementById('comActivo').checked = true;
+  document.getElementById('comModalTitulo').textContent = 'Nuevo comunicado';
+  document.getElementById('comUploadStatus').innerHTML = '';
+  document.getElementById('comImagenFile').value = '';
+  var ud = JSON.parse(localStorage.getItem('userName') || '{}');
+  document.getElementById('comCreadoPor').value = ud.nombre || ud.usuario || '';
+  actualizarCampoContenido();
+  actualizarPreview();
+  new bootstrap.Modal(document.getElementById('modalComunicado')).show();
+}
+
+// ── Editar ───────────────────────────────────────────────────────────────
+function editarComunicado(id) {
+  var c = _comItems.find(function(x) { return x.id === id; });
+  if (!c) return;
+  document.getElementById('comId').value = c.id;
+  document.getElementById('comFechaCreacion').value = c.fechaCreacion;
+  document.getElementById('comTitulo').value = c.titulo;
+  document.getElementById('comTipo').value = c.tipo;
+  document.getElementById('comContenidoUrl').value = c.tipo !== 'texto' ? c.contenido : '';
+  document.getElementById('comContenidoTexto').value = c.tipo === 'texto' ? c.contenido : '';
+  document.getElementById('comDescripcion').value = c.descripcion;
+  document.getElementById('comDesde').value = c.fechaDesde;
+  document.getElementById('comHasta').value = c.fechaHasta;
+  document.getElementById('comActivo').checked = c.activo;
+  document.getElementById('comCreadoPor').value = c.creadoPor;
+  document.getElementById('comModalTitulo').textContent = 'Editar comunicado';
+  actualizarCampoContenido();
+  actualizarPreview();
+  new bootstrap.Modal(document.getElementById('modalComunicado')).show();
+}
+
+// ── Campo de contenido dinámico ──────────────────────────────────────────
+function actualizarCampoContenido() {
+  var tipo = document.getElementById('comTipo').value;
+  var urlInput    = document.getElementById('comContenidoUrl');
+  var txtArea     = document.getElementById('comContenidoTexto');
+  var label       = document.getElementById('comContenidoLabel');
+  var uploadBlock = document.getElementById('comImagenUpload');
+
+  if (tipo === 'texto') {
+    urlInput.style.display = 'none';
+    txtArea.style.display = '';
+    uploadBlock.style.display = 'none';
+    label.textContent = 'Contenido del comunicado';
+  } else {
+    urlInput.style.display = '';
+    txtArea.style.display = 'none';
+    uploadBlock.style.display = tipo === 'imagen' ? '' : 'none';
+    label.textContent = tipo === 'video' ? 'URL del video (YouTube o Google Drive)' : 'URL de la imagen o link de Google Drive';
+    urlInput.placeholder = tipo === 'video'
+      ? 'https://www.youtube.com/watch?v=...  ó  https://drive.google.com/file/d/ID/view'
+      : 'https://ejemplo.com/imagen.jpg  ó  https://drive.google.com/file/d/ID/view';
+  }
+  actualizarPreview();
+}
+
+// ── Drag & Drop handlers ─────────────────────────────────────────────────
+function comDragOver(e) {
+  e.preventDefault();
+  var zone = document.getElementById('comDropZone');
+  zone.style.background = '#e8f4fd';
+  zone.style.borderColor = '#0d6efd';
+}
+function comDragLeave(e) {
+  var zone = document.getElementById('comDropZone');
+  zone.style.background = '';
+  zone.style.borderColor = '';
+}
+function comDrop(e) {
+  e.preventDefault();
+  comDragLeave(e);
+  var files = e.dataTransfer && e.dataTransfer.files;
+  if (files && files[0]) subirImagenLocal(files[0]);
+}
+
+// ── Subir imagen local a Google Drive ────────────────────────────────────
+function subirImagenLocal(file) {
+  if (!file) return;
+  var status = document.getElementById('comUploadStatus');
+
+  // Validar tipo
+  if (!file.type.startsWith('image/')) {
+    status.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation me-1"></i>Solo se permiten archivos de imagen</span>';
+    return;
+  }
+  // Validar tamaño máx. 8 MB
+  if (file.size > 8 * 1024 * 1024) {
+    status.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation me-1"></i>La imagen no debe superar 8 MB</span>';
+    return;
+  }
+
+  status.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm me-1"></span>Subiendo imagen...</span>';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl  = e.target.result;
+    var comma    = dataUrl.indexOf(',');
+    var base64   = dataUrl.substring(comma + 1);
+    var mimeType = file.type || 'image/jpeg';
+    var nombre   = file.name;
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        document.getElementById('comImagenFile').value = '';
+        if (!res.ok) {
+          status.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation me-1"></i>Error: ' + res.error + '</span>';
+          return;
+        }
+        document.getElementById('comContenidoUrl').value = res.url;
+        status.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Imagen subida — preview actualizado</span>';
+        actualizarPreview();
+      })
+      .withFailureHandler(function(err) {
+        document.getElementById('comImagenFile').value = '';
+        status.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation me-1"></i>Error: ' + err.message + '</span>';
+      })
+      .subirImagenComunicado(base64, nombre, mimeType);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Preview ──────────────────────────────────────────────────────────────
+function actualizarPreview() {
+  var tipo     = document.getElementById('comTipo').value;
+  var contenido = tipo === 'texto'
+    ? document.getElementById('comContenidoTexto').value
+    : document.getElementById('comContenidoUrl').value;
+  var titulo   = document.getElementById('comTitulo').value || 'Título del comunicado';
+  var desc     = document.getElementById('comDescripcion').value;
+  var area     = document.getElementById('comPreviewArea');
+  area.innerHTML = _renderContenidoComunicado(tipo, contenido, titulo, desc, true);
+}
+
+function _getDriveImageUrl(url) {
+  if (!url) return url;
+  // Thumbnail Drive: ya está en formato thumbnail → devolver tal cual
+  if (url.indexOf('drive.google.com/thumbnail') !== -1) return url;
+  // file/d/ID o ?id=ID → thumbnail (más confiable que uc?export=view)
+  var gd = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (gd) return 'https://drive.google.com/thumbnail?id=' + gd[1] + '&sz=w2000';
+  return url;
+}
+
+function _getVideoEmbedUrl(url) {
+  if (!url) return '';
+  // YouTube
+  var yt = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  if (yt) return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1';
+  // Google Drive: /file/d/FILE_ID/  o  ?id=FILE_ID
+  var gd = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (gd) return 'https://drive.google.com/file/d/' + gd[1] + '/preview';
+  return '';
+}
+
+function _renderContenidoComunicado(tipo, contenido, titulo, desc, enModal) {
+  var html = '<div style="text-align:center">';
+  if (tipo === 'video') {
+    var embedUrl = _getVideoEmbedUrl(contenido);
+    if (embedUrl) {
+      html += '<div class="com-preview-box"><iframe src="' + embedUrl + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+    } else if (contenido) {
+      html += '<div class="com-preview-box"><video src="' + contenido + '" controls style="width:100%;height:100%"></video></div>';
+    } else {
+      html += '<div class="com-preview-box d-flex align-items-center justify-content-center text-white opacity-50"><i class="fa-solid fa-video fa-3x"></i></div>';
+    }
+  } else if (tipo === 'imagen') {
+    if (contenido) {
+      var imgSrc = _getDriveImageUrl(contenido);
+      html += '<img src="' + imgSrc + '" style="max-width:100%;border-radius:8px;max-height:360px;object-fit:contain" onerror="this.style.display=\'none\'">';
+    } else {
+      html += '<div class="com-preview-box d-flex align-items-center justify-content-center" style="background:#e9ecef;aspect-ratio:16/9"><i class="fa-regular fa-image fa-3x text-muted"></i></div>';
+    }
+  } else {
+    html += '<div class="com-preview-texto text-start">' + (contenido || '<em class="opacity-50">Sin contenido</em>') + '</div>';
+  }
+  if (desc) html += '<p class="mt-2 mb-0 text-muted" style="font-size:.8rem">' + _escHtml(desc) + '</p>';
+  html += '</div>';
+  return html;
+}
+
+// ── Guardar ──────────────────────────────────────────────────────────────
+function guardarComunicadoForm() {
+  var titulo = document.getElementById('comTitulo').value.trim();
+  if (!titulo) { mostrarNotificacion('El título es obligatorio', 'warning'); return; }
+
+  var tipo = document.getElementById('comTipo').value;
+  var contenido = tipo === 'texto'
+    ? document.getElementById('comContenidoTexto').value.trim()
+    : document.getElementById('comContenidoUrl').value.trim();
+
+  var obj = {
+    id:           document.getElementById('comId').value,
+    titulo:       titulo,
+    tipo:         tipo,
+    contenido:    contenido,
+    descripcion:  document.getElementById('comDescripcion').value.trim(),
+    fechaDesde:   document.getElementById('comDesde').value,
+    fechaHasta:   document.getElementById('comHasta').value,
+    activo:       document.getElementById('comActivo').checked,
+    creadoPor:    document.getElementById('comCreadoPor').value,
+    fechaCreacion:document.getElementById('comFechaCreacion').value
+  };
+
+  var btn = document.querySelector('#modalComunicado .btn-primary');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar';
+      if (!res.ok) { mostrarNotificacion('Error: ' + res.error, 'error'); return; }
+      bootstrap.Modal.getInstance(document.getElementById('modalComunicado')).hide();
+      mostrarNotificacion('Comunicado guardado correctamente', 'success');
+      cargarComunicados();
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar';
+      mostrarNotificacion('Error: ' + e.message, 'error');
+    })
+    .guardarComunicado(obj);
+}
+
+// ── Toggle activo ────────────────────────────────────────────────────────
+function toggleComActivo(id, nuevoEstado) {
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res.ok) { mostrarNotificacion('Error: ' + res.error, 'error'); return; }
+      mostrarNotificacion(nuevoEstado ? 'Comunicado activado' : 'Comunicado desactivado', 'success');
+      cargarComunicados();
+    })
+    .withFailureHandler(function(e) { mostrarNotificacion('Error: ' + e.message, 'error'); })
+    .toggleActivoComunicado(id, nuevoEstado);
+}
+
+// ── Eliminar ─────────────────────────────────────────────────────────────
+function confirmarEliminarComunicado(id) {
+  Swal.fire({
+    title: '¿Eliminar comunicado?',
+    text: 'Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    confirmButtonText: 'Eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then(function(result) {
+    if (!result.isConfirmed) return;
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (!res.ok) { mostrarNotificacion('Error: ' + res.error, 'error'); return; }
+        mostrarNotificacion('Comunicado eliminado', 'success');
+        cargarComunicados();
+      })
+      .withFailureHandler(function(e) { mostrarNotificacion('Error: ' + e.message, 'error'); })
+      .eliminarComunicado(id);
+  });
+}
+
+// Cargar al iniciar el tab
+document.addEventListener('DOMContentLoaded', function() {
+  var tabEl = document.getElementById('v-pills-comunicados-tab');
+  if (tabEl) {
+    tabEl.addEventListener('shown.bs.tab', function() {
+      if (!_comItems.length) cargarComunicados();
+    });
+  }
+});
+</script>
