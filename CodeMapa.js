@@ -59,13 +59,6 @@ function mapRowToObj_(row){
 }
 
 
-function norm_(s){
-  return (s||"")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"");
-}
 
 // Extrae ID de un URL tipo https://lh5.googleusercontent.com/d/<ID>  o drive/uc?id=<ID>
 function extractDriveId_(urlOrId){
@@ -128,7 +121,7 @@ function getMapasPage(search, offset, limit){
   const data = hoja.getDataRange().getValues();
   if (data.length <= 1) return { items: [], total: 0 };
 
-  const term = norm_(search || "");
+  const term = _normText(search || "");
   const filtered = [];
   for (let i = 1; i < data.length; i++){
     const row = data[i];
@@ -137,8 +130,8 @@ function getMapasPage(search, offset, limit){
       filtered.push(row);
       continue;
     }
-    const tituloOk = norm_(row[1]).includes(term);
-    const autorOk  = norm_(row[9]).includes(term);
+    const tituloOk = _normText(row[1]).includes(term);
+    const autorOk  = _normText(row[9]).includes(term);
     let textosOk = false;
     if (!(tituloOk || autorOk)){
       const textosStr = (row[3] || "").toString().toLowerCase();
@@ -281,7 +274,7 @@ function subirIcono(tipo, nombre, base64) {
     hoja.getRange(nuevaFila, 1, 1, 4).setValues([[id, tipo || '', nombre || '', imageUrl]]);
     return true;
   } catch (error) {
-    console.error('Error subiendo ícono:', error);
+    Logger.log('Error subiendo ícono: ' + error);
     throw new Error('No se pudo subir el ícono: ' + error.message);
   }
 }
@@ -304,7 +297,7 @@ function eliminarIcono(iconoId) {
           const fileId = extractDriveId_(imageUrlOrId);
           if (fileId) DriveApp.getFileById(fileId).setTrashed(true);
         } catch (driveError) {
-          console.log('No se pudo eliminar la imagen de Drive:', driveError);
+          Logger.log('No se pudo eliminar la imagen de Drive: ' + driveError);
         }
         hoja.deleteRow(i + 1);
         return true;
@@ -312,7 +305,7 @@ function eliminarIcono(iconoId) {
     }
     return false;
   } catch (error) {
-    console.error('Error eliminando ícono:', error);
+    Logger.log('Error eliminando ícono: ' + error);
     throw new Error('No se pudo eliminar el ícono: ' + error.message);
   }
 }
@@ -334,7 +327,7 @@ function eliminarIconoPorNombre(nombre) {
           const fileId = extractDriveId_(imageUrlOrId);
           if (fileId) DriveApp.getFileById(fileId).setTrashed(true);
         } catch (driveError) {
-          console.log('No se pudo eliminar la imagen de Drive:', driveError);
+          Logger.log('No se pudo eliminar la imagen de Drive: ' + driveError);
         }
         hoja.deleteRow(i + 1);
         return true;
@@ -342,7 +335,7 @@ function eliminarIconoPorNombre(nombre) {
     }
     return false;
   } catch (error) {
-    console.error('Error eliminando ícono por nombre:', error);
+    Logger.log('Error eliminando ícono por nombre: ' + error);
     throw new Error('No se pudo eliminar el ícono: ' + error.message);
   }
 }
@@ -375,7 +368,7 @@ function subirImagenADrive(nombre, base64) {
     archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     return archivo.getId();
   } catch (error) {
-    console.error('Error subiendo imagen a Drive:', error);
+    Logger.log('Error subiendo imagen a Drive: ' + error);
     throw new Error('No se pudo subir la imagen: ' + error.message);
   }
 }
@@ -391,7 +384,7 @@ function testStructure() {
     const i = getIconos();
     return { mapas: m.length, iconos: i.length };
   } catch (error) {
-    console.error('Error en test:', error);
+    Logger.log('Error en test: ' + error);
     throw error;
   }
 }

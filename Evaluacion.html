@@ -112,7 +112,7 @@
         btnGuardar.textContent = "Valorar";
         btnGuardar.disabled = false;
       }
-    }).guardarCalificacionEnFila(dni, starRating);
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).guardarCalificacionEnFila(dni, starRating);
   }
 
 //Resetear el formulaio

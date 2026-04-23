@@ -467,9 +467,9 @@
     // Tarjeta de Desempeño: guarda las preguntas del checklist activo
     var currentChecklistData_v2 = [];
 
-    function affterPageLoads_v2() {
+    function afterPageLoads_v2() {
       // A. Cargar datos dependientes desde Google Sheets (Checklist -> Equipo)
-      google.script.run.withSuccessHandler(affterDropdownArrayReturned_v2).getDropDownarray_v2();
+      google.script.run.withSuccessHandler(afterDropdownArrayReturned_v2).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDropDownarray_v2();
 
       // C. Auto-rellenar Inspector (Lógica original conservada)
       const userObj = JSON.parse(localStorage.getItem('userName') || '{}');
@@ -477,7 +477,7 @@
       if (userObj.nombre) {
         inspectorField.value = userObj.nombre;
       } else {
-        google.script.run.withSuccessHandler(n => { if(n) inspectorField.value = n; }).getUserNameFromServer_v2(); 
+        google.script.run.withSuccessHandler(n => { if(n) inspectorField.value = n; }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getUserNameFromServer_v2(); 
       }
     }
 
@@ -486,7 +486,7 @@
     // ==========================================
     
     // Callback cuando vuelven los datos del servidor
-    function affterDropdownArrayReturned_v2(arrayOfArrays){
+    function afterDropdownArrayReturned_v2(arrayOfArrays){
       arrayOfValues_v2 = arrayOfArrays;
       
       // AHORA: El índice 0 es el Checklist (Antes Col D, ahora Col B en Sheet pero 0 en array procesado)
@@ -560,13 +560,13 @@
           m2.innerHTML = `Documento: <a href="${data.message2}" target="_blank" style="font-weight: bold; text-decoration: underline;">Link</a>`;
           m2.classList.remove('d-none');
         }
-      }).getAdditionalInfoByValue_v2(val); 
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getAdditionalInfoByValue_v2(val); 
 
       // LLAMADA GS
       google.script.run.withSuccessHandler(data => {
         showTable_v2(data);
         hideSearchSpinner_v2();
-      }).searchData_v2(obj); 
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).searchData_v2(obj); 
     }
 
     function showTable_v2(dataArray) {
@@ -732,7 +732,7 @@
             });
              updateCounters_v2();
             Swal.fire('Análisis completo', 'La IA ha marcado los puntos detectados.', 'success');
-        }).analizarImagenConLista_v2(base64Image.split(',')[1], 'image/png', listaItems); 
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).analizarImagenConLista_v2(base64Image.split(',')[1], 'image/png', listaItems); 
     });
 
     // Guardar Reporte V2
@@ -921,7 +921,7 @@
       document.getElementById('imagen-preview-upload_v2').style.display = 'none';
       document.getElementById('imagen-preview-upload_v2').src = '';
       
-      affterPageLoads_v2(); 
+      afterPageLoads_v2(); 
     }
 
     function btnw_v2(){ $('#serachCheck_v2').click(); }

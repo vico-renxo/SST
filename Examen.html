@@ -102,7 +102,7 @@
           datosMatrizSheet = res.datosMatrizSheet;
           datosTemasSheet  = res.datosTemasSheet;
           if (typeof cargarOpciones === 'function') cargarOpciones();
-        }).obtenerOpcionesFormulario();
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerOpcionesFormulario();
       }
       _cargarOpcionesExamen();
 
@@ -131,7 +131,7 @@
           btnVerMas.style.display = (datosExamen.length < totalExamen) ? "inline-block" : "none";
           document.getElementById("loadingTablaExamen").style.display = "none";
           btnVerMasExamen.disabled = false;
-        }).obtenerMatrizExamenPaginado(offsetExamen, limitExamen, filtroExamen);
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerMatrizExamenPaginado(offsetExamen, limitExamen, filtroExamen);
       }
 
       function mostrarFilas2(data) {
@@ -303,7 +303,7 @@
       idsOriginales = res.map(r => r.id);
       indiceActual = 0;
       mostrarPregunta();
-    }).obtenerPreguntasPorTema(tema);
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerPreguntasPorTema(tema);
   } else {
     // Modo Nuevo Registro
     preguntasActuales = [crearNuevaPregunta()];
@@ -487,7 +487,7 @@ function procesarResultadoIA(res, numPreguntas, msg) {
               mostrarFilas2(datosExamen);
               Swal.fire('Eliminado', 'La pregunta fue eliminada.', 'success');
               if (typeof window.refrescarSelectExamen === 'function') window.refrescarSelectExamen();
-            }).eliminarPreguntaPorID(id);
+            }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarPreguntaPorID(id);
           }
         });
       }

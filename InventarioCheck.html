@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
   google.script.run.withSuccessHandler(function (listas) {
     listasGlobales = listas;
     cargarDatosInvet(true); // Solo cargar datos cuando las listas estén listas
-  }).getTodasLasListas();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getTodasLasListas();
 
   // 2. Buscador de inventario
   document.getElementById("buscadorInvet").addEventListener("input", function () {
@@ -123,7 +123,7 @@ function cargarDatosInvet(reset = false) {
 
     document.getElementById("btnCargarMasInvet").style.display = (offsetInvet < totalFilasInvet) ? "block" : "none";
 
-  }).obtenerInventarioServerSide(offsetInvet, limitInvet, terminoBusquedaInvet);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerInventarioServerSide(offsetInvet, limitInvet, terminoBusquedaInvet);
 }
 
 
@@ -322,9 +322,9 @@ function abrirFormularioInvet(index = null) {
       };
 
       if (index === "null") {
-        google.script.run.withSuccessHandler(callback).agregarInventario(data);
+        google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarInventario(data);
       } else {
-        google.script.run.withSuccessHandler(callback).actualizarInventario(data);
+        google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarInventario(data);
       }
     }
 
@@ -341,7 +341,7 @@ function abrirFormularioInvet(index = null) {
           google.script.run.withSuccessHandler(() => {
             Swal.fire("Eliminado", "", "success");
             cargarDatosInvet(true);
-          }).eliminarInventarioPorNum(num);
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarInventarioPorNum(num);
         }
       });
     }

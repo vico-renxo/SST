@@ -18,16 +18,10 @@ function _diasLaboralesMes(mes, anio) {
   return count;
 }
 
-// Helper: normalizar texto (quitar acentos y minúsculas)
-function _normalizarPASSO(str) {
-  return String(str || "").trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 // Helper: verificar si un tipo de la hoja coincide con el buscado
 function _tipoCoincide(valorHoja, tipoBuscado) {
-  var a = _normalizarPASSO(valorHoja);
-  var b = _normalizarPASSO(tipoBuscado);
+  var a = _normText(valorHoja);
+  var b = _normText(tipoBuscado);
   if (!a || !b) return false;
   if (a === b) return true;
   var minLen = Math.min(a.length, b.length, 6);
@@ -37,7 +31,7 @@ function _tipoCoincide(valorHoja, tipoBuscado) {
 // Helper: parsear frecuencia TEXTO a objeto de configuración
 function _parsearFrecuenciaTexto(texto) {
   if (!texto) return null;
-  var t = _normalizarPASSO(texto);
+  var t = _normText(texto);
   if (!t) return null;
 
   if (t === "diaria" || t === "diario") return { label: "DIARIA",      cadaDias: 1,   clase: "diario"     };
@@ -193,7 +187,7 @@ function obtenerDatosPASSOInspecciones() {
     for (var i = 0; i < invData.length; i++) {
 
       // Col P (index 15) = estado
-      var estado = (invData[i].length > 15) ? _normalizarPASSO(invData[i][15]) : "";
+      var estado = (invData[i].length > 15) ? _normText(invData[i][15]) : "";
       if (estado === "retirado") continue;
 
       // 🔥 PUNTO 4: Normalizar nombre equipo desde INVENTARIO

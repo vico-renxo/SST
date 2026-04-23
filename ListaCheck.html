@@ -90,7 +90,7 @@
     function precargarOpcionesInventario() {
       google.script.run.withSuccessHandler(opciones => {
         opcionesGlobalesInventario = opciones;
-      }).obtenerOpcionesInventario();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerOpcionesInventario();
     }
     precargarOpcionesInventario();
 
@@ -104,7 +104,7 @@
           headersCheck.map(t => `<th>${t}</th>`).join("") + "<th>Acción</th>";
         mostrarFilasCheck(datosGlobalesCheck);
         document.getElementById("loadingListasCheck").style.display = "none";
-      }).obtenerDatosChecklist();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerDatosChecklist();
     }
 
     function mostrarFilasCheck(data) {
@@ -230,7 +230,7 @@
     `).join("");
 
     actualizarContadorItems();
-  }).obtenerItemsPorEquipo(equipo);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerItemsPorEquipo(equipo);
 }
 
 
@@ -419,7 +419,7 @@ function resetGuardarBtn() {
             cargarDatosCheck();
             mostrarEquiposSinChecklist();
             Swal.fire('Eliminado', 'El registro fue eliminado.', 'success');
-          }).eliminarChecklist(index);
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarChecklist(index);
         }
       });
     }
@@ -448,7 +448,7 @@ function resetGuardarBtn() {
     } else {
       mensajeDiv.style.display = "none";
     }
-  }).obtenerEquiposSinChecklist();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerEquiposSinChecklist();
 }
 
   </script>

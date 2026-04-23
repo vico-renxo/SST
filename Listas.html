@@ -110,7 +110,7 @@
           allData = result.data;
           drawTable(allData);
           document.getElementById("loadingListasGeneral").style.display = "none";
-        }).getRecordsList();
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getRecordsList();
       }
 
 
@@ -163,7 +163,7 @@
         Swal.fire("Guardado correctamente", "", "success");
         loadTableList();
         btn.disabled = false;
-      }).saveRecordsList(allData);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).saveRecordsList(allData);
     }
 
       function filterTableList() {

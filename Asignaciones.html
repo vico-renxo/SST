@@ -871,7 +871,7 @@ function ejecutarChequeoAlertas(dni, nombre) {
 
         document.getElementById('contenedorCampana').style.display = 'flex';
       }
-    })
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
     .obtenerAlertasVencimientos(dni);
 }
 

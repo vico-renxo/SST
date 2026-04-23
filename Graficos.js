@@ -8,11 +8,7 @@ let cacheGraficos = {
 
 // Constantes
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutos (reducido para mejor responsividad)
-const SPREADSHEET_IDS = {
-  graficos: "1J_v47ohrGj8S1XfWUdneH0l7mMTB8auSOEscHZwsM0g", // HOJA DE CALCULO GRAFICOS
-  check: "12KkPwl_gfQCkqS9ZHsp4hS2fFkebgNbszvTDtZELObU", // HOJA DE CALCULO CHECK LIST 
-  desvios: "1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE" // HOJA DE CALCULO INSPECCIONES
-};
+// SPREADSHEET_IDS está definido en Code.js para que esté disponible en todos los módulos
 
 // Gestión de cacheGraficos optimizada
 function cleanCache() {
@@ -174,7 +170,7 @@ function obtenerDatosDesvios(hoja) {
   
   // Verificar que tenemos las columnas mínimas
   if (indices.fecha < 0 || indices.empresa < 0) {
-    console.warn("No se encontraron columnas necesarias en desvíos");
+    Logger.log("No se encontraron columnas necesarias en desvíos");
     return [];
   }
   
@@ -222,7 +218,7 @@ function obtenerDatosObservaciones(hoja) {
   };
   
   if (indices.fecha < 0 || indices.empresa < 0) {
-    console.warn("No se encontraron columnas necesarias en observaciones");
+    Logger.log("No se encontraron columnas necesarias en observaciones");
     return [];
   }
   
@@ -549,71 +545,6 @@ function obtenerEstadoCache() {
   };
 }
 
-// Función para pre-cargar datos (útil para warming up)
-function precargarDatos() {
-  try {
-    const datos = obtenerDatosOptimizados();
-    return {
-      success: true,
-      message: "Datos precargados correctamente",
-      stats: {
-        principales: datos.principales.length,
-        empresas: datos.empresas.length,
-        desvios: datos.desvios.length,
-        observaciones: datos.observaciones.length
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: "Error al precargar datos: " + error.message
-    };
-  }
-}
-
-// Función de diagnóstico
-function diagnosticarRendimiento() {
-  const start = Date.now();
-  
-  try {
-    // Test de carga de datos
-    const datos = obtenerDatosOptimizados();
-    const loadTime = Date.now() - start;
-    
-    // Test de procesamiento
-    const processStart = Date.now();
-    const empresas = datos.empresas;
-    const hoy = new Date();
-    const hace30dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
-    
-    procesarDatosNiveles(datos.principales, hace30dias.toISOString().split('T')[0], 
-                        hoy.toISOString().split('T')[0], empresas[0] || '');
-    
-    const processTime = Date.now() - processStart;
-    
-    return {
-      loadTime: `${loadTime}ms`,
-      processTime: `${processTime}ms`,
-      totalTime: `${Date.now() - start}ms`,
-      cacheStatus: obtenerEstadoCache(),
-      dataStats: {
-        principales: datos.principales.length,
-        empresas: datos.empresas.length,
-        desvios: datos.desvios.length,
-        observaciones: datos.observaciones.length
-      }
-    };
-    
-  } catch (error) {
-    return {
-      error: error.message,
-      loadTime: `${Date.now() - start}ms (falló)`
-    };
-  }
-}
-
-
-
 //PRONOSTICO
 
 const CONFIG = {
@@ -760,20 +691,6 @@ La zona o zonas es [UBICACIÓN ESPECÍFICA] con un [PORCENTAJE]% de probabilidad
   }
   
   callGeminiAPI(prompt) {
-    const payload = {
-      contents: [{ parts: [{ text: prompt }] }]
-    };
-    
-    const options = {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify(payload)
-    };
-    
-    const response = UrlFetchApp.fetch(geminiUrl, options);
-    const result = JSON.parse(response.getContentText());
-    
-    return result?.candidates?.[0]?.content?.parts?.[0]?.text || 
-           "🤖 No se pudo generar el pronóstico. Intente nuevamente.";
+    return _callGemini(prompt) || "🤖 No se pudo generar el pronóstico. Intente nuevamente.";
   }
 }

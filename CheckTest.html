@@ -80,7 +80,7 @@
       // Cargar opciones para el select de equipos
       google.script.run.withSuccessHandler(ops => {
         opcionesInventarioExtra = ops;
-      }).obtenerOpcionesInventarioExtra();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerOpcionesInventarioExtra();
 
       // Buscador
       document.getElementById("buscadorCheckExtra").addEventListener("input", function() {
@@ -102,7 +102,7 @@
         
         mostrarFilasCheckExtra(datosGlobalesCheckExtra);
         document.getElementById("loadingListasCheckExtra").style.display = "none";
-      }).obtenerDatosChecklistExtra();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerDatosChecklistExtra();
     }
 
     // --- RENDERIZADO DE TABLA CON ESTILO DE BOTONES TIPO IMAGEN ---
@@ -200,7 +200,7 @@
          document.getElementById("contenedorItemsExtra").innerHTML = ""; 
          agregarCampoCExtra(); // Agregar uno vacío
       } else {
-         google.script.run.withSuccessHandler(renderItemsExtra).obtenerItemsPorEquipoExtra(equipo);
+         google.script.run.withSuccessHandler(renderItemsExtra).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerItemsPorEquipoExtra(equipo);
       }
     }
 
@@ -314,12 +314,12 @@
            
            google.script.run.withSuccessHandler(() => {
               finGuardadoExtra();
-           }).agregarChecklistExtra(datosMasivos);
+           }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarChecklistExtra(datosMasivos);
            
        } else {
            google.script.run.withSuccessHandler(res => {
               finGuardadoExtra();
-           }).actualizarChecklistPorEquipoExtra(equipo, JSON.stringify(itemsParaGuardar));
+           }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarChecklistPorEquipoExtra(equipo, JSON.stringify(itemsParaGuardar));
        }
     }
 
@@ -347,7 +347,7 @@
              google.script.run.withSuccessHandler(() => {
                 cargarDatosCheckExtra();
                 mostrarEquiposSinChecklistExtra();
-             }).eliminarChecklistExtra(index);
+             }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarChecklistExtra(index);
           }
        });
     }
@@ -361,7 +361,7 @@
           } else {
              div.style.display = "none";
           }
-       }).obtenerEquiposSinChecklistExtra();
+       }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerEquiposSinChecklistExtra();
     }
 
     // --- FUNCIÓN DESCARGAR EXCEL ---

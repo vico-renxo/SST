@@ -605,7 +605,7 @@ function repairJSON(s){
 /* ════════════════════════════════════
    EMPRESA
 ════════════════════════════════════ */
-function sEmp(){var c={empresa:document.getElementById("cfgEmp").value,proyecto:document.getElementById("cfgProy").value,codigo:document.getElementById("cfgCod").value,nom:document.getElementById("cfgNomM").value};localStorage.setItem("iperc_e3",JSON.stringify(c));apEmp(c);if(GAS)google.script.run.withSuccessHandler(function(){}).ipercGuardarConfigEmpresa(JSON.stringify(c));pop("Guardado","Configuracion de empresa guardada.");}
+function sEmp(){var c={empresa:document.getElementById("cfgEmp").value,proyecto:document.getElementById("cfgProy").value,codigo:document.getElementById("cfgCod").value,nom:document.getElementById("cfgNomM").value};localStorage.setItem("iperc_e3",JSON.stringify(c));apEmp(c);if(GAS)google.script.run.withSuccessHandler(function(){}).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).ipercGuardarConfigEmpresa(JSON.stringify(c));pop("Guardado","Configuracion de empresa guardada.");}
 function ldEmp(){try{var s=localStorage.getItem("iperc_e3");if(s)apEmp(JSON.parse(s));}catch(e){}}
 function apEmp(c){if(c.empresa){document.getElementById("bdgEmp").textContent=c.empresa;document.getElementById("cfgEmp").value=c.empresa;}if(c.proyecto){document.getElementById("sDoc").textContent=c.proyecto;document.getElementById("cfgProy").value=c.proyecto;}if(c.codigo){document.getElementById("hCod").value=c.codigo;document.getElementById("cfgCod").value=c.codigo;}if(c.nom)document.getElementById("cfgNomM").value=c.nom;}
 

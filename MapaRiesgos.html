@@ -765,7 +765,7 @@ function setupCanvasDragDrop() {
         mapsOffset += items.length;
         if (mapsOffset >= mapsTotal || items.length === 0) mapsDone = true;
         mapsLoading = false;
-      }).getMapasPage(mapsQuery, mapsOffset, MAPS_LIMIT);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getMapasPage(mapsQuery, mapsOffset, MAPS_LIMIT);
     } else {
       // Fallback para desarrollo/testing
       console.warn('Google Apps Script no disponible');
@@ -1201,7 +1201,7 @@ function verMapa(id) {
           }
           showView('galeria');
           resetAndLoadGallery(mapsQuery);
-        }).saveMapa(payload);
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).saveMapa(payload);
       }
     };
 
@@ -1277,7 +1277,7 @@ function eliminarMapa(id) {
           Swal.fire('Eliminado', 'El mapa fue eliminado', 'success');
         }
         resetAndLoadGallery(mapsQuery);
-      }).deleteMapa(id); // 👈 si luego implementas validación server-side, cámbialo a deleteMapa(id, pass)
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).deleteMapa(id); // 👈 si luego implementas validación server-side, cámbialo a deleteMapa(id, pass)
     }
   };
 
@@ -1686,7 +1686,7 @@ function zoomTextos(factor) {
           renderIconsToSidebar();
           if (document.getElementById('rm-iconosGrid')) renderIconosModal();
           refreshAllCardBadges();
-        }).getIconos();
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getIconos();
       }
       return;
     }
@@ -1699,7 +1699,7 @@ function zoomTextos(factor) {
         if (document.getElementById('rm-iconosGrid')) renderIconosModal();
         refreshAllCardBadges();
         if (typeof cb === 'function') cb();
-      }).getIconos();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getIconos();
     }
   }
 
@@ -1770,7 +1770,7 @@ function zoomTextos(factor) {
                 if (typeof Swal !== 'undefined') {
                   Swal.fire('Listo', 'Ícono eliminado', 'success');
                 }
-              }).eliminarIconoPorNombre(name);
+              }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarIconoPorNombre(name);
             }
           });
         }

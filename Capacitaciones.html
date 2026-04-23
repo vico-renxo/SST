@@ -1274,7 +1274,7 @@ function generarCertificado(nombre, tema) {
 
     // Mostrar primera pregunta
     updateQuestion(++qNumb);
-  }).getDataQuestion(selectedValue);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDataQuestion(selectedValue);
 }
                                                                                                                                       
                                                                                                                                               
@@ -1406,14 +1406,14 @@ function generarCertificado(nombre, tema) {
       const dniInput = JSON.parse(localStorage.getItem('userName')).usuario;
      localStorage.removeItem(`datosDNI_${dniInput}`); // Limpiar caché
 
-      google.script.run.withSuccessHandler(mostrarResultados).obtenerDatosPorDNI(dniInput);
+      google.script.run.withSuccessHandler(mostrarResultados).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerDatosPorDNI(dniInput);
     } else {
       Swal.fire("Error", "No se pudo guardar la información.", "error");
     }
 
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar respuesta';
-  })
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
   .recordData(
     dniInput,
     nombreGlobal,
@@ -1501,7 +1501,7 @@ function iniciarCronometro(id, fechaFin) {
       function reLoad() {                                                                                                                     
         google.script.run.withSuccessHandler(function(url){                                                                                   
           window.open(url,'_top');                                                                                                            
-        }).getScriptURL();                                                                                                                    
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getScriptURL();                                                                                                                    
       }                                                                                                                                       
 
   </script>   
@@ -1745,7 +1745,7 @@ function guardarFirma() {
 
     // Registro de Firma → solo REGISTRO FIRMAS, nunca B DATOS
     const codigoRegistro = document.getElementById('codigoTemaFirma').value.trim();
-    google.script.run.withSuccessHandler(onSuccess).registrarSoloFirma(
+    google.script.run.withSuccessHandler(onSuccess).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).registrarSoloFirma(
       dni,
       nombre,
       cargo,
@@ -1797,7 +1797,7 @@ function iniciarTest() {
       document.getElementById("btnTestRegistro").disabled = true;
       actualizarVistaTest();
 
-  }).getDataQuestion(tema);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDataQuestion(tema);
 }
 function actualizarVistaTest(){
     for (let i = 1; i <= maxValue; i++) {
@@ -1909,7 +1909,7 @@ function actualizarDatosCursos() {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
       }, 1500);
-    }).obtenerDatosPorDNI(usuario);
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerDatosPorDNI(usuario);
 
   } catch (error) {
     console.error(error);

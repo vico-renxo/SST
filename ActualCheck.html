@@ -48,7 +48,7 @@ var mydata;
         google.script.run.withSuccessHandler(function(kembaliData){                
         mydata = kembaliData.slice();
         cari();
-        }).muatData();  
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).muatData();  
     }
 
    document.getElementById("kolompencarian").addEventListener("input",cari);
@@ -127,7 +127,7 @@ var mydata;
             document.getElementById('ndias').innerText = dias;
             $('#exampleModalCheck').modal('show');
             muatData(); // Call the function to load data
-          }).updateCell(dias);
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).updateCell(dias);
         } else {
           Swal.fire('Error', 'Debe ingresar un número de días válido', 'error');
         }

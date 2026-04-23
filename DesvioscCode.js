@@ -1,7 +1,5 @@
-const desvios = SpreadsheetApp.openById("1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE")
 const folderimginspe = "1G_RoN2wmOzoso4zupMfi240S7y1criFk"   //INSPECCIONES - IMG
 const folderpdfinspe = "199bLX65wB1pkFT9U2b-YnpxPm9OZmdCm"    //INSPECCIONES - PDF
-// var logo = desvios.getSheetByName('MENÚ').getRange('B18:B18').getValues()
 
 let cachedDesvios = null;
 function getDesviosSpreadsheet() {
@@ -617,7 +615,7 @@ function emailDesvios() {
       const subject = `⚠️ Alerta: ${Blanco}, ${Subestandar}, de potencial ${Potencial}`;
 
       // ✅ Enviar el correo
-      GmailApp.sendEmail(emailAddress, subject, '', { htmlBody: htmlMessage });
+      MailApp.sendEmail({ to: emailAddress, subject: subject, htmlBody: htmlMessage });
     }
   }
 }
@@ -684,110 +682,43 @@ function geminiAPI3() {
       // Escribir la respuesta en la hoja "ANALISIS", celda B4
       cellB4.setValue(responseText);
 
-      // Opcional: Imprimir la respuesta en el log
-      console.log(`Análisis general: ${responseText}`);
     } catch (error) {
       const errorMessage = `Error al obtener el análisis: ${error}`;
-      cellB4.setValue(errorMessage); // Mostrar mensaje de error en la celda B4
-      console.error(errorMessage);
+      cellB4.setValue(errorMessage);
+      Logger.log(errorMessage);
     }
   } else {
     const noDataMessage = 'No hay datos en el rango de fechas especificado para analizar.';
-    cellB4.setValue(noDataMessage); // Mostrar mensaje de no datos en la celda B4
-    console.log(noDataMessage);
+    cellB4.setValue(noDataMessage);
   }
 }
 
 
 
 //USADO PARA REALIZAR LA PETICIÓN A LA IA CUANDO SE PRESIONE EL BOTÓN "MEDIDAS CORRECTIVAS"
-function geminiAPI4(concatenatedText) { 
-  let responseText = "No se obtuvo respuesta."; // Inicializa con un valor predeterminado
-
-  // Preparar la solicitud solo si hay contenido en concatenatedText
-  if (concatenatedText) {
-    const payload = {
-      "contents": [
-        {"parts": [
-          { 
-            "text": `Describe, en máximo 200 caracteres y sin comentarios introductorios, las Medidas Correctivas Inmediatas a realizar en base al siguiente reporte: ${concatenatedText}`
-          }
-        ]}
-      ]
-    };
-
-    const params = {
-      'contentType': 'application/json',
-      'method': 'post',
-      'payload': JSON.stringify(payload)
-    };
-
-    try {
-      const response = UrlFetchApp.fetch(geminiUrl, params);
-      const data = JSON.parse(response.getContentText()); // Obtener el texto y parsear JSON
-      responseText = data.candidates[0]?.content?.parts[0]?.text || "No se obtuvo una respuesta válida.";
-
-      // Escribir la respuesta en la celda J22 (descomentar si se usa en una hoja de cálculo)
-      // const cellF = sheet.getRange('J22');
-      // cellF.setValue(responseText);
-
-      // Opcional: Imprimir la respuesta en el log
-      console.log(`Análisis general: ${responseText}`);
-    } catch (error) {
-      console.error(`Error al obtener el análisis: ${error.message}`);
-    }
-  } else {
-    console.log('No hay datos en la columna I para analizar.');
+function geminiAPI4(concatenatedText) {
+  if (!concatenatedText) return "No se obtuvo respuesta.";
+  try {
+    const prompt = `Describe, en máximo 200 caracteres y sin comentarios introductorios, las Medidas Correctivas Inmediatas a realizar en base al siguiente reporte: ${concatenatedText}`;
+    return _callGemini(prompt) || "No se obtuvo una respuesta válida.";
+  } catch (error) {
+    Logger.log('Error geminiAPI4: ' + error.message);
+    return "No se obtuvo respuesta.";
   }
-
-  return responseText;
 }
 
 
 //USADO PARA REALIZAR LA PETICIÓN A LA IA CUANDO SE PRESIONE EL BOTÓN "GENERAR PLAN DE ACCIÓN"
-function geminiAPI5(concatenatedText) { 
-  let responseText = "No se obtuvo respuesta."; // Inicializa con un valor predeterminado
-
-  // Preparar la solicitud solo si hay contenido en concatenatedText
-  if (concatenatedText) {
-    const payload = {
-      "contents": [
-        {"parts": [
-          { 
-            "text": `Describe, en máximo 200 caracteres y sin comentarios introductorios, un plan de acción global teniendo como referencia las gerarquias de controles (Eliminación, Sustitución, Controles de ingenieria, Controles administrativos y EPP) para poder contrarrestar este caso ${concatenatedText} y otros similares. Nota la geraquia de controles solo es una referencia no necesitas enumerar o listar`
-          }
-        ]}
-      ]
-    };
-
-    const params = {
-      'contentType': 'application/json',
-      'method': 'post',
-      'payload': JSON.stringify(payload)
-    };
-
-    try {
-      const response = UrlFetchApp.fetch(geminiUrl, params);
-      const data = JSON.parse(response.getContentText()); // Obtener el texto y parsear JSON
-      responseText = data.candidates[0]?.content?.parts[0]?.text || "No se obtuvo una respuesta válida.";
-
-      // Escribir la respuesta en la celda J22 (descomentar si se usa en una hoja de cálculo)
-      // const cellF = sheet.getRange('J22');
-      // cellF.setValue(responseText);
-
-      // Opcional: Imprimir la respuesta en el log
-      console.log(`Análisis general: ${responseText}`);
-    } catch (error) {
-      console.error(`Error al obtener el análisis: ${error.message}`);
-    }
-  } else {
-    console.log('No hay datos en la columna I para analizar.');
+function geminiAPI5(concatenatedText) {
+  if (!concatenatedText) return "No se obtuvo respuesta.";
+  try {
+    const prompt = `Describe, en máximo 200 caracteres y sin comentarios introductorios, un plan de acción global teniendo como referencia las gerarquias de controles (Eliminación, Sustitución, Controles de ingenieria, Controles administrativos y EPP) para poder contrarrestar este caso ${concatenatedText} y otros similares. Nota la geraquia de controles solo es una referencia no necesitas enumerar o listar`;
+    return _callGemini(prompt) || "No se obtuvo una respuesta válida.";
+  } catch (error) {
+    Logger.log('Error geminiAPI5: ' + error.message);
+    return "No se obtuvo respuesta.";
   }
-
-  return responseText;
 }
-
-
 
 
 // FUNCIÓN 2 -  CAPAZ DE USAR GEMINI PARA ANALIZAR IMÁGENES 
@@ -822,7 +753,6 @@ function describirImagen(imageUrl) {
 
   try {
     const response = UrlFetchApp.fetch(apiUrl, options);
-    console.log("Respuesta de la API:", response.getContentText()); // Para depuración
     const json = JSON.parse(response.getContentText());
 
     if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts.length > 0) {
@@ -831,7 +761,7 @@ function describirImagen(imageUrl) {
       return "No se pudo obtener una descripción de la imagen.";
     }
   } catch (error) {
-    console.error("Error al analizar la imagen:", error);
+    Logger.log("Error al analizar la imagen: " + error);
     return "Hubo un error al intentar analizar la imagen.";
   }
 }
@@ -868,7 +798,6 @@ function describirImagenBase64(base64Image, mimeType) {
 
   try {
     const response = UrlFetchApp.fetch(geminiUrl, options);
-    console.log("Respuesta de la API (base64):", response.getContentText()); // Para depuración
     const json = JSON.parse(response.getContentText());
 
     if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts.length > 0) {
@@ -877,7 +806,7 @@ function describirImagenBase64(base64Image, mimeType) {
       return "No se pudo obtener una descripción de la imagen.";
     }
   } catch (error) {
-    console.error("Error al analizar la imagen (base64):", error);
+    Logger.log("Error al analizar la imagen (base64): " + error);
     return "Hubo un error al intentar analizar la imagen.";
   }
 }

@@ -924,7 +924,7 @@ inputElement.addEventListener("input", function () {
         outputElement.value = "No se encontró";
       }
     }
-  }).onInputChange(valorActual);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).onInputChange(valorActual);
 });
   
     //Change valor
@@ -1256,7 +1256,7 @@ async function cargarPasswordsDesvios() {
       passwordsDesvios = data;
       CacheManager.setSessionWithExpiry('passwordsDesvios', data, 60);
       resolve();
-    }).getPasswordsDesvios();
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getPasswordsDesvios();
   });
 }
 
@@ -1714,7 +1714,7 @@ function setIDAndOpenLink(recordId) {
       google.script.run.withSuccessHandler(function(url) {
         window.open(url, '_blank');
         Swal.close();
-      }).setIDAndGetLink(recordId);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setIDAndGetLink(recordId);
     }
   });
 }
@@ -1728,7 +1728,7 @@ function deleteDataDesvios(el) {
       timer: 1500
     });
     const recordId = el.getAttribute("data-record-id");
-    google.script.run.withSuccessHandler(reiniciarTablaDesvios).deleteDataDesvios(recordId);
+    google.script.run.withSuccessHandler(reiniciarTablaDesvios).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).deleteDataDesvios(recordId);
   });
 }
 

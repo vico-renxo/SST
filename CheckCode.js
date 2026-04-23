@@ -1424,7 +1424,6 @@ function getData2() {
   // ✅ Hasta columna 98 (CT)
   const data = sheet.getRange(1, 1, lastRow, 98).getDisplayValues(); 
   
-  console.log(data);
   return data;
 }
 

@@ -351,13 +351,13 @@
   var arrayOfValues;
 
   // ── 1. Carga inicial ──────────────────────────────────────────────
-  function affterPageLoads() {
+  function afterPageLoads() {
     // Pasar el cargo del usuario para filtrar el inventario según col F
     var _ud = _getLoginData();
     var _cargo = _ud.cargo || '';
-    google.script.run.withSuccessHandler(affterDropdownArrayReturned).getDropDownarray(_cargo);
-    google.script.run.withSuccessHandler(populateResponsables).getResponsablesPersonal();
-    google.script.run.withSuccessHandler(populateSupervisores).getSupervisoresOperaciones();
+    google.script.run.withSuccessHandler(afterDropdownArrayReturned).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDropDownarray(_cargo);
+    google.script.run.withSuccessHandler(populateResponsables).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getResponsablesPersonal();
+    google.script.run.withSuccessHandler(populateSupervisores).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getSupervisoresOperaciones();
   }
 
   // ── 2. Recibe datos de INVENTARIO (cols B-R) ──────────────────────
@@ -365,7 +365,7 @@
   //   0=B empresa | 1=C área | 2=D equipo | 3=E código/placa
   //   4=F cargo responsable (filtrado por login)
   //   6=H msg1    | 10=L lugar            | 12=N msg2    | 13=O estado
-  function affterDropdownArrayReturned(arrayOfArrays) {
+  function afterDropdownArrayReturned(arrayOfArrays) {
     arrayOfValues = arrayOfArrays.filter(function(r) { return true; });
     var item = document.getElementById("ad1");
     addUniqueOptionToDropDown(item, arrayOfValues, 0);
@@ -598,7 +598,7 @@
     var ch1 = document.getElementById("ad3").value;
     var ch2 = document.getElementById("ad4").value;
     if (ch2.length !== "") {
-      google.script.run.withSuccessHandler(updatecodepost).setcodepost(t1, u1, ch1, ch2);
+      google.script.run.withSuccessHandler(updatecodepost).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setcodepost(t1, u1, ch1, ch2);
     }
   }
 
@@ -618,7 +618,7 @@ function loaddata() {
   var user = {};
   user.ad4 = document.getElementById("ad4").value;
   user.ad3 = document.getElementById("ad3").value;
-  google.script.run.withSuccessHandler(showDataTable).getDataCheckList(user);
+  google.script.run.withSuccessHandler(showDataTable).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDataCheckList(user);
 }
 
 function showDataTable(result) {
@@ -681,7 +681,7 @@ function showDataTable(result) {
 function submitForm(obj) {
   event.preventDefault();
 
-  google.script.run.withSuccessHandler(showTable).searchData(obj);
+  google.script.run.withSuccessHandler(showTable).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).searchData(obj);
 }
 
 
@@ -1361,7 +1361,7 @@ function savesuccess(result) {
     google.script.run.withSuccessHandler(function(data) {
       totalCheck1.innerHTML = data[0];
       totalCheck2.innerHTML = data[1];
-    }).setStatusCheck();
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setStatusCheck();
   }, 500);
 }
 
@@ -1421,7 +1421,7 @@ function generatePdf(columnAValue) {
         });
 
         window.open(pdfUrl, '_blank');
-    }).getPdfUrl(columnAValue);
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getPdfUrl(columnAValue);
 }
 
 function clearForm() {

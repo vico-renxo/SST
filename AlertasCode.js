@@ -88,7 +88,7 @@ function obtenerAlertasVencimientos(dniLogin) {
     return alertas.sort((a, b) => (a.badge === 'bg-rojo' ? -1 : 1)).slice(0, 15);
 
   } catch (e) {
-    console.error("Error en alertas: " + e.message);
+    Logger.log("Error en alertas: " + e.message);
     return [];
   }
 }
@@ -111,7 +111,7 @@ function verificarAlertasCompletas(dniLogin) {
       totalPendientes: pendientes ? pendientes.length : 0
     };
   } catch (e) {
-    console.error("Error en verificarAlertasCompletas: " + e.message);
+    Logger.log("Error en verificarAlertasCompletas: " + e.message);
     return { tieneVencimientos: false, tienePendientes: false, totalPendientes: 0 };
   }
 }

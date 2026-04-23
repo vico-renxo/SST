@@ -105,7 +105,7 @@ function verDetalle(valor) {
   });
 
   google.script.run
-    .withSuccessHandler(previsualizarCumplimiento)
+    .withSuccessHandler(previsualizarCumplimiento).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
     .insertarYObtenerDatosCumplimiento(valor);
 }
 
@@ -224,7 +224,7 @@ function aplicarFiltrosCumplimiento(start = 0, length = 30) {
     // Aquí podrías agregar un renderizador de paginación con response.total
     // renderizarPaginacion(response.total, start, length);
 
-  }).getDatosDesdeBDATOS(start, length, texto, desde, hasta);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDatosDesdeBDATOS(start, length, texto, desde, hasta);
 }
 
 

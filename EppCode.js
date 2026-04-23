@@ -369,7 +369,7 @@ function _invalidateStockCache_(){
       try{ cache.remove(k); }catch(_){}
     });
   }catch(e){
-    console.warn('No se pudo invalidar cachés:', e);
+    Logger.log('No se pudo invalidar cachés: ' + e);
   }
 }
 /** ============ Mapa email→nombre para resolver registros antiguos ============ **/
@@ -1196,7 +1196,7 @@ function getHistorialByDni(dni, limit) {
       : items;
       
   } catch (e) {
-    console.error('Error en getHistorialByDni: ' + e.message);
+    Logger.log('Error en getHistorialByDni: ' + e.message);
     return [];
   }
 }
@@ -1300,7 +1300,7 @@ function obtenerEntregasPendientes(dni){
     }
     return pendientes;
   }catch(e){
-    console.error('Error en obtenerEntregasPendientes: ' + e.message);
+    Logger.log('Error en obtenerEntregasPendientes: ' + e.message);
     return [];
   }
 }
@@ -1634,7 +1634,7 @@ function invalidateStockCache(){
       try{ cache.remove(k); }catch(_){}
     });
   }catch(e){
-    console.warn('No se pudo invalidar cachés:', e);
+    Logger.log('No se pudo invalidar cachés: ' + e);
   }
 }
 
@@ -2052,7 +2052,7 @@ function generarPDFPendientes(datos) {
     return pdfFile.getUrl();
     
   } catch(e) {
-    console.error('Error en generarPDFPendientes:', e);
+    Logger.log('Error en generarPDFPendientes: ' + e);
     throw new Error('Error al generar PDF: ' + e.message);
   }
 }
@@ -2141,7 +2141,7 @@ function generarListaCompra(agrupado) {
     return pdfFile.getUrl();
     
   } catch(e) {
-    console.error('Error en generarListaCompra:', e);
+    Logger.log('Error en generarListaCompra: ' + e);
     throw new Error('Error al generar lista: ' + e.message);
   }
 }
@@ -2179,7 +2179,7 @@ function getImagenesEPP(productos) {
     return resultado;
     
   } catch(e) {
-    console.error('Error en getImagenesEPP:', e);
+    Logger.log('Error en getImagenesEPP: ' + e);
     return {};
   }
 }

@@ -135,7 +135,7 @@
 
           // Cargar progreso de firmas por registro
           cargarProgreso(datosTemas);
-        }).obtenerMatrizTemasPaginado(offsetTemas, limitTemas, filtroTemas);
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerMatrizTemasPaginado(offsetTemas, limitTemas, filtroTemas);
       }
 
       function mostrarFilasTemas(data) {
@@ -214,7 +214,7 @@
               `<span class="badge bg-${color} fs-6">${stats.firmados}/${stats.total}</span>` +
               `<br><small class="text-muted">${pct}%</small>`;
           });
-        }).obtenerConteoPorRegistros(registros);
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerConteoPorRegistros(registros);
       }
 
       function abrirFormularioTemas(codigo = null) {
@@ -398,9 +398,9 @@
         };
 
         if (index === "null") {
-          google.script.run.withSuccessHandler(callback).agregarTema(dataObj);
+          google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarTema(dataObj);
         } else {
-          google.script.run.withSuccessHandler(callback).actualizarTema(dataObj);
+          google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarTema(dataObj);
         }
       }
 
@@ -428,7 +428,7 @@
               offsetTemas = 0;
               cargarDatosTemas();
               Swal.fire('Cerrado', 'El registro fue cerrado.', 'success');
-            }).cerrarRegistroManual(codigo);
+            }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).cerrarRegistroManual(codigo);
           }
         });
       }
@@ -449,7 +449,7 @@
               datosGlobalesTemas = datosGlobalesTemas.filter(fila => String(fila[0]) !== String(codigo));
               mostrarFilasTemas(datosTemas);
               Swal.fire('Eliminado', 'El registro fue eliminado.', 'success');
-            }).eliminarTemaPorCodigo(codigo);
+            }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarTemaPorCodigo(codigo);
           }
         });
       }
@@ -497,7 +497,7 @@
                 }
               } catch (e) { console.warn("prefill error", e); }
             }
-          })
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
           .obtenerMatrizInvertida();
 
         cargarDatosTemas();

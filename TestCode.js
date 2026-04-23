@@ -21,7 +21,7 @@ function getCheckSpreadsheet_v2() {
     try {
       cachedCheck_v2 = SpreadsheetApp.openById(SPREADSHEET_IDSCHECK_V2.check);
     } catch (e) {
-      console.error("Error conectando sheet V2: " + e.message);
+      Logger.log("Error conectando sheet V2: " + e.message);
     }
   }
   return cachedCheck_v2;
@@ -567,7 +567,7 @@ ${listaItems.join('\n')}
     }
     return [];
   } catch (error) {
-    console.error("Error en analizarImagenConLista_v2:", error);
+    Logger.log("Error en analizarImagenConLista_v2: " + error);
     return [];
   }
 }

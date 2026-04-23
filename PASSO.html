@@ -951,16 +951,16 @@ function guardarReunion() {
 
   if (id) {
     var raw = (datosPassoGlobal.reunionesRaw || []).find(function(r) { return r.id === id; });
-    google.script.run.withSuccessHandler(cb).actualizarReunion([id, tema, resp, ger, area, meses, raw ? raw.mesesEjecutados : '', raw ? raw.anio : new Date().getFullYear()]);
+    google.script.run.withSuccessHandler(cb).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarReunion([id, tema, resp, ger, area, meses, raw ? raw.mesesEjecutados : '', raw ? raw.anio : new Date().getFullYear()]);
   } else {
-    google.script.run.withSuccessHandler(cb).agregarReunion([tema, resp, ger, area, meses]);
+    google.script.run.withSuccessHandler(cb).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarReunion([tema, resp, ger, area, meses]);
   }
 }
 
 function eliminarReunionUI(id) {
   Swal.fire({ title: 'Eliminar reunion', text: 'Estas seguro?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Si, eliminar', confirmButtonColor: '#dc3545' }).then(function(r) {
     if (r.isConfirmed) {
-      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Eliminada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).eliminarReunion(id);
+      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Eliminada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarReunion(id);
     }
   });
 }
@@ -984,7 +984,7 @@ function marcarEjecutadaUI(id) {
 
   Swal.fire({ title: 'Marcar ejecutada', input: 'select', inputOptions: opts, inputPlaceholder: 'Mes...', showCancelButton: true, confirmButtonText: 'Confirmar', confirmButtonColor: '#28a745' }).then(function(r) {
     if (r.isConfirmed && r.value) {
-      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Ejecutada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).marcarReunionEjecutada(id, parseInt(r.value));
+      google.script.run.withSuccessHandler(function() { Swal.fire({ icon: 'success', title: 'Ejecutada', timer: 1000, showConfirmButton: false }); cargarPASSO(); }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).marcarReunionEjecutada(id, parseInt(r.value));
     }
   });
 }

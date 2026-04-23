@@ -465,9 +465,9 @@
     // Tarjeta de Desempeño: guarda las preguntas del checklist activo
     var currentChecklistData_v2 = [];
 
-    function affterPageLoads_v2() {
+    function afterPageLoads_v2() {
       // A. Cargar datos dependientes desde Google Sheets (Checklist -> Equipo)
-      google.script.run.withSuccessHandler(affterDropdownArrayReturned_v2).getDropDownarray_v2();
+      google.script.run.withSuccessHandler(afterDropdownArrayReturned_v2).getDropDownarray_v2();
 
       // C. Auto-rellenar Inspector (Lógica original conservada)
       const userObj = JSON.parse(localStorage.getItem('userName') || '{}');
@@ -484,7 +484,7 @@
     // ==========================================
     
     // Callback cuando vuelven los datos del servidor
-    function affterDropdownArrayReturned_v2(arrayOfArrays){
+    function afterDropdownArrayReturned_v2(arrayOfArrays){
       arrayOfValues_v2 = arrayOfArrays;
       
       // AHORA: El índice 0 es el Checklist (Antes Col D, ahora Col B en Sheet pero 0 en array procesado)
@@ -883,7 +883,7 @@
       document.getElementById('imagen-preview-upload_v2').style.display = 'none';
       document.getElementById('imagen-preview-upload_v2').src = '';
       
-      affterPageLoads_v2(); 
+      afterPageLoads_v2(); 
     }
 
     function btnw_v2(){ $('#serachCheck_v2').click(); }

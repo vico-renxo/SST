@@ -85,7 +85,7 @@
       google.script.run.withSuccessHandler(function (listas) {
         listasGlobalesExtra = listas; 
         cargarDatosInvetExtra(true); 
-      }).getTodasLasListas(); 
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getTodasLasListas(); 
 
       // 2. Buscador local
       document.getElementById("buscadorInvetExtra").addEventListener("input", function () {
@@ -122,7 +122,7 @@
         offsetInvetExtra += limitInvetExtra;
         document.getElementById("btnCargarMasInvetExtra").style.display = (offsetInvetExtra < totalFilasInvetExtra) ? "block" : "none";
 
-      }).obtenerInventarioServerSideExtra(offsetInvetExtra, limitInvetExtra, terminoBusquedaInvetExtra);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerInventarioServerSideExtra(offsetInvetExtra, limitInvetExtra, terminoBusquedaInvetExtra);
     }
 
     function buscarInventarioExtra() {
@@ -264,9 +264,9 @@
       };
 
       if (isNuevo) {
-        google.script.run.withSuccessHandler(callback).agregarInventarioExtra(data);
+        google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarInventarioExtra(data);
       } else {
-        google.script.run.withSuccessHandler(callback).actualizarInventarioExtra(data);
+        google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarInventarioExtra(data);
       }
     }
 
@@ -286,7 +286,7 @@
           google.script.run.withSuccessHandler(() => {
             Swal.fire("Eliminado", "", "success");
             cargarDatosInvetExtra(true);
-          }).eliminarInventarioExtraPorNum(num);
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarInventarioExtraPorNum(num);
         }
       });
     }

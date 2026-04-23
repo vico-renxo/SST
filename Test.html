@@ -338,7 +338,7 @@ async function cargarPasswordsCheck_v2() {
       deletePasswords_v2 = passwords.deletePasswords;
       CacheManagerCheck_v2.setSessionWithExpiry('passwordsCheck_v2', passwords, 60);
       resolve();
-    }).getAccessPasswords_v2(); 
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getAccessPasswords_v2(); 
   });
 }
 
@@ -373,9 +373,9 @@ google.script.run.withSuccessHandler(data => {
 
     cargarDatosCheckG_v2();
     actualizarTitulosDesdeSheet_v2();
-  }).getHeadersCheck_v2(); 
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getHeadersCheck_v2(); 
 
-}).getItemsData_v2(); 
+}).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getItemsData_v2(); 
 
 const camposChecklist_v2 = {
   numid_v2: 0,          
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
     google.script.run.withSuccessHandler(data => {
       totalCheck2.innerHTML = data[0];
       totalCheck1.innerHTML = data[1];
-    }).setStatusCheck_v2();
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setStatusCheck_v2();
   }
 
   cargarPasswordsCheck_v2();
@@ -1200,7 +1200,7 @@ function abrirFormularioParaEditar_v2(data) {
       m2.innerHTML = `Documento: <a href="${info.message2}" target="_blank" style="font-weight: bold; text-decoration: underline;">Link</a>`;
       m2.classList.remove('d-none');
     }
-  }).getAdditionalInfoByValue_v2(data[3]);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getAdditionalInfoByValue_v2(data[3]);
 
   // Estados y actividad
   if(document.getElementById('estadoCheck2_v2')) document.getElementById('estadoCheck2_v2').value = data[12] || "Abierto";
@@ -1347,7 +1347,7 @@ async function deleteData_v2(id, el) {
       google.script.run.withSuccessHandler(() => {
         reiniciarTablaCheck_v2();
         Swal.close(); 
-      }).deleteData_v2(id); 
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).deleteData_v2(id); 
 
     } else {
       Swal.fire('Password incorrecto', '', 'error');
@@ -1479,7 +1479,7 @@ function generatePdf_v2(columnAValue) {
         });
 
         window.open(pdfUrl, '_blank');
-    }).getPdfUrl_v2(columnAValue); 
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getPdfUrl_v2(columnAValue); 
 }
 
 //WHATSAPP V2

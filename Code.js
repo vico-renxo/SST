@@ -52,8 +52,35 @@ function include(filename) {
 const API_KEY = 'AIzaSyD5VkYKWnQ4TdBdDFWnK_4D5Q_nXxXU1BM';
 //const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-//let personal = SpreadsheetApp.openById("1X2zQSVpj3HkGptI2n5LdLZi4ikT0vGU2mQCnfah2QhQ") 
+//let personal = SpreadsheetApp.openById("1X2zQSVpj3HkGptI2n5LdLZi4ikT0vGU2mQCnfah2QhQ")
 const folderIdFirma = '1TzV9UlPupxeRyo7l2Vn2nO9mh64WG_Kv'; //GESTION - FIRMA
+
+// Normalización de texto compartida: minúsculas, sin acentos, sin espacios extremos
+function _normText(s) {
+  return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Utilitario compartido para llamadas a Gemini — usado por DesvioscCode.js y Graficos.js
+function _callGemini(prompt, generationConfig) {
+  const payload = { contents: [{ parts: [{ text: prompt }] }] };
+  if (generationConfig) payload.generationConfig = generationConfig;
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+  const response = UrlFetchApp.fetch(geminiUrl, options);
+  const data = JSON.parse(response.getContentText());
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// IDs centralizados — usados por múltiples módulos (CheckCode.js, DesvioscCode.js, Graficos.js)
+const SPREADSHEET_IDS = {
+  graficos: "1J_v47ohrGj8S1XfWUdneH0l7mMTB8auSOEscHZwsM0g",
+  check:    "12KkPwl_gfQCkqS9ZHsp4hS2fFkebgNbszvTDtZELObU",
+  desvios:  "1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE"
+};
 
 
 let cachedPersonal = null;

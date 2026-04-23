@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   google.script.run.withSuccessHandler(function (res) {
     listas = res;
-  }).getTodasLasListas();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getTodasLasListas();
 
   document.getElementById("buscador3").addEventListener("input", function () {
     const txt = this.value.toLowerCase();
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('fotoPerfil').style.borderColor = color;
       document.getElementById('iconoEmpresa').style.color = color;
     }
-  }).getColor();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getColor();
 });
 
 
@@ -475,9 +475,9 @@ function mostrarFilas3(data) {
 
   // Guardar nuevo o actualizar
   if (index === "null") {
-    google.script.run.withSuccessHandler(callback).agregarUsuario(valores);
+    google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarUsuario(valores);
   } else {
-    google.script.run.withSuccessHandler(callback).actualizarUsuario(valores);
+    google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarUsuario(valores);
   }
 }
 
@@ -497,7 +497,7 @@ function eliminarRegistro3(usuario, nombre) {
       google.script.run.withSuccessHandler(() => {
         cargarDatos3();
         Swal.fire('Eliminado', 'El usuario fue eliminado.', 'success');
-      }).eliminarUsuarioPorUsuario(usuario); // Debes tener esta función en Apps Script
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarUsuarioPorUsuario(usuario); // Debes tener esta función en Apps Script
     }
   });
 }
@@ -519,7 +519,7 @@ function eliminarRegistro3(usuario, nombre) {
         if (select2) select2.value = res.select2 || '';
         if (emailInput) emailInput.value = res.emailInput || ''; // Aquí va el valor de la columna Q
 
-      }).buscarDatosPorNumero(valor);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).buscarDatosPorNumero(valor);
     }
 
     </script>
@@ -596,7 +596,7 @@ function eliminarRegistro3(usuario, nombre) {
       document.getElementById('guardarColor').addEventListener('click', function () {
         const color = document.getElementById('colorBorde').value;
         localStorage.setItem('brandColor', color); // sync inmediato entre módulos
-        google.script.run.saveColor(color);
+        google.script.run.withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).saveColor(color);
         Swal.fire({
           icon: 'success',
           title: 'Color actualizado correctamente',

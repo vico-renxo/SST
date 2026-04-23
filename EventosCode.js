@@ -215,19 +215,6 @@ function getStockData() {
   return stockCache;
 }
 
-function puxaProdutos(produto) {
-  const data = getStockData(); // ✅ Usa caché
-  return data
-    .filter(r => r[0] === produto)
-    .map(r => ({
-      produto: r[0],
-      nome: r[1] || "",
-      custo: parseFloat(r[2]) ? parseFloat(r[2]).toFixed(2) : "0.00",
-      valor: parseFloat(r[3]) ? parseFloat(r[3]).toFixed(2) : "0.00"
-    }));
-}
-
-
 function salvar(pedido) {
   if (!pedido || !pedido.length) return;
 
@@ -248,28 +235,6 @@ function salvar(pedido) {
   ]);
 
   hojaevento.getRange(lastRow + 1, 1, rows.length, 7).setValues(rows);
-}
-
-function getMedicamentos() {
-  const data = getStockData();
-  return [...new Set(data.map(r => r[1]).filter(String))];
-}
-
-function getMedicamentoData(medicamento) {
-  const data = getStockData();
-  const found = data.find(r => r[1] === medicamento);
-  if (!found) return {};
-
-  return {
-    grupo: found[0],
-    costo: found[2],
-    proveedor: found[4],
-    presentacion: found[5]
-  };
-}
-
-function resetStockCache() {
-  stockCache = null;
 }
 
 // NUEVO

@@ -1911,7 +1911,7 @@ function cargarStock(callback) {
         stockDataCache = data;
         localStorage.setItem("stockCache", JSON.stringify(data));
         callback(data);
-      }).getStockData();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getStockData();
     }
   }
 }
@@ -2078,7 +2078,7 @@ function cargarStock(callback) {
       btn.disabled = true;
       btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
 
-    google.script.run.withSuccessHandler(salvou).salvar(pedido);
+    google.script.run.withSuccessHandler(salvou).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).salvar(pedido);
   }
 
 function salvou() {
@@ -2248,7 +2248,7 @@ $(document).on('click', '.newcircle', function () {
 
       $('#pinForm').show();
     }
-  }).searchByCoordinates(x, y);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).searchByCoordinates(x, y);
 });
 
 
@@ -2429,7 +2429,7 @@ $(document).on('click', '.btn-delete', function (e) {
             heightAuto: false
           });
           $('#showPointsButton').click(); // Recargar puntos y tabla
-        })
+        }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
         .deleteByIDAccindentes(id);
     }
   });
@@ -2447,7 +2447,7 @@ function obtenerNombre() {
     document.getElementById('nomeCliente').value = respuesta.nombre;
     // Si también quieres guardar el cargo ahí:
     // document.getElementById('nomeClienteCargo').value = respuesta.cargo;
-  }).getNombreEnferno(idEnfermo);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getNombreEnferno(idEnfermo);
 }
 
 function addResp(res) {
@@ -2464,7 +2464,7 @@ function addResp(res) {
 }
 
 $('document').ready(function(){
-  google.script.run.withSuccessHandler(addResp).getParte();
+  google.script.run.withSuccessHandler(addResp).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getParte();
 });
 
 

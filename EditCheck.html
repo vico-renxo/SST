@@ -279,11 +279,11 @@
       dataSet = data;
       document.getElementById('pForm').style.display = "block";
       document.getElementById('ploading').style.display = "none";
-    }).getData2();
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getData2();
     
     google.script.run.withSuccessHandler(data => {
       itemsData = data;
-    }).getItemsData();
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getItemsData();
   });
 
   // =============================================
@@ -793,7 +793,7 @@
               window.currentCheckData = rows.data[0];
               populateSubsanacion(rows.data[0], rows.data[0][2]);
             }
-          }).getDatosRegistroCheck(0, 1, String(checkId), '', 'A', 'todos');
+          }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDatosRegistroCheck(0, 1, String(checkId), '', 'A', 'todos');
 
           // Refrescar tabla principal (IndexCheck) para que muestre el estado actualizado
           if (typeof reiniciarTablaCheck === 'function') {
@@ -807,7 +807,7 @@
             google.script.run.withSuccessHandler(function(data) {
               totalCheck1.innerHTML = data[0];
               totalCheck2.innerHTML = data[1];
-            }).setStatusCheck();
+            }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setStatusCheck();
           }
         });
       btn.innerHTML = "<i class='fa-solid fa-cloud-arrow-up me-1'></i>Guardar";
@@ -927,7 +927,7 @@
           timer: 2500
         });
       }
-    }).generarPDF(numid);
+    }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).generarPDF(numid);
   }
 
   // =============================================

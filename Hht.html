@@ -305,9 +305,9 @@ const callback = () => {
 
 
   if (index === "null") {
-    google.script.run.withSuccessHandler(callback).agregarPreguntaHht(data);
+    google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarPreguntaHht(data);
   } else {
-    google.script.run.withSuccessHandler(callback).actualizarHht(data);
+    google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarHht(data);
   }
 }
 
@@ -330,7 +330,7 @@ function eliminarRegistroHht(id) {
         mostrarFilasHht(datosHht); // 👈 Vuelve a renderizar sin recargar todo
 
         Swal.fire('Eliminado', 'La pregunta fue eliminada.', 'success');
-      }).eliminarHhtPorID(id);
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarHhtPorID(id);
     }
   });
 }

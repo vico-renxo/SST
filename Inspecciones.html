@@ -28,7 +28,7 @@ function aplicarFiltrosInspecciones() {
     google.script.run.withSuccessHandler(data => {
     Swal.close(); // cerrar alerta
     dibujarTabla(data); // dibuja tabla con los datos filtrados
-  }).getFilteredData(filtros);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getFilteredData(filtros);
 }
 
 const TITULOS = [

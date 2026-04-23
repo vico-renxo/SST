@@ -597,7 +597,7 @@ function guardarCambios1() {
     cerrarModal();
     cargarDatos();
     refrescarCursos();
-    google.script.run.withSuccessHandler(construirTabla).obtenerMatrizPermisos();
+    google.script.run.withSuccessHandler(construirTabla).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerMatrizPermisos();
     btnGuardar.textContent = "Guardar";
     btnGuardar.disabled = false;
   };
@@ -617,9 +617,9 @@ function guardarCambios1() {
   };
 
   if (isNuevo) {
-    google.script.run.withSuccessHandler(callbackAgregar).agregarRegistro(data);
+    google.script.run.withSuccessHandler(callbackAgregar).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).agregarRegistro(data);
   } else {
-    google.script.run.withSuccessHandler(callbackActualizar).actualizarRegistro(data);
+    google.script.run.withSuccessHandler(callbackActualizar).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarRegistro(data);
   }
 }
 
@@ -631,7 +631,7 @@ function cargarDatos() {
   // Cargar listas y datos en paralelo
   google.script.run.withSuccessHandler(function(listas) {
     listasGlobales = listas;
-  }).getTodasLasListas();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getTodasLasListas();
 
   google.script.run.withSuccessHandler(function(res) {
     if (!res?.headers || !res?.filas) return console.error("Datos incompletos:", res);
@@ -655,7 +655,7 @@ function cargarDatos() {
 
     mostrarFilas(datosGlobales);
     document.getElementById("loadingCursosG").style.display = "none";
-  }).obtenerMatrizInvertida();
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerMatrizInvertida();
 }
 
 
@@ -678,8 +678,8 @@ function eliminarRegistro(index) {
       google.script.run.withSuccessHandler(() => {
         Swal.fire('Eliminado!', 'El curso ha sido eliminado.', 'success');
         cargarDatos();
-        google.script.run.withSuccessHandler(construirTabla).obtenerMatrizPermisos();
-      }).eliminarRegistroPorCurso(curso);
+        google.script.run.withSuccessHandler(construirTabla).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerMatrizPermisos();
+      }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarRegistroPorCurso(curso);
     }
   });
 }
