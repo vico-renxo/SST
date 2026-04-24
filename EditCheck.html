@@ -861,7 +861,8 @@
             google.script.run.withSuccessHandler(function(data) {
               totalCheck1.innerHTML = data[0];
               totalCheck2.innerHTML = data[1];
-            }).setStatusCheck();
+            })
+            .withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setStatusCheck();
           }
         } else {
           Swal.fire('Error', result.error || 'Error al guardar', 'error');

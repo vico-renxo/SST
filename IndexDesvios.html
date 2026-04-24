@@ -1632,7 +1632,8 @@ function handleFormSubmitDesvios(formObject) {
     google.script.run.withSuccessHandler(function(data) {
       total1.innerHTML = data[0];    
       total2.innerHTML = data[1];
-    }).setStatusDesvios();
+    })
+    .withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).setStatusDesvios();
 
   }).withFailureHandler(function(error) {
     Swal.close();

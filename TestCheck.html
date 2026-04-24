@@ -467,7 +467,7 @@
 
     function afterPageLoads_v2() {
       // A. Cargar datos dependientes desde Google Sheets (Checklist -> Equipo)
-      google.script.run.withSuccessHandler(afterDropdownArrayReturned_v2).getDropDownarray_v2();
+      google.script.run.withSuccessHandler(afterDropdownArrayReturned_v2).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDropDownarray_v2();
 
       // C. Auto-rellenar Inspector (Lógica original conservada)
       const userObj = JSON.parse(localStorage.getItem('userName') || '{}');
@@ -475,7 +475,7 @@
       if (userObj.nombre) {
         inspectorField.value = userObj.nombre;
       } else {
-        google.script.run.withSuccessHandler(n => { if(n) inspectorField.value = n; }).getUserNameFromServer_v2(); 
+        google.script.run.withSuccessHandler(n => { if(n) inspectorField.value = n; }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getUserNameFromServer_v2(); 
       }
     }
 
@@ -558,13 +558,15 @@
           m2.innerHTML = `Documento: <a href="${data.message2}" target="_blank" style="font-weight: bold; text-decoration: underline;">Link</a>`;
           m2.classList.remove('d-none');
         }
-      }).getAdditionalInfoByValue_v2(val); 
+      })
+      .withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getAdditionalInfoByValue_v2(val); 
 
       // LLAMADA GS
       google.script.run.withSuccessHandler(data => {
         showTable_v2(data);
         hideSearchSpinner_v2();
-      }).searchData_v2(obj); 
+      })
+      .withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).searchData_v2(obj); 
     }
 
     function showTable_v2(dataArray) {
