@@ -158,7 +158,7 @@ function deleteByIDAccindentes(id) {
 
 let empleadosCache = null;
 
-function getNombreEnferno(idEnfermo) {
+function getNombreEmpleado(idEnfermo) {
   if (!empleadosCache) {
     const hojaevento = getSpreadsheetPersonal().getSheetByName('PERSONAL');
     const lastRow = hojaevento.getLastRow();

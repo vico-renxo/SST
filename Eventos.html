@@ -2447,7 +2447,7 @@ function obtenerNombre() {
     document.getElementById('nomeCliente').value = respuesta.nombre;
     // Si también quieres guardar el cargo ahí:
     // document.getElementById('nomeClienteCargo').value = respuesta.cargo;
-  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getNombreEnferno(idEnfermo);
+  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getNombreEmpleado(idEnfermo);
 }
 
 function addResp(res) {
