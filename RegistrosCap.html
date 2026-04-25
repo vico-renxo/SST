@@ -79,6 +79,7 @@
       const limitTemas = 30;
       let filtroTemas = "";
       let cursosMap = {}; // { [cursoNombre]: { area, capacitador, puntajeMin } }
+      let cursosOcupados = new Set(); // cursos con registro ABIERTO actualmente
 
       function esAdmin() {
         try {
@@ -128,6 +129,14 @@
 
           totalTemas = res.total;
           mostrarFilasTemas(datosTemas);
+
+          cursosOcupados = new Set(
+            datosTemas
+              .filter(f => String(f[7] || '').trim().toUpperCase() === 'ABIERTO')
+              .map(f => String(f[1] || '').trim())
+              .filter(Boolean)
+          );
+          localStorage.setItem('_cursosOcupados', JSON.stringify([...cursosOcupados]));
 
           btnVerMas.style.display = datosTemas.length < totalTemas ? "inline-block" : "none";
           document.getElementById("loadingTablaTemas").style.display = "none";
@@ -217,7 +226,7 @@
         }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).obtenerConteoPorRegistros(registros);
       }
 
-      function abrirFormularioTemas(codigo = null) {
+      function abrirFormularioTemas(codigo = null, cursoPrefill = null) {
         const modal2 = document.getElementById("modal2Temas");
         const form   = document.getElementById("formularioTemas");
         const isNuevo = codigo === null;
@@ -239,27 +248,42 @@
           valores = filaOriginal;
         }
 
-        const cursoActual      = valores[1]  || "";
-        const capacitadorActual = valores[3] || "";
-        const areaActual       = valores[2]  || "";
+        const mapData          = cursoPrefill ? (cursosMap[cursoPrefill] || {}) : {};
+        const cursoActual      = cursoPrefill || valores[1]  || "";
+        const capacitadorActual = valores[3] || mapData.capacitador || "";
+        const areaActual       = valores[2]  || mapData.area        || "";
         const estadoActual     = valores[7]  || "ABIERTO";
-        const examenActual     = valores[10] || "No";
-        const puntajeActual    = String(valores[12] || "0");
+        const puntajeActual    = String(valores[12] || mapData.puntajeMin || "0");
+        const examenActual     = valores[10] || (parseFloat(puntajeActual) > 0 ? "Sí" : "No");
         const fechaActual      = convertirFechaInputDate(valores[8]);
 
-        // Build curso options from cursosMap
-        const opcionesCurso = Object.keys(cursosMap).map(nombre =>
-          `<option value="${nombre.replace(/"/g, '&quot;')}" ${nombre === cursoActual ? "selected" : ""}>${nombre}</option>`
-        ).join("");
+        // Build curso options based on context
+        let opcionesCurso = '';
+        if (!isNuevo) {
+          // Editing: show current course only
+          if (cursoActual) opcionesCurso = `<option value="${cursoActual.replace(/"/g,'&quot;')}" selected>${cursoActual}</option>`;
+        } else if (cursoPrefill) {
+          // Navigated from Cursos.html: show only this course pre-selected
+          opcionesCurso = `<option value="${cursoPrefill.replace(/"/g,'&quot;')}" selected>${cursoPrefill}</option>`;
+        }
+        // else isNuevo without prefill: empty select
+
+        const mostrarManual = isNuevo;
 
         form.innerHTML = `
           <div class="mb-3">
             <label class="form-label fw-semibold">Curso</label>
-            <select id="reg-curso" class="form-select" onchange="autoRellenarCurso()">
+            <select id="reg-curso" class="form-select" onchange="onCursoSeleccionado()">
               <option value="">Seleccione curso...</option>
               ${opcionesCurso}
+              ${mostrarManual ? '<option value="__MANUAL__">📝 Registro manual (difusión de documentos)</option>' : ''}
             </select>
           </div>
+          ${mostrarManual ? `
+          <div id="bloque-manual" class="mb-3" style="display:none;">
+            <label class="form-label fw-semibold">Nombre del tema / documento</label>
+            <input id="reg-curso-manual" class="form-control" placeholder="Ej: Difusión procedimiento P-001">
+          </div>` : ''}
           <div class="mb-3">
             <label class="form-label fw-semibold">Capacitador</label>
             <input id="reg-capacitador" class="form-control" value="${capacitadorActual}" readonly style="background:#f5f5f5;">
@@ -281,12 +305,6 @@
         `;
 
         form.dataset.index = isNuevo ? "null" : indexOriginal;
-
-        // If editing, trigger auto-fill to show readonly capacitador correctly
-        if (!isNuevo && cursoActual) {
-          // values already set from existing record — no auto-fill needed
-        }
-
         modal2.showModal();
       }
 
@@ -300,6 +318,25 @@
         if (el("reg-area"))        el("reg-area").value        = info.area        || "";
         if (el("reg-puntaje"))     el("reg-puntaje").value     = info.puntajeMin  || "0";
         if (el("reg-examen"))      el("reg-examen").value      = parseFloat(info.puntajeMin || "0") > 0 ? "Sí" : "No";
+      }
+
+      function onCursoSeleccionado() {
+        const val         = document.getElementById("reg-curso").value;
+        const bloqueManual = document.getElementById("bloque-manual");
+        const capInput    = document.getElementById("reg-capacitador");
+
+        if (val === "__MANUAL__") {
+          if (bloqueManual) bloqueManual.style.display = "block";
+          if (capInput) { capInput.removeAttribute("readonly"); capInput.style.background = ""; capInput.value = ""; }
+          const el = id => document.getElementById(id);
+          if (el("reg-area"))    el("reg-area").value    = "";
+          if (el("reg-puntaje")) el("reg-puntaje").value = "0";
+          if (el("reg-examen"))  el("reg-examen").value  = "No";
+        } else {
+          if (bloqueManual) bloqueManual.style.display = "none";
+          if (capInput) { capInput.setAttribute("readonly", ""); capInput.style.background = "#f5f5f5"; }
+          autoRellenarCurso();
+        }
       }
 
       function convertirFechaInputDate(valor) {
@@ -322,7 +359,11 @@
         const btnGuardar = document.getElementById("btn-guardarTemas");
         const mensajeError = document.getElementById("mensaje-errorTemas");
 
-        const curso       = (document.getElementById("reg-curso")?.value || "").trim();
+        const cursoRaw    = (document.getElementById("reg-curso")?.value || "").trim();
+        const isManual    = cursoRaw === "__MANUAL__";
+        const curso       = isManual
+          ? (document.getElementById("reg-curso-manual")?.value || "").trim()
+          : cursoRaw;
         const capacitador = (document.getElementById("reg-capacitador")?.value || "").trim();
         const fecha       = document.getElementById("reg-fecha")?.value || "";
         const estado      = document.getElementById("reg-estado")?.value || "ABIERTO";
@@ -331,7 +372,9 @@
         const puntaje     = document.getElementById("reg-puntaje")?.value || "0";
 
         if (!curso || !fecha) {
-          mensajeError.textContent = "Curso y Fecha del Evento son obligatorios.";
+          mensajeError.textContent = isManual && !curso
+            ? "Debe escribir el nombre del tema o documento."
+            : "Curso y Fecha del Evento son obligatorios.";
           mensajeError.style.display = "block";
           return;
         }
@@ -485,15 +528,18 @@
               localStorage.removeItem('prefilledRegistroCurso');
               try {
                 const { curso } = JSON.parse(prefill);
-                if (curso && cursosMap[curso]) {
+                if (curso) {
                   setTimeout(() => {
-                    abrirFormularioTemas();
-                    const sel = document.getElementById("reg-curso");
-                    if (sel) {
-                      sel.value = curso;
-                      autoRellenarCurso();
+                    if (cursosOcupados.has(curso)) {
+                      Swal.fire({
+                        icon: 'warning',
+                        title: 'Registro activo existente',
+                        text: `El curso "${curso}" ya tiene un registro de asistencia abierto.`
+                      });
+                      return;
                     }
-                  }, 200);
+                    abrirFormularioTemas(null, curso);
+                  }, 300);
                 }
               } catch (e) { console.warn("prefill error", e); }
             }
