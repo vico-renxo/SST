@@ -522,32 +522,41 @@
               });
             }
 
-            // Check for pre-fill from Cursos.html "Crear Registro" button
-            const prefill = localStorage.getItem('prefilledRegistroCurso');
-            if (prefill) {
-              localStorage.removeItem('prefilledRegistroCurso');
-              try {
-                const { curso } = JSON.parse(prefill);
-                if (curso) {
-                  setTimeout(() => {
-                    if (cursosOcupados.has(curso)) {
-                      Swal.fire({
-                        icon: 'warning',
-                        title: 'Registro activo existente',
-                        text: `El curso "${curso}" ya tiene un registro de asistencia abierto.`
-                      });
-                      return;
-                    }
-                    abrirFormularioTemas(null, curso);
-                  }, 300);
-                }
-              } catch (e) { console.warn("prefill error", e); }
-            }
+            // Check for pre-fill on initial load
+            checkAndApplyPrefill();
           }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
           .obtenerMatrizInvertida();
 
         cargarDatosTemas();
+
+        // When the registros tab is shown (navigated from Cursos.html), check prefill again
+        document.addEventListener('shown.bs.tab', function(e) {
+          if (e.target && e.target.id === 'v-pills-registros-tab') {
+            checkAndApplyPrefill();
+          }
+        });
       });
+
+      function checkAndApplyPrefill() {
+        const prefill = localStorage.getItem('prefilledRegistroCurso');
+        if (!prefill) return;
+        localStorage.removeItem('prefilledRegistroCurso');
+        try {
+          const { curso } = JSON.parse(prefill);
+          if (!curso) return;
+          setTimeout(() => {
+            if (cursosOcupados.has(curso)) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Registro activo existente',
+                text: `El curso "${curso}" ya tiene un registro de asistencia abierto.`
+              });
+              return;
+            }
+            abrirFormularioTemas(null, curso);
+          }, 100);
+        } catch (e) { console.warn("prefill error", e); }
+      }
     </script>
   </body>
 </html>
