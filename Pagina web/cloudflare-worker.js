@@ -8,10 +8,8 @@
 //    - PUSH_AUTH_TOKEN  (token secreto que GAS envía para autenticarse)
 // ============================================================
 
-const VAPID_PUBLIC  = 'BGivQjFutLF_ixAlil_Q2ntGtM1RgRcLEuxtlwXLknRXN_GOogO26oCOcm9aTfhYfrKPicrhUQP7AqBk4Q1PpRY';
-const VAPID_SUBJECT = 'mailto:victorcaracela@gmail.com';
-const GAS_URL       = 'https://script.google.com/macros/s/AKfycbwJrer0KO6jEd9HFso-AKzARyzlVdRrblJzm1H2i2ylWCbsCS9XzLGAfuQio2EPMzg/exec';
-const AUTH_TOKEN_FALLBACK = 'adecco_push_2026_secret_token_xyz123';
+// Secrets configurados con: wrangler secret put VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / PUSH_AUTH_TOKEN / GAS_URL
+const VAPID_SUBJECT = 'mailto:admin@empresa.com';
 
 export default {
   async fetch(request, env) {
@@ -39,7 +37,7 @@ export default {
       return serveServiceWorker();
     }
     if (url.pathname === '/api/push/vapid-key') {
-      return json({ publicKey: VAPID_PUBLIC });
+      return json({ publicKey: env.VAPID_PUBLIC_KEY || '' });
     }
     if (url.pathname === '/api/push/status' && request.method === 'POST') {
       return handleStatus(request, env);
@@ -54,12 +52,12 @@ export default {
         hasEnvVapidPub: !!env.VAPID_PUBLIC_KEY,
         hasEnvVapidPriv: !!env.VAPID_PRIVATE_KEY,
         hasKV: !!env.PUSH_SUBSCRIPTIONS,
-        fallbackTokenLen: AUTH_TOKEN_FALLBACK.length
+        hasGasUrl: !!env.GAS_URL
       });
     }
 
     // ---- Página principal (shell PWA) ----
-    return serveShell();
+    return serveShell(env);
   }
 };
 
@@ -120,15 +118,10 @@ async function handleSend(request, env) {
   try {
     const data = await request.json();
 
-    // Autenticar — comparar con token hardcodeado (no depende de env)
     const received = (data.token || '').trim();
-    const expected = AUTH_TOKEN_FALLBACK.trim();
-    if (!received || received !== expected) {
-      return json({
-        ok: false,
-        error: 'No autorizado',
-        debug: { receivedLen: received.length, expectedLen: expected.length, match: received === expected, receivedFirst5: received.substring(0, 5) }
-      }, 401);
+    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
+    if (!received || !expected || received !== expected) {
+      return json({ ok: false, error: 'No autorizado' }, 401);
     }
 
     const { dni, title, body, icon, url, tag } = data;
@@ -170,13 +163,9 @@ async function handleSendBulk(request, env) {
   try {
     const data = await request.json();
     const received = (data.token || '').trim();
-    const expected = AUTH_TOKEN_FALLBACK.trim();
-    if (!received || received !== expected) {
-      return json({
-        ok: false,
-        error: 'No autorizado',
-        debug: { receivedLen: received.length, expectedLen: expected.length, match: received === expected }
-      }, 401);
+    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
+    if (!received || !expected || received !== expected) {
+      return json({ ok: false, error: 'No autorizado' }, 401);
     }
 
     const { dnis, title, body, icon, url, tag } = data;
@@ -219,8 +208,8 @@ async function handleStatus(request, env) {
   try {
     const data = await request.json();
     const received = (data.token || '').trim();
-    const expected = AUTH_TOKEN_FALLBACK.trim();
-    if (!received || received !== expected) {
+    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
+    if (!received || !expected || received !== expected) {
       return json({ ok: false, error: 'No autorizado' }, 401);
     }
     const { dni } = data;
@@ -244,23 +233,21 @@ async function sendToAll(subscriptions, payload, env) {
 async function sendPush(subscription, payload, env) {
   try {
     const vapidPrivate = env.VAPID_PRIVATE_KEY;
+    const vapidPublic = env.VAPID_PUBLIC_KEY;
     const aud = new URL(subscription.endpoint).origin;
 
-    // JWT Header + Claims
     const header = { typ: 'JWT', alg: 'ES256' };
     const now = Math.floor(Date.now() / 1000);
     const claims = { aud, exp: now + 86400, sub: VAPID_SUBJECT };
 
-    // Firmar JWT con clave VAPID privada
-    const jwt = await signJWT(header, claims, vapidPrivate);
+    const jwt = await signJWT(header, claims, vapidPrivate, vapidPublic);
 
-    // Cifrar payload con claves del usuario
     const encrypted = await encryptPayload(subscription, payload);
 
     const resp = await fetch(subscription.endpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `vapid t=${jwt}, k=${VAPID_PUBLIC}`,
+        'Authorization': `vapid t=${jwt}, k=${vapidPublic}`,
         'Content-Encoding': 'aes128gcm',
         'Content-Type': 'application/octet-stream',
         'TTL': '86400'
@@ -296,7 +283,7 @@ function base64urlDecode(str) {
   return bytes;
 }
 
-async function signJWT(header, claims, privateKeyBase64url) {
+async function signJWT(header, claims, privateKeyBase64url, publicKeyBase64url) {
   const enc = new TextEncoder();
   const headerB64 = base64urlEncode(enc.encode(JSON.stringify(header)));
   const claimsB64 = base64urlEncode(enc.encode(JSON.stringify(claims)));
@@ -308,8 +295,8 @@ async function signJWT(header, claims, privateKeyBase64url) {
   const jwk = {
     kty: 'EC', crv: 'P-256',
     d: privateKeyBase64url,
-    x: VAPID_PUBLIC ? base64urlEncode(base64urlDecode(VAPID_PUBLIC).slice(1, 33)) : '',
-    y: VAPID_PUBLIC ? base64urlEncode(base64urlDecode(VAPID_PUBLIC).slice(33, 65)) : ''
+    x: publicKeyBase64url ? base64urlEncode(base64urlDecode(publicKeyBase64url).slice(1, 33)) : '',
+    y: publicKeyBase64url ? base64urlEncode(base64urlDecode(publicKeyBase64url).slice(33, 65)) : ''
   };
 
   const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
@@ -457,7 +444,9 @@ self.addEventListener('notificationclick', function(event) {
 // ============================================================
 //  SHELL PWA — Página principal con registro de push
 // ============================================================
-function serveShell() {
+function serveShell(env) {
+  const gasUrl    = env.GAS_URL || '';
+  const vapidKey  = env.VAPID_PUBLIC_KEY || '';
   const manifest = JSON.stringify({
     name: 'ADECCO - ISOS',
     short_name: 'ADECCO - ISOS',
@@ -526,7 +515,7 @@ function serveShell() {
     <button onclick="hideNotificationBanner()" style="background:transparent;color:#aaa;border:none;font-size:20px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>
   </div>
 
-  <iframe id="main-iframe" src="${GAS_URL}" allow="camera; geolocation; microphone"
+  <iframe id="main-iframe" src="${gasUrl}" allow="camera; geolocation; microphone"
     style="position:fixed;top:0;left:0;bottom:0;right:0;width:100%;height:100%;border:none;margin:0;padding:0;overflow:hidden;z-index:999999;"></iframe>
 
   <script>
@@ -541,7 +530,7 @@ function serveShell() {
     setTimeout(()=>{splash.style.opacity='0';setTimeout(()=>splash.style.display='none',500);iframe.classList.add('loaded');},8000);
 
     // ============ SERVICE WORKER + PUSH ============
-    const VAPID_KEY = '${VAPID_PUBLIC}';
+    const VAPID_KEY = '${vapidKey}';
     let swRegistration = null;
     let pendingDni = null;
 

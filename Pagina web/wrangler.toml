@@ -16,3 +16,15 @@ id = "REEMPLAZAR_CON_TU_KV_ID"
 # GAS_URL se configura con:
 # wrangler secret put GAS_URL
 # (pega tu URL https://script.google.com/macros/s/.../exec)
+
+# ============================================================
+# WORKER DE PUSH NOTIFICATIONS (cloudflare-worker.js)
+# Configurar con los siguientes comandos wrangler secret:
+#   wrangler secret put VAPID_PUBLIC_KEY
+#   wrangler secret put VAPID_PRIVATE_KEY
+#   wrangler secret put PUSH_AUTH_TOKEN
+#   wrangler secret put GAS_URL
+# KV namespace para suscripciones:
+#   wrangler kv namespace create PUSH_SUBSCRIPTIONS
+#   (luego pegar el id generado en el binding de abajo)
+# ============================================================
