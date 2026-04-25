@@ -9,6 +9,10 @@
 // ============================================================
 
 // Secrets configurados con: wrangler secret put VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / PUSH_AUTH_TOKEN / GAS_URL
+// Fallbacks para compatibilidad mientras no se configuren los secrets
+const VAPID_PUBLIC_FALLBACK  = 'BGivQjFutLF_ixAlil_Q2ntGtM1RgRcLEuxtlwXLknRXN_GOogO26oCOcm9aTfhYfrKPicrhUQP7AqBk4Q1PpRY';
+const GAS_URL_FALLBACK       = 'https://script.google.com/macros/s/AKfycbwJrer0KO6jEd9HFso-AKzARyzlVdRrblJzm1H2i2ylWCbsCS9XzLGAfuQio2EPMzg/exec';
+const AUTH_TOKEN_FALLBACK    = 'adecco_push_2026_secret_token_xyz123';
 const VAPID_SUBJECT = 'mailto:admin@empresa.com';
 
 export default {
@@ -37,7 +41,7 @@ export default {
       return serveServiceWorker();
     }
     if (url.pathname === '/api/push/vapid-key') {
-      return json({ publicKey: env.VAPID_PUBLIC_KEY || '' });
+      return json({ publicKey: env.VAPID_PUBLIC_KEY || VAPID_PUBLIC_FALLBACK });
     }
     if (url.pathname === '/api/push/status' && request.method === 'POST') {
       return handleStatus(request, env);
@@ -119,8 +123,8 @@ async function handleSend(request, env) {
     const data = await request.json();
 
     const received = (data.token || '').trim();
-    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
-    if (!received || !expected || received !== expected) {
+    const expected = (env.PUSH_AUTH_TOKEN || AUTH_TOKEN_FALLBACK).trim();
+    if (!received || received !== expected) {
       return json({ ok: false, error: 'No autorizado' }, 401);
     }
 
@@ -163,8 +167,8 @@ async function handleSendBulk(request, env) {
   try {
     const data = await request.json();
     const received = (data.token || '').trim();
-    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
-    if (!received || !expected || received !== expected) {
+    const expected = (env.PUSH_AUTH_TOKEN || AUTH_TOKEN_FALLBACK).trim();
+    if (!received || received !== expected) {
       return json({ ok: false, error: 'No autorizado' }, 401);
     }
 
@@ -208,8 +212,8 @@ async function handleStatus(request, env) {
   try {
     const data = await request.json();
     const received = (data.token || '').trim();
-    const expected = (env.PUSH_AUTH_TOKEN || '').trim();
-    if (!received || !expected || received !== expected) {
+    const expected = (env.PUSH_AUTH_TOKEN || AUTH_TOKEN_FALLBACK).trim();
+    if (!received || received !== expected) {
       return json({ ok: false, error: 'No autorizado' }, 401);
     }
     const { dni } = data;
@@ -233,7 +237,7 @@ async function sendToAll(subscriptions, payload, env) {
 async function sendPush(subscription, payload, env) {
   try {
     const vapidPrivate = env.VAPID_PRIVATE_KEY;
-    const vapidPublic = env.VAPID_PUBLIC_KEY;
+    const vapidPublic = env.VAPID_PUBLIC_KEY || VAPID_PUBLIC_FALLBACK;
     const aud = new URL(subscription.endpoint).origin;
 
     const header = { typ: 'JWT', alg: 'ES256' };
@@ -445,8 +449,8 @@ self.addEventListener('notificationclick', function(event) {
 //  SHELL PWA — Página principal con registro de push
 // ============================================================
 function serveShell(env) {
-  const gasUrl    = env.GAS_URL || '';
-  const vapidKey  = env.VAPID_PUBLIC_KEY || '';
+  const gasUrl    = env.GAS_URL || GAS_URL_FALLBACK;
+  const vapidKey  = env.VAPID_PUBLIC_KEY || VAPID_PUBLIC_FALLBACK;
   const manifest = JSON.stringify({
     name: 'ADECCO - ISOS',
     short_name: 'ADECCO - ISOS',
