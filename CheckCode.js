@@ -336,7 +336,7 @@ function saveDataCheck(obj) {
 
     // ✅ GUARDAR OBSERVACIONES POR SECCIÓN EN COLUMNAS BQ-CT (69-98)
     var lastRow = sheet.getLastRow();
-    agregarFotosSeccion(obj, lastRow, folder);
+    var resultFotos = agregarFotosSeccion(obj, lastRow, folder);
 
     // ✅ GUARDAR FIRMA DEL RESPONSABLE EN COLUMNA CU (99)
     if (obj.firmaData) {
@@ -367,10 +367,12 @@ function saveDataCheck(obj) {
       sendChecklistEmail(obj, newValue, imageUrl, status);
     }
 
-    return { 
+    return {
       columnAValue: newValue,
       success: true,
-      clearForm: true
+      clearForm: true,
+      fotosFallidas:  (resultFotos || {}).fotosFallidas  || 0,
+      fotosGuardadas: (resultFotos || {}).fotosGuardadas || 0
     };
 
   } catch (error) {
@@ -413,25 +415,27 @@ function agregarFotosSeccion(obj, fila, folder) {
       sectionObsList = JSON.parse(obj.sectionObs);
     } catch (e) {
       Logger.log("⚠️ Error parseando sectionObs: " + e.message);
-      return;
+      return { fotosFallidas: 0, fotosGuardadas: 0 };
     }
   }
 
-  if (sectionObsList.length === 0) return;
+  if (sectionObsList.length === 0) return { fotosFallidas: 0, fotosGuardadas: 0 };
+
+  var fotosFallidas  = 0;
+  var fotosGuardadas = 0;
 
   sectionObsList.forEach(function(obs) {
-    var seccion = obs.section + 1;  // 0-based → 1-based
+    var seccion = obs.section + 1;
     if (seccion < 1 || seccion > 10) return;
 
-    var colFoto       = 69 + (seccion - 1) * 3;  // BQ,BT,BW...
-    var colComentario = 71 + (seccion - 1) * 3;  // BS,BV,BY...
+    var colFoto       = 69 + (seccion - 1) * 3;
+    var colComentario = 71 + (seccion - 1) * 3;
 
-    var fotoPartes     = [];
-    var comentPartes   = [];
+    var fotoPartes   = [];
+    var comentPartes = [];
 
     var items = obs.items || [];
     items.forEach(function(item) {
-      // 📸 Subir foto y guardar URL codificada
       if (item.image && item.image !== '') {
         try {
           var base64Data = item.image.split(',')[1];
@@ -441,12 +445,13 @@ function agregarFotosSeccion(obj, fila, folder) {
           var file       = folder.createFile(blob);
           var photoUrl   = 'https://lh5.googleusercontent.com/d/' + file.getId();
           fotoPartes.push(item.num + '::' + photoUrl);
+          fotosGuardadas++;
           Logger.log('✅ Foto sección ' + seccion + ' ítem ' + item.num + ' guardada');
         } catch (e) {
+          fotosFallidas++;
           Logger.log('❌ Error foto sec ' + seccion + ' ítem ' + item.num + ': ' + e.message);
         }
       }
-      // 📝 Guardar comentario codificado
       if (item.comment && item.comment.trim() !== '') {
         comentPartes.push(item.num + '::' + item.comment.trim());
       }
@@ -454,8 +459,9 @@ function agregarFotosSeccion(obj, fila, folder) {
 
     if (fotoPartes.length > 0)   sheet.getRange(fila, colFoto).setValue(fotoPartes.join('~~'));
     if (comentPartes.length > 0) sheet.getRange(fila, colComentario).setValue(comentPartes.join('~~'));
-    // colSubsanacion (colFoto+1) queda vacía — se llenará en seguimiento
   });
+
+  return { fotosFallidas: fotosFallidas, fotosGuardadas: fotosGuardadas };
 }
 
 // ✅ FUNCIÓN: Guardar seguimiento (fotos de levantamiento/subsanación)

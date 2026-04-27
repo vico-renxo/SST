@@ -834,7 +834,18 @@ async function firmarYGuardar() {
   google.script.run
     .withSuccessHandler(function(result) {
       Swal.close();
-      savesuccess(result);
+      if (result && result.fotosFallidas > 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Guardado con advertencia',
+          html: `El reporte fue guardado, pero <b>${result.fotosFallidas} foto(s) de observación no se pudieron subir</b> por un error de Drive.<br><br>
+                 El resto de los datos (Sí/No/NA, comentarios, firma) sí quedaron guardados.<br>
+                 Puedes editar el registro y agregar las fotos nuevamente.`,
+          confirmButtonText: 'Entendido'
+        }).then(function() { savesuccess(result); });
+      } else {
+        savesuccess(result);
+      }
     })
     .withFailureHandler(function(error) {
       Swal.fire({
