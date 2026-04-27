@@ -127,7 +127,13 @@ function processFormDesvios(formObject) {
   }
 }
 
-var folder = DriveApp.getFolderById(folderimginspe);
+let _cachedFolderImgInspe = null;
+function _getFolderImgInspe() {
+  if (!_cachedFolderImgInspe) {
+    _cachedFolderImgInspe = DriveApp.getFolderById(folderimginspe);
+  }
+  return _cachedFolderImgInspe;
+}
 
 // FUNCIÓN 4 - Extrae los valores del formulario y genera un array para su almacenamiento.(FUNCIONA)
 function getFormValuesDesvios(formObject) {
@@ -150,18 +156,18 @@ function getFormValuesDesvios(formObject) {
         'image/jpeg',
         'desvio_anotado_' + Date.now() + '.jpg'
       );
-      var file1Ann = folder.createFile(annotatedBlob);
+      var file1Ann = _getFolderImgInspe().createFile(annotatedBlob);
       imageUrl = "https://lh5.googleusercontent.com/d/" + file1Ann.getId();
     } catch (eAnn) {
       Logger.log("Error subiendo imagen anotada, usando original: " + eAnn);
       if (formObject.myFile1 && formObject.myFile1.length > 0) {
-        imageUrl = "https://lh5.googleusercontent.com/d/" + folder.createFile(formObject.myFile1).getId();
+        imageUrl = "https://lh5.googleusercontent.com/d/" + _getFolderImgInspe().createFile(formObject.myFile1).getId();
       } else {
         imageUrl = formObject.imgAnterior1 || "";
       }
     }
   } else if (formObject.myFile1 && formObject.myFile1.length > 0) {
-    let file1 = folder.createFile(formObject.myFile1);
+    let file1 = _getFolderImgInspe().createFile(formObject.myFile1);
     imageUrl = "https://lh5.googleusercontent.com/d/" + file1.getId();
   } else {
     imageUrl = formObject.imgAnterior1 || ""; // conservar imagen anterior
@@ -170,7 +176,7 @@ function getFormValuesDesvios(formObject) {
   // Verificar si se subió una nueva imagen de cierre
   let imageUrl2 = "";
   if (formObject.myFile2 && formObject.myFile2.length > 0) {
-    let file2 = folder.createFile(formObject.myFile2);
+    let file2 = _getFolderImgInspe().createFile(formObject.myFile2);
     imageUrl2 = "https://lh5.googleusercontent.com/d/" + file2.getId();
   } else {
     imageUrl2 = formObject.imgAnterior2 || ""; // conservar imagen anterior
