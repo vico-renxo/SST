@@ -367,6 +367,7 @@ const stateEPP = {
   historialRaw: [], historialCollapsed: [],
   cart: [], searchTerm:''
 };
+let _pendientePollTimer = null;
 const DEFAULT_CATS = ['EPP','Equipos','Herramientas','Materiales','Productos','Otros'];
 const PLACEHOLDER_IMGEPP='https://lh5.googleusercontent.com/d/1ZVsi2Z08waIlQ4_grLJtAyvb0e-lpTbV';
 const CART_KEY = () => `CART_EPP_${stateEPP.almacenActual||'NA'}_${stateEPP.persona?.DNI||'NA'}`;
@@ -521,6 +522,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // 🚫 Sin overlay: refreshInit inicia SSR (loadPage(true)) y verás skeletons
   await refreshInit(localStorage.getItem('ALMACEN_ACTUAL')||'');
+
+  // Polling: detecta cuando un trabajador confirma su EPP y actualiza la vista
+  _pendientePollTimer = setInterval(_pollPendientes, 30000);
 });
 
 
@@ -2188,6 +2192,40 @@ async function refreshAfterMutation({refetchInit=false} = {}){
     // Fallback: al menos repaginar
     await loadPage(true);
   }
+}
+
+/* =================== Polling automático de pendientes =================== */
+async function _pollPendientes() {
+  if (!stateEPP.persona?.DNI) return;
+  const hasPending = (stateEPP.historialRaw || []).some(
+    x => String(x.ESTADO || '').trim() === 'Pendiente'
+  );
+  if (!hasPending) return;
+
+  try {
+    const fresh = await gasCall('getHistorialByDni', [stateEPP.persona.DNI, 0]);
+    if (!fresh) return;
+    const prevMap = new Map((stateEPP.historialRaw || []).map(x => [x.ID_REG, x.ESTADO]));
+    const changed = fresh.some(x =>
+      prevMap.has(x.ID_REG) &&
+      String(prevMap.get(x.ID_REG)).trim() === 'Pendiente' &&
+      String(x.ESTADO || '').trim() !== 'Pendiente'
+    );
+    if (!changed) return;
+
+    stateEPP.historialRaw = fresh;
+    stateEPP.deliveredBase = new Set(
+      fresh.filter(x => x.OPERACION === 'Entrega').map(x => x.PRODUCTO)
+    );
+    renderHistorial(fresh);
+    renderCards();
+    cargarBadgesEstadoAdmin();
+    Swal.fire({
+      toast: true, position: 'bottom-end', showConfirmButton: false,
+      timer: 3000, icon: 'success',
+      title: 'EPP confirmado por el trabajador'
+    });
+  } catch(e) { /* silencioso — reintenta en el próximo ciclo */ }
 }
 
 /* =================== Badge de estados admin =================== */
