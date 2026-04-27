@@ -787,6 +787,13 @@ async function firmarYGuardar() {
     firmaData = firmaModalPad.toDataURL('image/png');
   }
 
+  if (!firmaData) {
+    btnFirmar.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Firmar y Guardar';
+    btnFirmar.disabled = false;
+    Swal.fire({ icon: 'warning', title: 'Firma requerida', text: 'Debes firmar antes de guardar el reporte.' });
+    return;
+  }
+
   let checked;
   let temp = document.querySelectorAll('.multi:checked');
   if (temp != null) {
