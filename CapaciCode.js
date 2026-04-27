@@ -466,10 +466,6 @@ function cargarDatosGlobales() {
 
     hojaBD.appendRow(filaNueva);
 
-    if (estadoFinal === "Aprobado") {
-      _registrarEnRegistroFirmas(ss, fechaHabilitacion, tema, String(dni).replace(/^'/, ""), nombre, cargo, empresa, area, capacitador, duracionMin, detalle || "", urlFirma);
-    }
-
     return ["success", point, estadoFinal];
   } catch (error) {
     Logger.log("Error en recordData: " + error);
