@@ -1350,21 +1350,23 @@ function guardarCambios() {
 
   // Enviar a servidor
   google.script.run.withSuccessHandler((urlFirmaSubida) => {
-    console.log('urlFirmaSubida recibido:', urlFirmaSubida);
-    // Validar que urlFirmaSubida sea una URL válida de Google Drive
-    const firmaFinal = seModificoFirma && urlFirmaSubida && urlFirmaSubida.includes('/drive/') ? urlFirmaSubida : firmaAnterior;
+    const firmaFinal = (seModificoFirma && urlFirmaSubida) ? urlFirmaSubida : firmaAnterior;
 
     const userData = {
+      ...datosPrevios,
       ...nuevosDatos,
-      foto: nuevosDatos.link, // IMAGEN
-      firma: firmaFinal       // FIRMA
+      foto: nuevosDatos.link,
+      firma: firmaFinal
     };
 
     localStorage.setItem('userName', JSON.stringify(userData));
 
     document.getElementById('admin').innerHTML = nuevosDatos.nombre;
     document.getElementById('img').src = nuevosDatos.link;
-    document.getElementById('firmaExistente').src = firmaFinal || '';
+
+    const imgFirma = document.getElementById('firmaExistente');
+    imgFirma.src = '';
+    setTimeout(() => { imgFirma.src = firmaFinal || ''; }, 50);
 
     const modal = bootstrap.Modal.getInstance(document.getElementById('configModal'));
     modal.hide();
@@ -1378,7 +1380,7 @@ function guardarCambios() {
 
     btnGuardar.textContent = "Guardar cambios";
     btnGuardar.disabled = false;
-    limpiarFirma();
+    limpiarFirma('config');
   }).withFailureHandler((error) => {
     console.error('Error al actualizar usuario:', error);
     Swal.fire({
