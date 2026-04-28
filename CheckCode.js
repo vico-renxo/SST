@@ -806,13 +806,13 @@ function getDropDownarray(cargo) {
     // 2. Filtro por cargo (col F = B-index 4) → excluir completamente
     if (cargoLower && !esSupervisor) {
       const cargoCol = String(row[4] || '').trim().toLowerCase();
-      if (cargoCol) {
-        const ok = cargoCol.split(',').some(c => {
-          const ct = c.trim();
-          return ct && cargoLower.includes(ct);
-        });
-        if (!ok) return;
-      }
+      // Col F vacía = sin restricción explícita → solo supervisores
+      if (!cargoCol) return;
+      const ok = cargoCol.split(',').some(c => {
+        const ct = c.trim();
+        return ct && cargoLower.includes(ct);
+      });
+      if (!ok) return;
     }
 
     // 3. Calcular disponibilidad por período → flag en índice 17
