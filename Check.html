@@ -488,15 +488,16 @@
     // r[17] === false → ya inspeccionado dentro del período → no mostrar en equipo
     var filtered = arrayOfValues.filter(function(r) {
       if (r[0] !== ad1 || r[1] !== ad2 || r[17] === false) return false;
-      // Filtro cargo (col F = r[4]): col vacía = solo supervisores
+      // Filtro cargo (col F = r[4]): col vacía = sin restricción (visible a todos)
       if (_userCargo && !_esSup) {
         var cargoCol = (r[4] || '').trim().toLowerCase();
-        if (!cargoCol) return false;
-        var ok = cargoCol.split(',').some(function(c) {
-          var ct = c.trim();
-          return ct && _userCargo.includes(ct);
-        });
-        if (!ok) return false;
+        if (cargoCol) {
+          var ok = cargoCol.split(',').some(function(c) {
+            var ct = c.trim();
+            return ct && _userCargo.includes(ct);
+          });
+          if (!ok) return false;
+        }
       }
       return true;
     });
