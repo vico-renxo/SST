@@ -483,8 +483,23 @@
     var itemtype = document.getElementById("ad3");
     var ad1 = document.getElementById("ad1").value;
     var ad2 = document.getElementById("ad2").value;
+    var _userCargo = (_getLoginData().cargo || '').trim().toLowerCase();
+    var _esSup = _userCargo.includes('supervisor');
     // r[17] === false → ya inspeccionado dentro del período → no mostrar en equipo
-    var filtered = arrayOfValues.filter(function(r) { return r[0] === ad1 && r[1] === ad2 && r[17] !== false; });
+    var filtered = arrayOfValues.filter(function(r) {
+      if (r[0] !== ad1 || r[1] !== ad2 || r[17] === false) return false;
+      // Filtro cargo (col F = r[4]): col vacía = solo supervisores
+      if (_userCargo && !_esSup) {
+        var cargoCol = (r[4] || '').trim().toLowerCase();
+        if (!cargoCol) return false;
+        var ok = cargoCol.split(',').some(function(c) {
+          var ct = c.trim();
+          return ct && _userCargo.includes(ct);
+        });
+        if (!ok) return false;
+      }
+      return true;
+    });
     // Primer opción vacía para evitar auto-selección y que la sección oculta no aparezca sola
     itemtype.innerHTML = '<option value="">-- Selecciona Equipo --</option>';
     filtered.forEach(function(r) {
