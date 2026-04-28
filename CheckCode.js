@@ -339,7 +339,9 @@ function saveDataCheck(obj) {
     var resultFotos = agregarFotosSeccion(obj, lastRow, folder);
 
     // ✅ GUARDAR FIRMA DEL RESPONSABLE EN COLUMNA CU (99)
-    if (obj.firmaData) {
+    if (obj.firmaData === 'SIN_PERSONAL') {
+      sheet.getRange(lastRow, 99).setValue('Área inspeccionada sin personal presente');
+    } else if (obj.firmaData) {
       try {
         var firmaImageData = Utilities.base64Decode(obj.firmaData.split(',')[1]);
         var firmaBlob = Utilities.newBlob(firmaImageData, MimeType.PNG, obj.ad3 + "_firma.png");
@@ -982,6 +984,7 @@ function generarPDFdesdeHTML(recordId) {
   var itemsCSV        = fila[14] || '';
   var firmaUrl        = (fila[98] || '').trim();  // col CU (index 98) - firma trabajador
   var firmaSupUrl     = (fila[99] || '').trim();  // col CV (index 99) - firma supervisor
+  var esSinPersonal   = firmaUrl === 'Área inspeccionada sin personal presente';
 
   // Separar fecha y hora
   var partes   = String(fechaHora).split(' ');
@@ -1080,7 +1083,7 @@ function generarPDFdesdeHTML(recordId) {
   }
 
   // Firmas
-  var firmaB64    = convertirUrlParaPDF(firmaUrl);     // firma trabajador
+  var firmaB64    = esSinPersonal ? '' : convertirUrlParaPDF(firmaUrl);  // firma trabajador
 
   // Buscar en PERSONAL: firma supervisor + cargos (col G = index 6)
   var cargoSupervisor  = '';
@@ -1314,9 +1317,11 @@ function generarPDFdesdeHTML(recordId) {
     '</tr></table>';
 
   // SECCIÓN DE FIRMAS (trabajador + supervisor)
-  var firmasTrabajadorImg = firmaB64
-    ? '<img src="' + firmaB64 + '" style="max-height:60px;max-width:140px">'
-    : '<span style="color:#aaa;font-size:7pt">Sin firma</span>';
+  var firmasTrabajadorImg = esSinPersonal
+    ? '<span style="font-size:7.5pt;color:#555;font-style:italic;line-height:1.4">Área inspeccionada<br>sin personal presente</span>'
+    : (firmaB64
+        ? '<img src="' + firmaB64 + '" style="max-height:60px;max-width:140px">'
+        : '<span style="color:#aaa;font-size:7pt">Sin firma</span>');
   var firmasSupervisorImg = firmaSupB64
     ? '<img src="' + firmaSupB64 + '" style="max-height:60px;max-width:140px">'
     : '<span style="color:#aaa;font-size:7pt">Sin firma</span>';
