@@ -371,7 +371,7 @@
   <div class="firma-modal">
     <h5 style="color:#212529;font-weight:700;margin-bottom:4px;"><i class="fa-solid fa-pen-nib"></i> Firma Digital</h5>
     <p id="firmaProductoLabel" style="font-size:.9rem;color:#6c757d;margin-bottom:12px;"></p>
-    <canvas id="sigPadWorker"></canvas>
+    <canvas id="sigPadWorker" style="width:100%;height:180px;border:2px dashed #aaa;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;display:block;"></canvas>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button onclick="limpiarFirmaWorker()" style="flex:1;padding:8px;border:1px solid #dee2e6;border-radius:10px;background:#fff;cursor:pointer;font-weight:500;">Limpiar</button>
       <button onclick="cancelarFirma()" style="flex:1;padding:8px;border:1px solid #dee2e6;border-radius:10px;background:#fff;cursor:pointer;font-weight:500;">Cancelar</button>
@@ -898,9 +898,7 @@ function cerrarAlertaFuera(event) {
 /* ===== FIRMAS PENDIENTES - FLUJO TRABAJADOR ===== */
 let pendientesData = [];
 let currentPendienteId = null;
-let sigPadWorkerCtx = null;
-let sigPadWorkerDown = false;
-let sigPadWorkerLast = null;
+let sigPadWorker = null;
 
 // Cargar pendientes al buscar
 function cargarPendientes(dni){
@@ -966,64 +964,33 @@ function renderListaPendientes(){
   }).join('');
 }
 
-/* --- FIRMA --- */
+/* --- FIRMA (SignaturePad) --- */
 function initSigPadWorker(){
   var c = document.getElementById('sigPadWorker');
-  if(!c) return;
-  sigPadWorkerCtx = c.getContext('2d', { willReadFrequently:true });
-  function resize(){
-    var dpr = window.devicePixelRatio || 1;
-    var cssW = c.parentElement.clientWidth - 10 || 460;
-    var cssH = 180;
-    c.width = Math.floor(cssW * dpr);
-    c.height = Math.floor(cssH * dpr);
-    c.style.width = cssW + 'px';
-    c.style.height = cssH + 'px';
-    sigPadWorkerCtx.setTransform(dpr,0,0,dpr,0,0);
-    sigPadWorkerCtx.lineWidth = 2;
-    sigPadWorkerCtx.lineCap = 'round';
-    sigPadWorkerCtx.lineJoin = 'round';
-  }
-  resize();
-
-  function pos(e){
-    var r = c.getBoundingClientRect();
-    var t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - r.left, y: t.clientY - r.top };
-  }
-  function start(e){ sigPadWorkerDown=true; sigPadWorkerLast=pos(e); e.preventDefault(); }
-  function move(e){
-    if(!sigPadWorkerDown || !sigPadWorkerLast) return;
-    var p=pos(e);
-    sigPadWorkerCtx.beginPath();
-    sigPadWorkerCtx.moveTo(sigPadWorkerLast.x, sigPadWorkerLast.y);
-    sigPadWorkerCtx.lineTo(p.x, p.y);
-    sigPadWorkerCtx.stroke();
-    sigPadWorkerLast=p;
-    e.preventDefault();
-  }
-  function end(){ sigPadWorkerDown=false; sigPadWorkerLast=null; }
-
-  c.addEventListener('pointerdown', start);
-  c.addEventListener('pointermove', move);
-  window.addEventListener('pointerup', end);
-  c.addEventListener('touchstart', start, {passive:false});
-  c.addEventListener('touchmove', move, {passive:false});
-  c.addEventListener('touchend', end);
+  if (!c) return;
+  if (sigPadWorker) { sigPadWorker.off(); sigPadWorker = null; }
+  c.removeAttribute('width');
+  c.removeAttribute('height');
+  var rect = c.getBoundingClientRect();
+  var ratio = Math.max(window.devicePixelRatio || 1, 1);
+  c.width  = Math.max(rect.width  || 300, 50) * ratio;
+  c.height = (rect.height || 180) * ratio;
+  c.getContext('2d').scale(ratio, ratio);
+  sigPadWorker = new SignaturePad(c, {
+    backgroundColor: 'rgba(255,255,255,0)',
+    penColor: '#222222',
+    minWidth: 1.5,
+    maxWidth: 3.5,
+  });
 }
 
 function limpiarFirmaWorker(){
-  var c = document.getElementById('sigPadWorker');
-  if(c && sigPadWorkerCtx) sigPadWorkerCtx.clearRect(0,0,c.width,c.height);
+  if (sigPadWorker) sigPadWorker.clear();
 }
 
 function getSigDataWorker(){
-  var c = document.getElementById('sigPadWorker');
-  if(!c) return null;
-  var ctx = c.getContext('2d');
-  var img = ctx.getImageData(0,0,c.width,c.height).data;
-  for(var i=3; i<img.length; i+=4){ if(img[i]!==0) return c.toDataURL('image/png'); }
-  return null;
+  if (!sigPadWorker || sigPadWorker.isEmpty()) return null;
+  return sigPadWorker.toDataURL('image/png');
 }
 
 function abrirFirma(idReg, producto, variante){
@@ -1031,8 +998,7 @@ function abrirFirma(idReg, producto, variante){
   document.getElementById('firmaProductoLabel').textContent = 'Confirmar recepci\u00f3n de: ' + producto + (variante ? ' (' + variante + ')' : '');
   document.getElementById('firmaOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
-  // Inicializar pad si es la primera vez
-  if(!sigPadWorkerCtx) initSigPadWorker();
+  initSigPadWorker();
   limpiarFirmaWorker();
 }
 

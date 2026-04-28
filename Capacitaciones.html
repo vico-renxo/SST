@@ -371,8 +371,7 @@
           <!-- FIRMA -->
           <div class="col-12">
             <label class="form-label fw-bold">Firma del trabajador *</label>
-            <canvas id="canvasFirma" width="600" height="200"
-              class="border border-secondary rounded-3 w-100" style="cursor: crosshair;"></canvas>
+            <canvas id="canvasFirma" style="width:100%;height:150px;border:2px dashed #aaa;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;display:block;"></canvas>
             <div class="mt-2 text-end">
               <button type="button" class="btn btn-sm btn-outline-danger" onclick="limpiarFirmaCap()">🧹 Limpiar</button>
             </div>
@@ -1360,15 +1359,8 @@ function generarCertificado(nombre, tema) {
     /*************** enviar respuesta **********************/                                                                                 
     function submitAns() {
   const submitBtn = document.getElementById('submit');
-  const canvas = document.getElementById("firmaCap");
-  const ctx = canvas.getContext("2d");
 
-  // ✅ Validar si el canvas está en blanco
-  const blank = document.createElement('canvas');
-  blank.width = canvas.width;
-  blank.height = canvas.height;
-
-  if (canvas.toDataURL() === blank.toDataURL()) {
+  if (!firmaCapSignPad || firmaCapSignPad.isEmpty()) {
     Swal.fire("Atención", "Por favor firma antes de enviar tus respuestas.", "warning");
     return;
   }
@@ -1393,7 +1385,7 @@ function generarCertificado(nombre, tema) {
     return "";
   });
 
-  const firmaBase64 = canvas.toDataURL("image/png");
+  const firmaBase64 = firmaCapSignPad.toDataURL('image/png');
 
   google.script.run.withSuccessHandler(info => {
     if (info && info[0] === 'success') {
@@ -1506,7 +1498,7 @@ function iniciarCronometro(id, fechaFin) {
 
   </script>   
 <script>
-let firmaCanvasReg, firmaCtx, firmando = false;
+let firmaSignPadCap = null;
 let debounceTimer, ultimoCodigoBuscado = "";
 
 // --- Abrir modal de firma ---
@@ -1537,58 +1529,29 @@ function abrirModalFirma() {
   setTimeout(() => inicializarCanvasFirma(), 300);
 }
 
-// --- Inicializa el área de firma ---
+// --- Inicializa el área de firma con SignaturePad ---
 function inicializarCanvasFirma() {
-  firmaCanvasReg = document.getElementById('canvasFirma');
-  firmaCtx = firmaCanvasReg.getContext('2d');
-  firmaCtx.lineWidth = 2;
-  firmaCtx.strokeStyle = "#000";
-  firmaCtx.lineCap = "round";
-
-  firmaCanvasReg.onmousedown = startDraw;
-  firmaCanvasReg.onmousemove = draw;
-  firmaCanvasReg.onmouseup = stopDraw;
-  firmaCanvasReg.onmouseleave = stopDraw;
-
-  firmaCanvasReg.ontouchstart = startDraw;
-  firmaCanvasReg.ontouchmove = draw;
-  firmaCanvasReg.ontouchend = stopDraw;
-  firmaCanvasReg.ontouchcancel = stopDraw;
-
-  function getCoords(e) {
-    const rect = firmaCanvasReg.getBoundingClientRect();
-    const scaleX = firmaCanvasReg.width / rect.width;
-    const scaleY = firmaCanvasReg.height / rect.height;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-  }
-
-  function startDraw(e) {
-    e.preventDefault();
-    firmando = true;
-    const pos = getCoords(e);
-    firmaCtx.beginPath();
-    firmaCtx.moveTo(pos.x, pos.y);
-  }
-
-  function draw(e) {
-    if (!firmando) return;
-    e.preventDefault();
-    const pos = getCoords(e);
-    firmaCtx.lineTo(pos.x, pos.y);
-    firmaCtx.stroke();
-  }
-
-  function stopDraw() {
-    firmando = false;
-  }
+  const canvas = document.getElementById('canvasFirma');
+  if (!canvas) return;
+  if (firmaSignPadCap) { firmaSignPadCap.off(); firmaSignPadCap = null; }
+  canvas.removeAttribute('width');
+  canvas.removeAttribute('height');
+  const rect = canvas.getBoundingClientRect();
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  canvas.width  = Math.max(rect.width  || 300, 50) * ratio;
+  canvas.height = (rect.height || 150) * ratio;
+  canvas.getContext('2d').scale(ratio, ratio);
+  firmaSignPadCap = new SignaturePad(canvas, {
+    backgroundColor: 'rgba(255,255,255,0)',
+    penColor: '#222222',
+    minWidth: 1.5,
+    maxWidth: 3.5,
+  });
 }
 
 // --- Limpiar firma ---
 function limpiarFirmaCap() {
-  if (firmaCtx && firmaCanvasReg)
-    firmaCtx.clearRect(0, 0, firmaCanvasReg.width, firmaCanvasReg.height);
+  if (firmaSignPadCap) firmaSignPadCap.clear();
 }
 
 // --- Buscar tema (con indicador visual y control de caché) ---
@@ -1696,21 +1659,12 @@ function guardarFirma() {
   const capacitador = document.getElementById('capacitadorFirma').value.trim();
   const detalle = document.getElementById('detalleFirma').value.trim();
 
-  const firmaVacia = (() => {
-    if (!firmaCtx || !firmaCanvasReg) return true;
-    const pixels = firmaCtx.getImageData(0, 0, firmaCanvasReg.width, firmaCanvasReg.height).data;
-    for (let i = 3; i < pixels.length; i += 4) {
-      if (pixels[i] !== 0) return false;
-    }
-    return true;
-  })();
-
-  if (!tema || firmaVacia) {
+  if (!tema || !firmaSignPadCap || firmaSignPadCap.isEmpty()) {
     Swal.fire("Ingresa el código del tema y dibuja tu firma antes de guardar.", "", "warning");
     return;
   }
 
-  const firmaBase64 = firmaCanvasReg.toDataURL("image/png");
+  const firmaBase64 = firmaSignPadCap.toDataURL('image/png');
 
   const tituloConfirm = temaConExamen
     ? "¿Deseas registrar esta capacitación?"
