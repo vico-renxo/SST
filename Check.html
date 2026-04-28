@@ -777,21 +777,24 @@ function abrirFirmaModal() {
   });
 }
 
-async function firmarYGuardar() {
+async function firmarYGuardar(firmaOverride) {
   var btnFirmar = document.getElementById('btn-firmar-guardar');
   btnFirmar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
   btnFirmar.disabled = true;
 
   var firmaData = '';
-  if (firmaModalPad && !firmaModalPad.isEmpty()) {
-    firmaData = firmaModalPad.toDataURL('image/png');
-  }
-
-  if (!firmaData) {
-    btnFirmar.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Firmar y Guardar';
-    btnFirmar.disabled = false;
-    Swal.fire({ icon: 'warning', title: 'Firma requerida', text: 'Debes firmar antes de guardar el reporte.' });
-    return;
+  if (firmaOverride === 'SIN_PERSONAL') {
+    firmaData = 'SIN_PERSONAL';
+  } else {
+    if (firmaModalPad && !firmaModalPad.isEmpty()) {
+      firmaData = firmaModalPad.toDataURL('image/png');
+    }
+    if (!firmaData) {
+      btnFirmar.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Firmar y Guardar';
+      btnFirmar.disabled = false;
+      Swal.fire({ icon: 'warning', title: 'Firma requerida', text: 'Debes firmar antes de guardar el reporte.' });
+      return;
+    }
   }
 
   let checked;
@@ -819,7 +822,7 @@ async function firmarYGuardar() {
     imageData: document.getElementById('imageData').value,
     sectionObs: JSON.stringify(sectionObs),
     firmaData: firmaData,
-    firmaSupervisor: (function() { try { var u = JSON.parse(localStorage.getItem('userName') || '{}'); var esSup = u.cargo && u.cargo.toLowerCase().includes('supervisor'); return esSup ? (u.firma || '') : ''; } catch(e) { return ''; } })(),
+    firmaSupervisor: (function() { try { return JSON.parse(localStorage.getItem('userName') || '{}').firma || ''; } catch(e) { return ''; } })(),
     tipoInspeccion: document.getElementById('tipoInspeccion').value || 'Planeada'
   };
 
@@ -1325,8 +1328,13 @@ async function whenButtonClicked() {
 
   if (!confirmResult.isConfirmed) return;
 
-  // 3. Abrir modal de firma (separado del formulario)
-  abrirFirmaModal();
+  // 3. Sin personal → guardar directo; persona presente → modal de firma
+  var ad6El = document.getElementById('ad6');
+  if (ad6El && ad6El.value === 'Área inspeccionada sin personal presente') {
+    firmarYGuardar('SIN_PERSONAL');
+  } else {
+    abrirFirmaModal();
+  }
 }
 
 
