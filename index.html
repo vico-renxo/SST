@@ -965,11 +965,14 @@ function login(obj) {
         
         localStorage.setItem('userName', JSON.stringify(userObj));
         DOM.myForm?.reset();
-        
+
         showPage('main');
         updateUserInterface(userObj);
         initEPPAfterLogin(userObj);
-        
+
+        // Refrescar dropdowns de Check que dependen del cargo del usuario
+        if (typeof afterPageLoads === 'function') afterPageLoads();
+
         if (typeof startRolModule === 'function') {
             startRolModule(userObj);
         }
