@@ -208,7 +208,8 @@
     </div>
     <div class="mt-2 d-flex align-items-center gap-2">
       <button class="btn btn-sm btn-outline-secondary" id="btnToggleHistEPP">Historial</button>
-      <button class="btn btn-sm btn-outline-primary" id="btnExportHistEPP"><i class="fa-solid fa-file-excel"></i> Exportar historial</button>
+      <button class="btn btn-sm btn-outline-primary" id="btnExportHistEPP"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
+      <button class="btn btn-sm btn-danger" id="btnExportRegistroPDF"><i class="fa-solid fa-file-pdf"></i> Exportar Registro</button>
       <span class="small text-muted">Almacén actual: <b id="cartAlmEPP">—</b></span>
       <span id="badgeEstadosAdmin" class="ms-auto"></span>
     </div>
@@ -475,6 +476,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('swAsignadosEPP').addEventListener('change', renderCards);
   document.getElementById('btnToggleHistEPP').addEventListener('click', ()=> document.getElementById('historialBoxEPP').classList.toggle('d-none'));
   document.getElementById('btnExportHistEPP').addEventListener('click', exportHistorialXlsx);
+  document.getElementById('btnExportRegistroPDF').addEventListener('click', exportarRegistroPDF);
   document.getElementById('productSearch').addEventListener('input', (e)=>{ stateEPP.searchTerm=(e.target.value||'').toLowerCase(); renderCards(); });
   document.getElementById('btnClearSearch').addEventListener('click', ()=>{ document.getElementById('productSearch').value=''; stateEPP.searchTerm=''; renderCards(); });
 
@@ -978,6 +980,37 @@ function exportHistorialXlsx(){
   const ts = new Date(); const pad=n=>String(n).padStart(2,'0');
   const name = `Historial_${stateEPP.persona.DNI}_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.xlsx`;
   XLSX.writeFile(wb, name);
+}
+
+
+function exportarRegistroPDF() {
+  if (!stateEPP.persona) { Swal.fire('Primero busca un trabajador', '', 'info'); return; }
+  const dni = stateEPP.persona.DNI;
+
+  Swal.fire({
+    title: 'Generando Registro…',
+    html: `<div class="text-muted small">Convirtiendo firmas y construyendo el PDF.<br>Puede tardar unos segundos.</div>`,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  google.script.run
+    .withSuccessHandler(url => {
+      Swal.close();
+      if (!url) { Swal.fire('Error', 'No se pudo generar el registro.', 'error'); return; }
+      Swal.fire({
+        icon: 'success',
+        title: 'Registro generado',
+        html: `<a href="${url}" target="_blank" class="btn btn-danger mt-2"><i class="fa-solid fa-file-pdf"></i> Abrir / Descargar PDF</a>`,
+        showConfirmButton: false,
+        showCloseButton: true
+      });
+    })
+    .withFailureHandler(err => {
+      Swal.fire('Error al generar el registro', err?.message || String(err), 'error');
+    })
+    .generarRegistroEPP(dni);
 }
 
 

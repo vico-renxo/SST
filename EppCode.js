@@ -2531,9 +2531,295 @@ function buscarUltimaEntregaAnterior(dni, producto, variante, fechaActual, dataR
     entregas.sort((a,b) => b.FECHA - a.FECHA);
     
     return entregas[0] || null;
-    
+
   } catch (e) {
     Logger.log('❌ Error en buscarUltimaEntregaAnterior: ' + e.message);
     return null;
+  }
+}
+
+/* =================== REGISTRO EPP — Generación de PDF =================== */
+
+function _eppUrlToB64(url) {
+  if (!url) return '';
+  try {
+    var match = url.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+    if (!match) return '';
+    var file = DriveApp.getFileById(match[1]);
+    var blob = file.getBlob();
+    return 'data:' + (blob.getContentType() || 'image/png') + ';base64,' + Utilities.base64Encode(blob.getBytes());
+  } catch (e) { return ''; }
+}
+
+function _fmtFechaPDF(val) {
+  if (!val) return '';
+  try {
+    var d = (val instanceof Date) ? val : new Date(val);
+    if (isNaN(d)) return String(val);
+    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+  } catch (e) { return String(val || ''); }
+}
+
+function generarRegistroEPP(dni) {
+  try {
+    // ── 1. Datos del trabajador ───────────────────────────────────────────
+    var persona = getPersonaByDni(dni);
+    if (!persona || !persona.NOMBRES) throw new Error('Persona no encontrada: ' + dni);
+
+    // ── 2. Datos del empleador (INFO EMPRESA) ─────────────────────────────
+    var rucEmp = '20810132279', domicilioEmp = '', actividadEmp = 'OTRAS ACTIVIDADES DE DOTACIÓN DE RECURSOS HUMANOS';
+    var numTrabajadores = '';
+    try {
+      var infoEmpSh = getSpreadsheetPersonal().getSheetByName('INFO EMPRESA');
+      if (infoEmpSh && infoEmpSh.getLastRow() > 1) {
+        var ieData = infoEmpSh.getRange(2, 1, infoEmpSh.getLastRow() - 1, 7).getDisplayValues();
+        for (var ie = 0; ie < ieData.length; ie++) {
+          if (_str(ieData[ie][0]).toLowerCase() === _str(persona.EMPRESA).toLowerCase()) {
+            if (ieData[ie][1]) rucEmp       = _str(ieData[ie][1]);
+            if (ieData[ie][2]) actividadEmp = _str(ieData[ie][2]);
+            if (ieData[ie][3]) domicilioEmp = _str(ieData[ie][3]);
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+    try {
+      var hPers = getSpreadsheetPersonal().getSheetByName('PERSONAL');
+      var nRows = hPers.getLastRow() - 1;
+      if (nRows > 0) numTrabajadores = hPers.getRange(2, 3, nRows, 1).getValues()
+        .filter(function(r) { return _str(r[0]) !== ''; }).length;
+    } catch (e) {}
+
+    // ── 3. Filas REGISTRO para este DNI (solo Entrega, orden ASC) ─────────
+    var regRaw = _readRows(SHEPP.REGISTRO)
+      .filter(function(r) {
+        return _str(r[IDX.REG.DNI - 1]) === _str(dni) &&
+               _str(r[IDX.REG.OPERACION - 1]) === 'Entrega';
+      })
+      .sort(function(a, b) { return new Date(a[IDX.REG.FECHA - 1]) - new Date(b[IDX.REG.FECHA - 1]); });
+
+    if (!regRaw.length) throw new Error('Sin registros de entrega para DNI: ' + dni);
+
+    // ── 4. Responsable del registro (USUARIO del registro más reciente) ───
+    var respNombre = '', respCargo = '', respFirmaB64 = '';
+    try {
+      var lastRow = regRaw[regRaw.length - 1];
+      var usuarioEmail = _str(lastRow[IDX.REG.USUARIO - 1]);
+      if (usuarioEmail) {
+        var hP = getSpreadsheetPersonal().getSheetByName('PERSONAL');
+        var pData = hP.getRange(2, 1, hP.getLastRow() - 1, 18).getDisplayValues();
+        for (var pi = 0; pi < pData.length; pi++) {
+          var emailFila  = _str(pData[pi][12]).toLowerCase();
+          var nombreFila = _str(pData[pi][2]).toLowerCase();
+          if (emailFila === usuarioEmail.toLowerCase() || nombreFila === usuarioEmail.toLowerCase()) {
+            respNombre   = _str(pData[pi][2]).toUpperCase();
+            respCargo    = _str(pData[pi][6]).toUpperCase();
+            respFirmaB64 = _eppUrlToB64(_str(pData[pi][17]));
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // ── 5. Construir filas de la tabla ────────────────────────────────────
+    var today = _today();
+    var rowsHtml = '';
+    regRaw.forEach(function(r, idx) {
+      var fechaEnt  = _fmtFechaPDF(r[IDX.REG.FECHA - 1]);
+      var producto  = _str(r[IDX.REG.PRODUCTO - 1]);
+      var variante  = _str(r[IDX.REG.VARIANTE - 1]);
+      var cantidad  = _num(r[IDX.REG.CANTIDAD - 1]) || 1;
+      var obsBase   = _str(r[IDX.REG.OBS - 1]) || 'Entrega';
+      var vidaUtil  = _num(r[IDX.REG.VIDA_UTIL_DIAS - 1]);
+      var firmaUrl  = _str(r[IDX.REG.FIRMA_URL - 1]);
+
+      // Fecha de renovación: guardada o calculada
+      var fechaVencRaw = r[IDX.REG.FECHA_VENCIMIENTO - 1];
+      if (!fechaVencRaw && vidaUtil > 0 && r[IDX.REG.FECHA - 1]) {
+        var dCalc = new Date(r[IDX.REG.FECHA - 1]);
+        dCalc.setDate(dCalc.getDate() + vidaUtil);
+        fechaVencRaw = dCalc;
+      }
+      var fechaRenov = _fmtFechaPDF(fechaVencRaw);
+
+      // Estado de vencimiento para observaciones
+      var delayHtml = '';
+      if (fechaVencRaw) {
+        var dV = (fechaVencRaw instanceof Date) ? fechaVencRaw : new Date(fechaVencRaw);
+        if (!isNaN(dV)) {
+          var diff = Math.ceil((dV - today) / 86400000);
+          if (diff < 0) {
+            delayHtml = '<br><span style="color:#cc0000;font-weight:bold">⚠ VENCIDO (' + Math.abs(diff) + ' días de atraso)</span>';
+          } else if (diff <= 30) {
+            delayHtml = '<br><span style="color:#b8860b">⚡ Por vencer en ' + diff + ' día' + (diff === 1 ? '' : 's') + '</span>';
+          } else {
+            delayHtml = '<br><span style="color:#0a6b1a;font-size:6.5pt">✓ Entrega a tiempo</span>';
+          }
+        }
+      }
+
+      var nombreEquipo = producto + (variante ? ' / ' + variante : '');
+      var firmaB64 = _eppUrlToB64(firmaUrl);
+      var firmaImg = firmaB64
+        ? '<img src="' + firmaB64 + '" style="max-width:70px;max-height:32px;display:block;margin:auto">'
+        : '';
+
+      rowsHtml +=
+        '<tr>' +
+          '<td style="text-align:center">' + (idx + 1) + '</td>' +
+          '<td style="text-align:center">' + fechaEnt + '</td>' +
+          '<td style="text-align:center">' + fechaRenov + '</td>' +
+          '<td style="font-weight:bold;font-size:8pt">' + nombreEquipo + '</td>' +
+          '<td style="text-align:center">' + cantidad + '</td>' +
+          '<td style="text-align:center">UND</td>' +
+          '<td style="font-size:7.5pt">' + obsBase + delayHtml + '</td>' +
+          '<td style="text-align:center;width:80px">' + firmaImg + '</td>' +
+        '</tr>';
+    });
+
+    // Filas vacías para completar al menos 10 filas
+    var emptyNeeded = Math.max(0, 10 - regRaw.length);
+    for (var ei = 0; ei < emptyNeeded; ei++) {
+      rowsHtml += '<tr><td style="height:22px">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+    }
+
+    // ── 6. HTML completo ──────────────────────────────────────────────────
+    var fechaHoy = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'M/d/yyyy');
+
+    var css =
+      '<style>' +
+      '* { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; box-sizing:border-box; margin:0; padding:0 }' +
+      'body { font-family:Arial,sans-serif; font-size:8pt; color:#222; padding:10px }' +
+      'table { border-collapse:collapse; width:100%; margin-bottom:4px }' +
+      'td,th { border:1px solid #888; padding:3px 5px; vertical-align:middle }' +
+      '.lbl { background:#d9d9d9; font-weight:bold; font-size:7.5pt; text-align:center }' +
+      '.val { font-size:8pt }' +
+      '.sec { background:#d9d9d9; font-weight:bold; font-size:8.5pt; text-align:center }' +
+      'th { background:#d9d9d9; text-align:center; font-size:7.5pt; font-weight:bold }' +
+      '@media print { @page { size:A4 portrait; margin:8mm } tr { page-break-inside:avoid } }' +
+      '</style>';
+
+    var hdr =
+      '<table>' +
+        '<tr>' +
+          '<td rowspan="3" style="width:13%;text-align:center;font-size:22pt;font-weight:bold;color:#e2001a;letter-spacing:-1px;border:1px solid #888;padding:8px">Adecco</td>' +
+          '<td colspan="2" class="sec" style="font-size:9pt">SISTEMA DE GESTIÓN DE SEGURIDAD, SALUD OCUPACIONAL Y MEDIO AMBIENTE</td>' +
+          '<td class="lbl" style="width:8%">CÓDIGO</td>' +
+          '<td class="val" style="width:12%;font-size:8pt">RE-SSOMA-011</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td colspan="2" style="text-align:center;font-weight:bold;font-size:9pt">Registro de Entrega de Equipos de Protección Personal y Emergencia</td>' +
+          '<td class="lbl">EMISIÓN</td>' +
+          '<td class="val">05/01/2019</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td colspan="2" style="height:8px;border:1px solid #888"></td>' +
+          '<td class="lbl">REVISIÓN<br>VERSIÓN</td>' +
+          '<td class="val">12/14/2020<br>V5</td>' +
+        '</tr>' +
+      '</table>';
+
+    var empSection =
+      '<table>' +
+        '<tr><td colspan="5" class="sec">DATOS DEL EMPLEADOR</td></tr>' +
+        '<tr>' +
+          '<td class="lbl" style="width:18%">RAZÓN SOCIAL</td>' +
+          '<td class="lbl" style="width:12%">RUC</td>' +
+          '<td class="lbl" style="width:28%">DOMICILIO</td>' +
+          '<td class="lbl" style="width:30%">ACTIVIDAD ECONÓMICA</td>' +
+          '<td class="lbl" style="width:12%">Nº TRABAJADORES EN EL CENTRO LABORAL</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td class="val">ADECCO PERU S.A</td>' +
+          '<td class="val" style="text-align:center">' + rucEmp + '</td>' +
+          '<td class="val">' + (domicilioEmp || 'Pasaje Angamos 103 - 105 Yanahuara Arequipa') + '</td>' +
+          '<td class="val" style="font-size:7pt">' + actividadEmp + '</td>' +
+          '<td class="val" style="text-align:center;font-weight:bold">' + numTrabajadores + '</td>' +
+        '</tr>' +
+      '</table>';
+
+    var workerSection =
+      '<table>' +
+        '<tr>' +
+          '<td class="lbl" style="width:38%">APELLIDOS Y NOMBRES (COMPLETOS)</td>' +
+          '<td class="lbl" style="width:13%;background:#ffe066;color:#222">DNI</td>' +
+          '<td class="lbl" style="width:20%">CARGO</td>' +
+          '<td class="lbl" style="width:29%">ÁREA / CLIENTE / OPERACIÓN</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td class="val" style="font-weight:bold">' + _str(persona.NOMBRES).toUpperCase() + '</td>' +
+          '<td class="val" style="text-align:center;background:#ffe066;font-weight:bold;font-size:9pt">' + _str(dni) + '</td>' +
+          '<td class="val">' + _str(persona.CARGO).toUpperCase() + '</td>' +
+          '<td class="val">' + _str(persona.EMPRESA).toUpperCase() + '</td>' +
+        '</tr>' +
+      '</table>';
+
+    var equipSection =
+      '<table>' +
+        '<tr>' +
+          '<td class="lbl" style="width:22%;text-align:center">EQUIPO DE PROTECCIÓN<br>PERSONAL</td>' +
+          '<td class="val" style="width:4%;text-align:center;font-weight:bold">X</td>' +
+          '<td class="lbl" style="width:22%;text-align:center">EQUIPO DE PROTECCIÓN<br>COLECTIVA</td>' +
+          '<td class="val" style="width:4%;text-align:center"></td>' +
+          '<td class="lbl" style="width:22%;text-align:center">EQUIPO DE EMERGENCIA</td>' +
+          '<td class="val" style="width:4%;text-align:center"></td>' +
+          '<td class="lbl" style="width:22%;text-align:center">OTRO (ESPECIFICAR)</td>' +
+          '<td class="val" style="width:0%;text-align:center">EPP</td>' +
+        '</tr>' +
+      '</table>';
+
+    var itemsTable =
+      '<table>' +
+        '<tr>' +
+          '<th style="width:4%">N°</th>' +
+          '<th style="width:10%">FECHA DE<br>ENTREGA</th>' +
+          '<th style="width:10%">FECHA DE<br>RENOVACIÓN</th>' +
+          '<th style="width:26%">NOMBRE DEL EQUIPO ENTREGADO</th>' +
+          '<th style="width:7%">CANTIDAD</th>' +
+          '<th style="width:8%">UNIDAD DE<br>MEDIDA</th>' +
+          '<th style="width:19%">MOTIVO DE ENTREGA /<br>OBSERVACIONES DE LA ENTREGA</th>' +
+          '<th style="width:16%">FIRMA</th>' +
+        '</tr>' +
+        rowsHtml +
+      '</table>';
+
+    var footer =
+      '<table>' +
+        '<tr><td colspan="4" class="sec">RESPONSABLE DEL REGISTRO</td></tr>' +
+        '<tr>' +
+          '<td class="lbl" style="width:10%">NOMBRE:</td>' +
+          '<td class="val" style="width:38%;text-align:center;font-weight:bold">' + respNombre + '</td>' +
+          '<td class="lbl" style="width:10%">CARGO:</td>' +
+          '<td class="val" style="width:42%;text-align:center">' + respCargo + '</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td class="lbl">FECHA:</td>' +
+          '<td class="val" style="text-align:center">' + fechaHoy + '</td>' +
+          '<td class="lbl">FIRMA:</td>' +
+          '<td class="val" style="height:70px;text-align:right;padding-right:8px;vertical-align:bottom">' +
+            (respFirmaB64 ? '<img src="' + respFirmaB64 + '" style="max-width:100px;max-height:60px">' : '') +
+          '</td>' +
+        '</tr>' +
+      '</table>';
+
+    var html =
+      '<!DOCTYPE html><html><head><meta charset="UTF-8">' + css + '</head><body>' +
+      hdr + empSection + workerSection + equipSection + itemsTable + footer +
+      '</body></html>';
+
+    // ── 7. PDF → Drive → URL pública ─────────────────────────────────────
+    var nombrePDF = 'REGISTRO_EPP_' + _str(persona.NOMBRES).replace(/\s+/g, '_').toUpperCase() + '_' + _str(dni) + '.pdf';
+    var pdfBlob = Utilities.newBlob(html, 'text/html', 'registro.html')
+      .getAs(MimeType.PDF)
+      .setName(nombrePDF);
+    var folder = DriveApp.getFolderById(FOLDER_IDEPP);
+    var file   = folder.createFile(pdfBlob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    Logger.log('generarRegistroEPP OK: ' + file.getUrl());
+    return file.getUrl();
+
+  } catch (e) {
+    Logger.log('generarRegistroEPP error: ' + e.message);
+    throw e;
   }
 }

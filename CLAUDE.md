@@ -197,6 +197,7 @@ eventos/accidentes e IPERC.
 - `getHistorialByDni(dni, limit)` — historial EPP de un trabajador
 - `confirmarEntregaEPP(regId, firmaBase64, dni)` — trabajador confirma con firma
 - `obtenerEntregasPendientes(dniLogin)` — entregas pendientes de confirmación
+- `generarRegistroEPP(dni)` — genera PDF "Registro de Entrega de EPP" (RE-SSOMA-011), sube a FOLDER_IDEPP y retorna URL pública
 
 **Funciones privadas:**
 - `_sh(name)` — atajo getSpreadsheetEPP().getSheetByName(name)
