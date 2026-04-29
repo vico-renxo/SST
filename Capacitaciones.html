@@ -198,7 +198,7 @@
           <small class="text-muted">Asignados y completados</small>
         </div>
       </div>                                         
-      <button class="btn btn-secondary my-4" title="Cumplimiento general" onclick="abrirCumplimientoGeneral()"><i class="fa-solid fa-chart-bar"></i></button>                           
+      <button class="btn btn-secondary my-4" onclick="abrirModalTabla()"><i class="fa-solid fa-print"></i></button>                           
       <input type="text" id="buscadorCursos" onkeyup="filtrarCursos()" placeholder="Buscar curso..." class="form-control" style="max-width:   
     250px;">                                                                                                                                  
                                                                                                                                               
@@ -382,68 +382,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-success" onclick="guardarFirma()">Guardar registro</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL CUMPLIMIENTO GENERAL ═══ -->
-<div class="modal fade" id="modalCumplimiento" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content shadow rounded-4 border-0">
-      <div class="modal-header bg-dark text-white py-2 rounded-top-4">
-        <h5 class="modal-title"><i class="fa-solid fa-chart-bar me-2"></i>Cumplimiento General — Capacitaciones</h5>
-        <div class="d-flex align-items-center gap-2 ms-auto">
-          <input type="text" id="cumplBuscador" placeholder="Buscar nombre o DNI..." oninput="cumplFiltrar()"
-                 class="form-control form-control-sm" style="max-width:220px">
-          <select id="cumplFiltroEstado" onchange="cumplFiltrar()" class="form-select form-select-sm" style="max-width:160px">
-            <option value="all">Todos</option>
-            <option value="ok">100% Aprobados</option>
-            <option value="inc">Incompletos</option>
-            <option value="rp">Con Reprobados</option>
-            <option value="cd">Con Caducados</option>
-          </select>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-      </div>
-      <div class="modal-body p-2">
-        <div id="cumplSpinner" class="text-center py-4">
-          <div class="spinner-border text-secondary"></div><div class="mt-2 text-muted small">Cargando datos...</div>
-        </div>
-        <div id="cumplStats" class="d-flex gap-3 flex-wrap mb-2 px-1" style="display:none!important"></div>
-        <div id="cumplTbWrap" style="display:none;overflow-x:auto">
-          <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
-            <thead class="table-dark sticky-top">
-              <tr><th>#</th><th>Trabajador</th><th>DNI</th><th>Cargo</th><th>Empresa</th>
-                  <th>Total</th><th>Aprobados</th><th>Reprobados</th><th>Caducados</th><th>Pendientes</th>
-                  <th>%</th><th>Acciones</th></tr>
-            </thead>
-            <tbody id="cumplTbody"></tbody>
-          </table>
-        </div>
-        <div id="cumplEmpty" style="display:none;text-align:center;padding:2rem;color:#9ca3af">Sin resultados</div>
-      </div>
-      <div class="modal-footer py-1">
-        <span id="cumplCountLabel" class="text-muted small me-auto"></span>
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL DETALLE TRABAJADOR ═══ -->
-<div class="modal fade" id="modalWorkerDetalle" tabindex="-1" aria-hidden="true" style="z-index:1060">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content shadow rounded-4 border-0">
-      <div class="modal-header bg-success text-white py-2 rounded-top-4">
-        <h6 class="modal-title" id="workerDetalleTitle"><i class="fa-solid fa-user me-2"></i>Detalle</h6>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body p-3">
-        <div id="workerDetalleSpinner" class="text-center py-4">
-          <div class="spinner-border text-success"></div>
-        </div>
-        <div id="workerDetalleContent" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -1139,153 +1077,73 @@ document.addEventListener('DOMContentLoaded', function() {
 // ✅ LIMPIEZA AL CAMBIAR DE PÁGINA
 window.addEventListener('beforeunload', limpiarRecursosCursos);
 
-    // ── Cumplimiento General ──────────────────────────────────────
-    let _cumplData = null;
-
-    function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-    function abrirCumplimientoGeneral() {
-      const modal = new bootstrap.Modal(document.getElementById('modalCumplimiento'));
-      modal.show();
-      if (_cumplData) { _cumplRenderTabla(_cumplData); return; }
-      document.getElementById('cumplSpinner').style.display = 'block';
-      document.getElementById('cumplTbWrap').style.display  = 'none';
-      document.getElementById('cumplStats').style.display   = 'none';
-      document.getElementById('cumplEmpty').style.display   = 'none';
-      google.script.run
-        .withSuccessHandler(function(raw) { _cumplData = raw; _cumplRenderTabla(raw); })
-        .withFailureHandler(function(err) {
-          document.getElementById('cumplSpinner').innerHTML =
-            '<div class="text-danger p-3"><i class="fa-solid fa-triangle-exclamation me-1"></i>Error: ' + _esc(err.message || err) + '</div>';
-        })
-        .obtenerDashboardLaboral();
-    }
-
-    function _cumplRenderTabla(raw) {
-      document.getElementById('cumplSpinner').style.display = 'none';
-      const k = raw && raw.kpis ? raw.kpis : {};
-      const workers = (raw && raw.cumplimientoPorTrabajador) || [];
-      document.getElementById('cumplStats').style.removeProperty('display');
-      document.getElementById('cumplStats').innerHTML = [
-        ['Activos', k.totalTrabajadores || workers.length, '#2563eb'],
-        ['Cumplimiento', (k.porcentajeCumplimiento || 0) + '%', '#059669'],
-        ['Incumplidores', k.totalIncumplidores || 0, '#dc2626'],
-        ['Temas', k.totalTemas || 0, '#7c3aed']
-      ].map(([lbl,val,c]) =>
-        '<span style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.3rem .8rem;font-size:.8rem">'
-        + '<b style="color:' + c + '">' + val + '</b> <span style="color:#6b7280">' + lbl + '</span></span>'
-      ).join('');
-      cumplFiltrar();
-    }
-
-    window.cumplFiltrar = function() {
-      if (!_cumplData) return;
-      const workers = _cumplData.cumplimientoPorTrabajador || [];
-      const q    = (document.getElementById('cumplBuscador').value || '').toLowerCase();
-      const filt = document.getElementById('cumplFiltroEstado').value;
-      const rows = workers.filter(t => {
-        const matchQ = !q || t.nombre.toLowerCase().includes(q) || String(t.dni).includes(q);
-        if (!matchQ) return false;
-        if (filt === 'ok')  return t.porcentaje === 100;
-        if (filt === 'inc') return t.porcentaje < 100;
-        if (filt === 'rp')  return t.reprobados > 0;
-        if (filt === 'cd')  return t.caducados  > 0;
-        return true;
-      });
-      document.getElementById('cumplCountLabel').textContent = rows.length + ' trabajador(es)';
-      if (!rows.length) {
-        document.getElementById('cumplTbWrap').style.display = 'none';
-        document.getElementById('cumplEmpty').style.display  = 'block';
-        return;
-      }
-      document.getElementById('cumplEmpty').style.display  = 'none';
-      document.getElementById('cumplTbWrap').style.display = 'block';
-      const colorPct = p => p >= 80 ? '#059669' : p >= 50 ? '#d97706' : '#dc2626';
-      const html = rows.map((t, i) => {
-        const ini = t.nombre.trim().split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-        return '<tr>'
-          + '<td class="text-muted">' + (i+1) + '</td>'
-          + '<td style="font-weight:600;white-space:nowrap">'
-          +   '<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;'
-          +     'border-radius:50%;background:' + colorPct(t.porcentaje) + ';color:#fff;font-size:.65rem;font-weight:700;margin-right:6px">'
-          +   _esc(ini) + '</span>' + _esc(t.nombre) + '</td>'
-          + '<td style="color:#6b7280;font-size:.78rem">' + _esc(t.dni) + '</td>'
-          + '<td style="font-size:.78rem">' + _esc(t.cargo) + '</td>'
-          + '<td style="font-size:.78rem">' + _esc(t.empresa) + '</td>'
-          + '<td>' + t.temasTotal + '</td>'
-          + '<td><span class="badge bg-success">' + t.aprobados + '</span></td>'
-          + '<td>' + (t.reprobados ? '<span class="badge bg-danger">' + t.reprobados + '</span>' : '—') + '</td>'
-          + '<td>' + (t.caducados  ? '<span class="badge" style="background:#8b5cf6">' + t.caducados + '</span>' : '—') + '</td>'
-          + '<td>' + (t.pendientes ? '<span class="badge bg-warning text-dark">' + t.pendientes + '</span>' : '—') + '</td>'
-          + '<td><b style="color:' + colorPct(t.porcentaje) + '">' + t.porcentaje + '%</b></td>'
-          + '<td><button class="btn btn-outline-primary btn-sm py-0 px-2" onclick="abrirDetalleWorker(' + "'" + _esc(t.dni) + "','" + _esc(t.nombre).replace(/'/g,"\'") + "')" + '>'
-          +   '<i class="fa-solid fa-eye me-1"></i>Acciones</button></td>'
-          + '</tr>';
-      }).join('');
-      document.getElementById('cumplTbody').innerHTML = html;
-    };
-
-    window.abrirDetalleWorker = function(dni, nombre) {
-      document.getElementById('workerDetalleTitle').innerHTML = '<i class="fa-solid fa-user me-2"></i>' + _esc(nombre);
-      document.getElementById('workerDetalleContent').style.display = 'none';
-      document.getElementById('workerDetalleSpinner').style.display = 'block';
-      const m = new bootstrap.Modal(document.getElementById('modalWorkerDetalle'));
-      m.show();
-      const t = (_cumplData && _cumplData.cumplimientoPorTrabajador || []).find(w => w.dni === dni);
-      const summaryHtml = t ? '<div class="d-flex gap-2 flex-wrap mb-3">'
-        + '<span class="badge bg-success">' + t.aprobados + ' Aprobados</span>'
-        + (t.reprobados ? '<span class="badge bg-danger">' + t.reprobados + ' Reprobados</span>' : '')
-        + (t.caducados  ? '<span class="badge" style="background:#8b5cf6">' + t.caducados + ' Caducados</span>' : '')
-        + (t.pendientes ? '<span class="badge bg-warning text-dark">' + t.pendientes + ' Pendientes</span>' : '')
-        + '<span class="badge bg-secondary">' + t.porcentaje + '% cumplimiento</span>'
-        + '</div>' : '';
-      google.script.run
-        .withSuccessHandler(function(raw) {
-          const data = JSON.parse(raw);
-          document.getElementById('workerDetalleSpinner').style.display = 'none';
-          const content = document.getElementById('workerDetalleContent');
-          if (!data.historial || !data.historial.length) {
-            content.innerHTML = summaryHtml + '<p class="text-muted">Sin registros en B DATOS para este trabajador.</p>';
-            content.style.display = 'block';
-            return;
-          }
-          const badgeCls = e => ({Aprobado:'bg-success',Reprobado:'bg-danger',Pendiente:'bg-warning text-dark'}[e]||'bg-secondary');
-          const temasHtml = data.historial.map(function(item) {
-            const rows = item.intentos.map(function(it, idx) {
-              return '<tr style="font-size:.78rem">'
-                + '<td class="text-muted ps-3">#' + (idx+1) + '</td>'
-                + '<td>' + _esc(it.fecha||'—') + '</td>'
-                + '<td>' + it.puntaje + '</td>'
-                + '<td><span class="badge ' + badgeCls(it.estado) + '">' + _esc(it.estado) + '</span></td>'
-                + '</tr>';
-            }).join('');
-            const ultimo = item.intentos[0];
-            return '<div class="mb-3 border rounded-3 overflow-hidden">'
-              + '<div class="d-flex align-items-center justify-content-between px-3 py-2" style="background:#f8fafc;border-bottom:1px solid #e2e8f0">'
-              +   '<span style="font-weight:600;font-size:.85rem">' + _esc(item.tema) + '</span>'
-              +   '<div class="d-flex align-items-center gap-2">'
-              +     '<small class="text-muted">' + item.intentos.length + ' intento(s)</small>'
-              +     (ultimo ? '<span class="badge ' + badgeCls(ultimo.estado) + '">' + _esc(ultimo.estado) + '</span>' : '')
-              +   '</div>'
-              + '</div>'
-              + '<table class="table table-sm mb-0" style="font-size:.78rem">'
-              +   '<thead class="table-light"><tr><th class="ps-3">#</th><th>Fecha</th><th>Puntaje</th><th>Estado</th></tr></thead>'
-              +   '<tbody>' + rows + '</tbody>'
-              + '</table>'
-              + '</div>';
-          }).join('');
-          content.innerHTML = summaryHtml + temasHtml;
-          content.style.display = 'block';
-        })
-        .withFailureHandler(function(err) {
-          document.getElementById('workerDetalleSpinner').style.display = 'none';
-          document.getElementById('workerDetalleContent').innerHTML =
-            '<div class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i>' + _esc(err.message||err) + '</div>';
-          document.getElementById('workerDetalleContent').style.display = 'block';
-        })
-        .getHistorialCapacitacionesTrabajador(dni);
-    };
-    // ── fin Cumplimiento General ───────────────────────────────────                                                                                                                                         
+    function abrirModalTabla() {                                                                                                              
+      const contenedor = document.getElementById("contenedorTablaCursos");                                                                    
+                                                                                                                                              
+      const filasHTML = cursosGlobal.map(({                                                                                                   
+        tema, image, area, puntajeMinimo, duracion, capacitador,                                                                              
+        temporabilidad, programacion, link, puntaje, fecha, estado                                                                            
+      }) => `                                                                                                                                 
+        <tr>                                                                                                                                  
+          <td>${tema}</td>                                                                                                                    
+          <td><img src="${image}" alt="imagen" style="max-width: 100px; max-height: 80px;"></td>                                              
+          <td>${area}</td>                                                                                                                    
+          <td>${puntajeMinimo}</td>                                                                                                           
+          <td>${duracion}</td>                                                                                                                
+          <td>${capacitador}</td>                                                                                                             
+          <td>${temporabilidad}</td>                                                                                                          
+          <td>${programacion}</td>                                                                                                            
+          <td><a href="${link}" target="_blank">Ver</a></td>                                                                                  
+          <td>${puntaje}</td>                                                                                                                 
+          <td>${fecha}</td>                                                                                                                   
+          <td>${estado}</td>                                                                                                                  
+        </tr>                                                                                                                                 
+      `).join("");                                                                                                                            
+                                                                                                                                              
+      contenedor.innerHTML = `                                                                                                                
+        <div class="table-responsive print-container">                                                                                        
+          <center><strong>Mis capacitaciones</strong></center>                                                                                
+          <table class="table table-bordered table-hover table-sm">                                                                           
+            <thead class="table-light">                                                                                                       
+              <tr>                                                                                                                            
+                <th>Tema</th>                                                                                                                 
+                <th>Imagen</th>                                                                                                               
+                <th>Área</th>                                                                                                                 
+                <th>Puntaje mínimo</th>                                                                                                       
+                <th>Duración (min)</th>                                                                                                       
+                <th>Capacitador</th>                                                                                                          
+                <th>Validez (días)</th>                                                                                                       
+                <th>Programación</th>                                                                                                         
+                <th>Link</th>                                                                                                                 
+                <th>Puntaje</th>                                                                                                              
+                <th>Fecha</th>                                                                                                                
+                <th>Estado</th>                                                                                                               
+              </tr>                                                                                                                           
+            </thead>                                                                                                                          
+            <tbody>                                                                                                                           
+              ${filasHTML}                                                                                                                    
+            </tbody>                                                                                                                          
+          </table>                                                                                                                            
+        </div>                                                                                                                                
+      `;                                                                                                                                      
+                                                                                                                                              
+      // Botón WhatsApp (después de renderizar)                                                                                               
+      document.getElementById("btnWhatsappCap").addEventListener("click", () => {                                                             
+        const filas = document.querySelectorAll("#contenedorTablaCursos tbody tr");                                                           
+        const mensaje = Array.from(filas).map(fila => {                                                                                       
+          const tema = fila.cells[0].textContent.trim();                                                                                      
+          const estado = fila.cells[11].textContent.trim();                                                                                   
+          return `✓ ${tema} - *${estado}*`;                                                                                                   
+        }).join("\n");                                                                                                                        
+                                                                                                                                              
+        const url = `https://wa.me/?text=${encodeURIComponent("*Ꙭ Mis cursos son:*\n\n" + mensaje)}`;                                         
+        window.open(url, "_blank");                                                                                                           
+      });                                                                                                                                     
+                                                                                                                                              
+      // Mostrar modal                                                                                                                        
+      const modal = new bootstrap.Modal(document.getElementById('modalTablaCursos'));                                                         
+      modal.show();                                                                                                                           
+    }                                                                                                                                         
                                                                                                                                               
                                                                                                                                               
     // filtrarCursos() ya definido arriba (versión optimizada) — NO duplicar                                                                                                                                         
