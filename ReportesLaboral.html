@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 /* ── ReportesLaboral — Tablero Ejecutivo ── */
 #rl-wrapper { font-family:'Inter',system-ui,sans-serif; background:#f0f4f8; min-height:100vh; padding:1.5rem; }
@@ -240,17 +241,15 @@
   <div id="rl-p-general" class="rl-panel" style="display:none">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem" class="rl-two-col">
 
-      <!-- Cumplimiento global barra -->
+      <!-- Cumplimiento global — donut Chart.js -->
       <div class="rl-card">
         <div class="rl-card-title"><i class="fas fa-chart-pie"></i>Cumplimiento Global</div>
-        <div style="text-align:center;margin-bottom:1rem">
-          <div style="font-size:3.5rem;font-weight:800;color:#1e293b" id="rl-big-pct">0%</div>
-          <div style="color:#6b7280;font-size:.85rem" id="rl-big-pct-sub"></div>
+        <div style="position:relative;max-width:240px;margin:0 auto .5rem">
+          <canvas id="ch-donut"></canvas>
+          <div id="rl-big-pct" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#1e293b;pointer-events:none">0%</div>
         </div>
-        <div class="rl-progress-wrap">
-          <div class="rl-progress-bar" id="rl-global-bar" style="background:linear-gradient(90deg,#10b981,#34d399);width:0%"></div>
-        </div>
-        <div class="rl-legend" style="margin-top:1rem">
+        <div id="rl-big-pct-sub" style="text-align:center;color:#6b7280;font-size:.8rem;margin-bottom:.8rem"></div>
+        <div class="rl-legend">
           <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#10b981"></div>Aprobado</div>
           <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#ef4444"></div>Reprobado</div>
           <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#8b5cf6"></div>Caducado</div>
@@ -266,7 +265,7 @@
 
     </div>
 
-    <!-- Barras por tema (resumen) -->
+    <!-- Barras por tema (resumen) — Chart.js stacked horizontal bar -->
     <div class="rl-card">
       <div class="rl-card-title"><i class="fas fa-bars"></i>Cumplimiento por Capacitación</div>
       <div class="rl-legend">
@@ -275,7 +274,9 @@
         <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#8b5cf6"></div>Caducado</div>
         <div class="rl-legend-item"><div class="rl-legend-dot" style="background:#fbbf24"></div>Pendiente</div>
       </div>
-      <div id="rl-temas-bars"></div>
+      <div style="overflow-x:auto">
+        <canvas id="ch-temas"></canvas>
+      </div>
     </div>
   </div>
 
@@ -317,6 +318,11 @@
 
   <!-- PANEL: INCUMPLIDORES -->
   <div id="rl-p-incump" class="rl-panel" style="display:none">
+    <!-- Ranking chart -->
+    <div class="rl-card" id="rl-inc-chart-card">
+      <div class="rl-card-title"><i class="fas fa-chart-bar"></i>Ranking Incumplidores (Top 10)</div>
+      <div style="overflow-x:auto"><canvas id="ch-inc"></canvas></div>
+    </div>
     <div class="rl-card">
       <div class="rl-card-title"><i class="fas fa-user-times"></i>Trabajadores que No Cumplen</div>
       <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
@@ -413,6 +419,9 @@
 (function(){
   // ── Estado global ─────────────────────────────────────────
   let rlData = null;
+  let _chDonut = null, _chTemas = null, _chInc = null;
+
+  function _destroyChart(ref) { if(ref) { try { ref.destroy(); } catch(e){} } return null; }
 
   // ── Inicializar ───────────────────────────────────────────
   function rlInit() {
@@ -476,15 +485,30 @@
   function rlRenderGeneral() {
     const k = rlData.kpis;
     const pct = k.porcentajeCumplimiento;
+    const color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444';
 
     setText('rl-big-pct', pct + '%');
-    setText('rl-big-pct-sub', k.totalAprobados + ' aprobados de ' + k.totalCeldas + ' (PERSONAL ACTIVO × temas B DATOS)');
+    document.getElementById('rl-big-pct').style.color = color;
+    setText('rl-big-pct-sub', k.totalAprobados + ' aprobados de ' + k.totalCeldas);
 
-    const bar = document.getElementById('rl-global-bar');
-    bar.style.width = pct + '%';
-    bar.style.background = pct >= 80 ? 'linear-gradient(90deg,#10b981,#34d399)' :
-                           pct >= 60 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' :
-                                       'linear-gradient(90deg,#ef4444,#f87171)';
+    // ── Donut chart: aprobados / reprobados / caducados / pendientes
+    _chDonut = _destroyChart(_chDonut);
+    const totalCeldas = k.totalCeldas || 1;
+    const reprobados  = rlData.resumenPorTema.reduce((s,t) => s + (t.reprobados||0), 0);
+    const caducados   = rlData.resumenPorTema.reduce((s,t) => s + (t.caducados||0), 0);
+    const pendientes  = totalCeldas - k.totalAprobados - reprobados - caducados;
+    _chDonut = new Chart(document.getElementById('ch-donut'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Aprobado','Reprobado','Caducado','Pendiente'],
+        datasets: [{ data: [k.totalAprobados, reprobados, caducados, Math.max(pendientes,0)],
+          backgroundColor: ['#10b981','#ef4444','#8b5cf6','#fbbf24'],
+          borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
+      },
+      options: { cutout:'72%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
+        label: ctx => ` ${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed/totalCeldas*100)}%)`
+      }}}, animation:{ animateRotate:true, duration:700 } }
+    });
 
     // Top 5 incumplidores
     const inc = rlData.incumplidores.slice(0, 5);
@@ -494,7 +518,7 @@
         <div class="rl-rank-avatar" style="background:${colors[i]||'#6b7280'}">${rlInitials(t.nombre)}</div>
         <div class="rl-rank-info">
           <div class="rl-ri-name">${rlEsc(t.nombre)}</div>
-          <div class="rl-ri-sub">${rlEsc(t.cargo)} &bull; ${t.reprobados+t.caducados} tema(s) incumplido(s)</div>
+          <div class="rl-ri-sub">${rlEsc(t.cargo)} &bull; ${t.reprobados+t.caducados} incumplido(s)</div>
           <div style="margin-top:.3rem">
             ${t.reprobados ? `<span class="rl-badge rp"><i class="fas fa-times-circle"></i>${t.reprobados} reprobado(s)</span> ` : ''}
             ${t.caducados  ? `<span class="rl-badge cd"><i class="fas fa-hourglass-end"></i>${t.caducados} caducado(s)</span>` : ''}
@@ -508,32 +532,43 @@
     `).join('');
     document.getElementById('rl-top-inc-list').innerHTML = inc.length ? html : '<div style="color:#9ca3af;text-align:center;padding:1rem"><i class="fas fa-check-circle" style="color:#10b981;font-size:1.5rem"></i><br>Sin incumplidores</div>';
 
-    // Barras por tema — fuente: B DATOS col E
+    // ── Stacked horizontal bar chart por tema
+    _chTemas = _destroyChart(_chTemas);
     const temas = [...rlData.resumenPorTema].sort((a,b) => {
       const pa = a.total ? a.aprobados/a.total : 0;
       const pb = b.total ? b.aprobados/b.total : 0;
       return pa - pb;
     });
-    const barsHtml = temas.map(t => {
-      const total = t.total || 1;   // denominador = total ACTIVOS
-      const pAp = (t.aprobados  / total * 100).toFixed(1);
-      const pRp = (t.reprobados / total * 100).toFixed(1);
-      const pCd = (t.caducados  / total * 100).toFixed(1);
-      const pPd = (t.pendientes / total * 100).toFixed(1);
-      const pct2 = Math.round(t.aprobados / total * 100);
-      return `
-        <div class="rl-topic-bar">
-          <div class="rl-topic-name" title="${rlEsc(t.tema)}">${rlEsc(t.tema)}</div>
-          <div class="rl-topic-track">
-            <div class="rl-seg-ap" style="width:${pAp}%" title="${t.aprobados} aprobados de ${t.total} activos"></div>
-            <div class="rl-seg-rp" style="width:${pRp}%" title="${t.reprobados} reprobados"></div>
-            <div class="rl-seg-cd" style="width:${pCd}%" title="${t.caducados} caducados"></div>
-            <div class="rl-seg-pd" style="width:${pPd}%" title="${t.pendientes} sin registro"></div>
-          </div>
-          <div class="rl-topic-pct" style="color:${pct2>=80?'#10b981':pct2>=60?'#f59e0b':'#ef4444'}">${pct2}%</div>
-        </div>`;
-    }).join('');
-    document.getElementById('rl-temas-bars').innerHTML = barsHtml || '<div style="color:#9ca3af;padding:1rem">Sin datos en B DATOS</div>';
+    const labels = temas.map(t => t.tema.length > 30 ? t.tema.slice(0,28)+'…' : t.tema);
+    const mkDs = (key, label, color2) => ({
+      label, backgroundColor: color2,
+      data: temas.map(t => t.total ? Math.round(t[key]/t.total*100) : 0)
+    });
+    const barH = Math.max(temas.length * 32 + 60, 120);
+    document.getElementById('ch-temas').style.height = barH + 'px';
+    _chTemas = new Chart(document.getElementById('ch-temas'), {
+      type: 'bar',
+      data: { labels,
+        datasets: [
+          mkDs('aprobados','Aprobado','#10b981'),
+          mkDs('reprobados','Reprobado','#ef4444'),
+          mkDs('caducados','Caducado','#8b5cf6'),
+          mkDs('pendientes','Pendiente','#fbbf24')
+        ]
+      },
+      options: {
+        indexAxis: 'y', responsive:true, maintainAspectRatio:false,
+        scales: {
+          x: { stacked:true, max:100, ticks:{ callback: v => v+'%', font:{size:11} }, grid:{color:'#f1f5f9'} },
+          y: { stacked:true, ticks:{ font:{size:11} } }
+        },
+        plugins: {
+          legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } },
+          tooltip:{ callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.x}%` } }
+        },
+        animation:{ duration:600 }
+      }
+    });
   }
 
   // ── Panel Temas ───────────────────────────────────────────
@@ -574,7 +609,43 @@
   };
 
   // ── Panel Incumplidores ───────────────────────────────────
-  function rlRenderIncumplidores() { rlFiltrarIncumplidores(); }
+  function rlRenderIncumplidores() {
+    // Horizontal bar chart — top 10 incumplidores por % cumplimiento
+    _chInc = _destroyChart(_chInc);
+    const top10 = rlData.incumplidores.slice(0, 10);
+    if (top10.length) {
+      const incH = Math.max(top10.length * 36 + 60, 120);
+      document.getElementById('ch-inc').style.height = incH + 'px';
+      _chInc = new Chart(document.getElementById('ch-inc'), {
+        type: 'bar',
+        data: {
+          labels: top10.map(t => t.nombre.split(' ').slice(0,2).join(' ')),
+          datasets: [{
+            label: '% Cumplimiento',
+            data: top10.map(t => t.porcentaje),
+            backgroundColor: top10.map(t => t.porcentaje >= 80 ? '#10b981' : t.porcentaje >= 60 ? '#f59e0b' : '#ef4444'),
+            borderRadius: 6, borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive:true, maintainAspectRatio:false,
+          scales: {
+            x: { max:100, ticks:{ callback: v => v+'%', font:{size:11} }, grid:{color:'#f1f5f9'} },
+            y: { ticks:{ font:{size:11} } }
+          },
+          plugins: {
+            legend:{ display:false },
+            tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.x}% cumplimiento` } }
+          },
+          animation:{ duration:600 }
+        }
+      });
+    } else {
+      const card = document.getElementById('rl-inc-chart-card');
+      if(card) card.style.display = 'none';
+    }
+    rlFiltrarIncumplidores();
+  }
   window.rlFiltrarIncumplidores = function() {
     const q    = (document.getElementById('rl-inc-search').value || '').toLowerCase();
     const filt = document.getElementById('rl-inc-filter').value;
