@@ -4,24 +4,44 @@
     <base target="_top">
     <style>
       /* Estilos se heredan de Bootstrap y css.html */
+      #tabla-container table { border-collapse: collapse; width: 100%; font-size: 12px; }
+      #tabla-container th, #tabla-container td { border: 1px solid #ddd; padding: 5px 7px; text-align: left; }
+      #tabla-container thead th { background: #6f42c1; color: #fff; position: sticky; top: 0; }
+      #tabla-container tbody tr:hover { background: #f3f0ff; }
+      .badge-ap { background:#198754; color:#fff; border-radius:4px; padding:2px 7px; font-size:.78rem; }
+      .badge-pct-ok  { background:#198754; color:#fff; border-radius:4px; padding:2px 7px; font-size:.78rem; }
+      .badge-pct-med { background:#f59e0b; color:#fff; border-radius:4px; padding:2px 7px; font-size:.78rem; }
+      .badge-pct-low { background:#dc3545; color:#fff; border-radius:4px; padding:2px 7px; font-size:.78rem; }
+      /* modal detalle */
+      #modalDetalle { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:flex-start; padding-top:40px; }
+      #modalDetalleBox { background:#fff; border-radius:8px; width:90%; max-width:700px;
+        max-height:82vh; overflow:auto; padding:20px; position:relative; }
+      .det-tema-hdr { background:#6f42c1; color:#fff; border-radius:6px 6px 0 0;
+        padding:7px 12px; font-weight:600; font-size:.85rem; display:flex;
+        justify-content:space-between; align-items:center; }
+      .det-tabla { width:100%; border-collapse:collapse; font-size:.8rem; margin-bottom:10px; }
+      .det-tabla th { background:#f3f0ff; padding:4px 8px; border:1px solid #ddd; }
+      .det-tabla td { padding:4px 8px; border:1px solid #ddd; }
+      .det-tabla tbody tr:nth-child(odd) { background:#fafafa; }
     </style>
   </head>
   <body>
     <div class="d-flex align-items-center mt-3">
-  <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #6f42c1;">
-    <i class="fas fa-clipboard-check text-white"></i>
-  </div>
-  <div>
-    <h5 class="mb-0" style="color: #6f42c1;">Cumplimiento</h5>
-    <small class="text-muted">Cursos llevados por trabajador</small>
-  </div>
-</div>
+      <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+           style="width:40px;height:40px;background-color:#6f42c1;">
+        <i class="fas fa-clipboard-check text-white"></i>
+      </div>
+      <div>
+        <h5 class="mb-0" style="color:#6f42c1;">Cumplimiento</h5>
+        <small class="text-muted">Cursos llevados por trabajador</small>
+      </div>
+    </div>
 
-    <!-- Dentro del <body> -->
-     <div id="filtroglobal" class="container-fluid px-0 my-1">
+    <div id="filtroglobal" class="container-fluid px-0 my-1">
       <div class="row g-2 align-items-end" id="noimprimir2">
         <div class="col-md-3">
-          <input type="text" class="form-control" id="filtroTexto" placeholder="Buscar...">
+          <input type="text" class="form-control" id="filtroTexto" placeholder="Buscar nombre, DNI, cargo...">
         </div>
         <div class="col-md-2">
           <label for="fechaDesde" class="form-label mb-0">Desde</label>
@@ -32,7 +52,8 @@
           <input type="date" class="form-control" id="fechaHasta">
         </div>
         <div class="col-md-2">
-          <button id="btnBuscarCapacitaciones" class="btn btn-info w-100" onclick="aplicarFiltrosCumplimiento()">Buscar</button>
+          <button id="btnBuscarCapacitaciones" class="btn btn-info w-100"
+                  onclick="aplicarFiltrosCumplimiento()">Buscar</button>
         </div>
         <div class="col-md-2">
           <div class="d-flex gap-2">
@@ -42,209 +63,224 @@
             </button>
           </div>
         </div>
-
       </div>
+
+      <div id="resumenStrip" class="d-flex gap-3 flex-wrap my-2" style="display:none!important"></div>
+
       <div class="table-responsive print-container">
-        <div id="tabla-container">Debe ingresar por lo menos un rango de fechas</div>
-        </div>
+        <div id="tabla-container">Ingrese criterios de búsqueda y presione Buscar.</div>
+      </div>
     </div>
-    <!-- Modal para visualizar cumplimiento -->
-<div id="modalCumplimiento" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-  <div style="background-color:white; padding:20px; max-width:90%; max-height:90%; overflow:auto;">
-    <button onclick="cerrarModalCumplimiento()" class="btn btn-danger btn-sm mb-0">Cerrar</button>
-    <div id="contenidoModalCumplimiento"></div>
-  </div>
-</div>
+
+    <!-- Modal detalle trabajador -->
+    <div id="modalDetalle">
+      <div id="modalDetalleBox">
+        <button onclick="cerrarDetalle()" class="btn btn-danger btn-sm mb-3">
+          <i class="fa-solid fa-xmark me-1"></i>Cerrar
+        </button>
+        <h6 id="modalDetalleTitulo" class="mb-3" style="color:#6f42c1;font-weight:700"></h6>
+        <div id="modalDetalleSummary" class="mb-3"></div>
+        <div id="modalDetalleContenido">
+          <div class="text-center py-3">
+            <div class="spinner-border text-secondary" style="width:1.5rem;height:1.5rem"></div>
+            <div class="small text-muted mt-1">Cargando historial...</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
-  let datosOriginalesCumpli = [];
+      let datosOriginalesCumpli = [];
 
-function renderizarTablaCumpli(datos) {
-  if (!datos || datos.length === 0) {
-    document.getElementById("tabla-container").innerHTML = "No hay datos.";
-    return;
-  }
-
-  let html = "<table><thead><tr>";
-  html += "<th>#</th>"; // Columna de numeración
-  datos[0].forEach(titulo => html += `<th>${titulo}</th>`);
-  html += "<th>Acciones</th>"; // Nueva columna para el botón Ver
-  html += "</tr></thead><tbody>";
-
-  for (let i = 1; i < datos.length; i++) {
-    html += `<tr><td>${i}</td>`;
-    for (let j = 0; j < datos[i].length; j++) {
-      const celda = datos[i][j] ?? '';
-      
-      // Suponiendo que la columna 'aprobados/previstos' es la número 8 (índice 7)
-      if (j === 13) {
-        html += `<td style="color:#2980b9;">${celda} <i class="fa-solid fa-chart-simple" style="margin-left:2px; font-size:20px;" title="Detalle cumplimiento"></i></td>`;
-      } else {
-        html += `<td>${celda}</td>`;
+      function _esc(s) {
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       }
-    }
 
-    const valorColumnaA = datos[i][0]; // Valor de la columna A (índice 0)
-    html += `<td><button class="btn btn-info" onclick="verDetalle('${valorColumnaA}')"><i class="fa-solid fa-eye"></i></button></td>`;
-    html += "</tr>";
-  }
-
-  html += "</tbody></table>";
-  document.getElementById("tabla-container").innerHTML = html;
-}
-
-function verDetalle(valor) {
-  Swal.fire({
-    title: 'Abriendo...',
-    text: 'Cargando información de Cumplimiento',
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  google.script.run
-    .withSuccessHandler(previsualizarCumplimiento).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); })
-    .insertarYObtenerDatosCumplimiento(valor);
-}
-
-
-
-function previsualizarCumplimiento(datos) {
-  if (!datos || datos.length === 0 || !datos[0]) {
-    Swal.fire("Sin datos", "No se encontraron datos para mostrar.", "warning");
-    return;
-  }
-
-  let html = `
-    <style>
-      .tabla-cumplimiento table {
-        border-collapse: collapse;
-        width: 100%;
-        font-size: 11px;
+      function pctBadge(pct) {
+        const cls = pct >= 80 ? 'badge-pct-ok' : pct >= 50 ? 'badge-pct-med' : 'badge-pct-low';
+        return '<span class="' + cls + '">' + pct + '%</span>';
       }
-      .tabla-cumplimiento th, .tabla-cumplimiento td {
-        border: 1px solid #ddd;
-        padding: 4px;
-        text-align: left;
+
+      function renderizarTablaCumpli(datos) {
+        if (!datos || datos.length === 0) {
+          document.getElementById('tabla-container').innerHTML = 'No hay datos para mostrar.';
+          return;
+        }
+
+        // datos[0] = headers array, datos[1..] = row objects
+        const headers = datos[0];
+        const rows    = datos.slice(1);
+
+        // Resumen strip
+        const strip = document.getElementById('resumenStrip');
+        const total = rows.length;
+        const ok    = rows.filter(r => r.porcentaje === 100).length;
+        const inc   = total - ok;
+        strip.style.removeProperty('display');
+        strip.innerHTML = [
+          ['Trabajadores', total, '#6f42c1'],
+          ['100% Aprobados', ok, '#198754'],
+          ['Incompletos', inc, '#dc3545']
+        ].map(([lbl,val,c]) =>
+          '<span style="background:#f8f5ff;border:1px solid #d8b4fe;border-radius:8px;padding:.3rem .8rem;font-size:.8rem">'
+          + '<b style="color:' + c + '">' + val + '</b> <span style="color:#6b7280">' + lbl + '</span></span>'
+        ).join('');
+
+        let html = '<table><thead><tr>';
+        html += '<th>#</th>';
+        headers.forEach(h => { html += '<th>' + _esc(h) + '</th>'; });
+        html += '<th>Acciones</th>';
+        html += '</tr></thead><tbody>';
+
+        rows.forEach(function(r, i) {
+          html += '<tr>';
+          html += '<td style="color:#9ca3af">' + (i+1) + '</td>';
+          html += '<td style="font-weight:600">' + _esc(r.nombre) + '</td>';
+          html += '<td style="color:#6b7280">' + _esc(r.dni) + '</td>';
+          html += '<td>' + _esc(r.cargo) + '</td>';
+          html += '<td>' + _esc(r.empresa) + '</td>';
+          html += '<td><span class="badge-ap">' + r.aprobados + '</span></td>';
+          html += '<td>' + r.previstos + '</td>';
+          html += '<td>' + pctBadge(r.porcentaje) + '</td>';
+          html += '<td><button class="btn btn-info btn-sm py-0 px-2" onclick="verDetalle(\'' + _esc(r.dni) + '\',\'' + _esc(r.nombre).replace(/'/g,"\\'") + '\')">'
+               + '<i class="fa-solid fa-eye"></i></button></td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('tabla-container').innerHTML = html;
       }
-      .tabla-cumplimiento th:nth-child(2), 
-      .tabla-cumplimiento td:nth-child(2) {
-        width: 300%;
+
+      function aplicarFiltrosCumplimiento() {
+        const btn = document.getElementById('btnBuscarCapacitaciones');
+        btn.innerHTML = 'Buscando...';
+        btn.disabled  = true;
+
+        const texto = document.getElementById('filtroTexto').value;
+        const desde = document.getElementById('fechaDesde').value;
+        const hasta = document.getElementById('fechaHasta').value;
+
+        Swal.fire({
+          title: 'Buscando...',
+          text: 'Cargando cumplimiento por trabajador',
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        google.script.run
+          .withSuccessHandler(function(raw) {
+            Swal.close();
+            btn.innerHTML = 'Buscar';
+            btn.disabled  = false;
+            const res = JSON.parse(raw);
+            if (res.error) {
+              Swal.fire('Error', res.error, 'error');
+              return;
+            }
+            datosOriginalesCumpli = [res.headers, ...res.data];
+            renderizarTablaCumpli(datosOriginalesCumpli);
+          })
+          .withFailureHandler(function(err) {
+            Swal.close();
+            btn.innerHTML = 'Buscar';
+            btn.disabled  = false;
+            Swal.fire('Error', err.message || String(err), 'error');
+          })
+          .getCumplimientoPorTrabajador(texto, desde, hasta);
       }
-      .tabla-cumplimiento tr:nth-child(1),
-      .tabla-cumplimiento tr:nth-child(2),
-      .tabla-cumplimiento tr:nth-child(3),
-      .tabla-cumplimiento tr:nth-child(4) {
-        border: none;
+
+      function limpiarFiltrosCumplimiento() {
+        document.getElementById('filtroTexto').value = '';
+        document.getElementById('fechaDesde').value  = '';
+        document.getElementById('fechaHasta').value  = '';
+        if (datosOriginalesCumpli.length > 1) {
+          renderizarTablaCumpli(datosOriginalesCumpli);
+        }
       }
-      .tabla-cumplimiento tr:nth-child(1) td,
-      .tabla-cumplimiento tr:nth-child(2) td,
-      .tabla-cumplimiento tr:nth-child(3) td,
-      .tabla-cumplimiento tr:nth-child(4) td {
-        border: none;
+
+      function verDetalle(dni, nombre) {
+        document.getElementById('modalDetalleTitulo').textContent = nombre + ' — ' + dni;
+        document.getElementById('modalDetalleSummary').innerHTML  = '';
+        document.getElementById('modalDetalleContenido').innerHTML =
+          '<div class="text-center py-3"><div class="spinner-border text-secondary" style="width:1.5rem;height:1.5rem"></div>'
+          + '<div class="small text-muted mt-1">Cargando historial...</div></div>';
+        document.getElementById('modalDetalle').style.display = 'flex';
+
+        // Summary from cached table
+        const fila = datosOriginalesCumpli.slice(1).find(r => r.dni === dni);
+        if (fila) {
+          document.getElementById('modalDetalleSummary').innerHTML =
+            '<div class="d-flex gap-2 flex-wrap">'
+            + '<span class="badge-ap">' + fila.aprobados + ' Aprobados</span>'
+            + '<span style="background:#e5e7eb;border-radius:4px;padding:2px 7px;font-size:.78rem">'
+            +   fila.previstos + ' Previstos</span>'
+            + pctBadge(fila.porcentaje)
+            + '</div>';
+        }
+
+        google.script.run
+          .withSuccessHandler(function(raw) {
+            const data = JSON.parse(raw);
+            mostrarDetalleHistorial(data);
+          })
+          .withFailureHandler(function(err) {
+            document.getElementById('modalDetalleContenido').innerHTML =
+              '<div class="text-danger p-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>'
+              + _esc(err.message || String(err)) + '</div>';
+          })
+          .getHistorialCapacitacionesTrabajador(dni);
       }
-      .tabla-cumplimiento tbody tr:nth-child(5) {
-        background-color: #d6dbdf;
-        font-weight: bold;
-        font-size: 10px;
+
+      function mostrarDetalleHistorial(data) {
+        const el = document.getElementById('modalDetalleContenido');
+        if (!data.historial || !data.historial.length) {
+          el.innerHTML = '<p class="text-muted">Sin registros en B DATOS para este trabajador.</p>';
+          return;
+        }
+
+        const badgeCls = function(e) {
+          return e === 'Aprobado' ? 'badge-ap'
+               : e === 'Reprobado' ? 'badge-pct-low'
+               : 'badge-pct-med';
+        };
+
+        const html = data.historial.map(function(item) {
+          const ultimo = item.intentos[0];
+          const filas  = item.intentos.map(function(it, i) {
+            return '<tr>'
+              + '<td style="color:#9ca3af;padding:4px 8px">#' + (i+1) + '</td>'
+              + '<td style="padding:4px 8px">' + _esc(it.fecha || '—') + '</td>'
+              + '<td style="padding:4px 8px;text-align:center">' + it.puntaje + '</td>'
+              + '<td style="padding:4px 8px"><span class="' + badgeCls(it.estado) + '">'
+              + _esc(it.estado) + '</span></td>'
+              + '</tr>';
+          }).join('');
+
+          return '<div style="margin-bottom:12px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden">'
+            + '<div class="det-tema-hdr">'
+            +   '<span>' + _esc(item.tema) + '</span>'
+            +   '<span style="font-size:.75rem;opacity:.85">' + item.intentos.length + ' intento(s)'
+            +   (ultimo ? ' &bull; <span class="' + badgeCls(ultimo.estado) + '">' + _esc(ultimo.estado) + '</span>' : '')
+            +   '</span>'
+            + '</div>'
+            + '<table class="det-tabla"><thead><tr>'
+            + '<th>#</th><th>Fecha</th><th>Puntaje</th><th>Estado</th>'
+            + '</tr></thead><tbody>' + filas + '</tbody></table>'
+            + '</div>';
+        }).join('');
+
+        el.innerHTML = html;
       }
-    </style>
-    <div class="tabla-cumplimiento">
-      <table><thead>
-  `;
 
-  // Fila 1 personalizada: combinar B1:G1
-  html += "<tr>";
-  html += "<th></th>";
-  html += `<th colspan="6" style="text-align:center;">${datos[0].slice(1, 7).join(' ')}</th>`;
-  html += "<th></th>";
-  html += "</tr>";
+      function cerrarDetalle() {
+        document.getElementById('modalDetalle').style.display = 'none';
+      }
 
-  // Fila de encabezados
-  if (datos.length > 1) {
-    html += "<tr>";
-    datos[1].forEach(titulo => html += `<th>${titulo}</th>`);
-    html += "</tr></thead><tbody>";
-  }
-
-  for (let i = 2; i < datos.length; i++) {
-    html += "<tr>";
-    datos[i].forEach(celda => html += `<td>${celda}</td>`);
-    html += "</tr>";
-  }
-
-  html += "</tbody></table></div>";
-   Swal.close();
-  abrirModalCumplimiento(html);
-}
-
-
-
-function abrirModalCumplimiento(html) {
-  document.getElementById("contenidoModalCumplimiento").innerHTML = html;
-  document.getElementById("modalCumplimiento").style.display = "flex";
-}
-
-function cerrarModalCumplimiento() {
-  document.getElementById("modalCumplimiento").style.display = "none";
-}
-
-
-function aplicarFiltrosCumplimiento(start = 0, length = 30) {
-  const btnbuscarCap = document.getElementById('btnBuscarCapacitaciones');
-  btnbuscarCap.innerHTML = "Buscando...";
-  btnbuscarCap.disabled = true;
-
-  const texto = document.getElementById("filtroTexto").value;
-  const desde = document.getElementById("fechaDesde").value;
-  const hasta = document.getElementById("fechaHasta").value;
-
-  Swal.fire({
-    title: 'Buscando...',
-    text: 'Aplicando filtros y buscando registros',
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  google.script.run.withSuccessHandler(function(response) {
-    Swal.close();
-    btnbuscarCap.innerHTML = "Buscar";
-    btnbuscarCap.disabled = false;
-
-    // Guardamos datos por si se quiere paginar luego
-    datosOriginalesCumpli = [response.headers, ...response.data];
-
-    renderizarTablaCumpli(datosOriginalesCumpli);
-
-    // Aquí podrías agregar un renderizador de paginación con response.total
-    // renderizarPaginacion(response.total, start, length);
-
-  }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getDatosDesdeBDATOS(start, length, texto, desde, hasta);
-}
-
-
-
-
-function limpiarFiltrosCumplimiento() {
-  document.getElementById("filtroTexto").value = "";
-  document.getElementById("fechaDesde").value = "";
-  document.getElementById("fechaHasta").value = "";
-
-  const encabezado = datosOriginalesCumpli[0];
-  const registros = datosOriginalesCumpli.slice(1); // sin cabecera
-  const ultimos30 = registros.slice(-30); // los últimos 30
-
-  const datosConEncabezado = [encabezado, ...ultimos30]; // unimos cabecera + últimos 30
-  renderizarTablaCumpli(datosConEncabezado);
-}
-
-  
-</script>
-
+      // Cerrar modal al hacer clic fuera
+      document.getElementById('modalDetalle').addEventListener('click', function(e) {
+        if (e.target === this) cerrarDetalle();
+      });
+    </script>
   </body>
 </html>

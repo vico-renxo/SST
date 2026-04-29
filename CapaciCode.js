@@ -1382,6 +1382,95 @@ function obtenerOpcionesFormulario() {
     }                                                                                                                                         
                                                                                                                                               
                                                                                                                                               
+// ─────────────────────────────────────────────────────────────────
+// getCumplimientoPorTrabajador(search, fechaDesde, fechaHasta)
+// Una fila por trabajador activo. Filtra B DATOS por rango de fecha
+// si se indica. Calcula aprobados vigentes vs previstos de la Matriz.
+// ─────────────────────────────────────────────────────────────────
+function getCumplimientoPorTrabajador(search, fechaDesde, fechaHasta) {
+  try {
+    const ssCap      = getSpreadsheetCapacitaciones();
+    const ssPersonal = getSpreadsheetPersonal();
+    const tz         = Session.getScriptTimeZone();
+
+    // 1. PERSONAL activos
+    const hP     = ssPersonal.getSheetByName('PERSONAL');
+    const rawP   = hP.getLastRow() > 1 ? hP.getRange(2, 1, hP.getLastRow()-1, 12).getValues() : [];
+    const personal = rawP.filter(r => {
+      const est = String(r[11]||'').trim().toUpperCase();
+      return r[1] && (est === 'ACTIVO' || est === 'SI');
+    }).map(r => ({
+      dni:     String(r[1]).trim().replace(/^'/,''),
+      nombre:  String(r[2]||'').trim(),
+      cargo:   String(r[6]||'').trim(),
+      empresa: String(r[4]||'').trim()
+    }));
+
+    // 2. Matriz → previstos por cargo
+    const hMat     = ssCap.getSheetByName('Matriz');
+    const lastColM = hMat.getLastColumn();
+    const lastRowM = hMat.getLastRow();
+    const temasFila   = hMat.getRange(17, 5, 1, lastColM - 4).getValues()[0];
+    const cargosCol   = hMat.getRange(18, 4, lastRowM - 17, 1).getValues().flat();
+    const matrizVals  = hMat.getRange(18, 5, lastRowM - 17, lastColM - 4).getValues();
+    const prevPorCargo = {};
+    cargosCol.forEach((cargo, i) => {
+      if (!cargo) return;
+      prevPorCargo[String(cargo).trim()] = (matrizVals[i] || []).filter(v => v === true || v === 'VERDADERO').length;
+    });
+
+    // 3. B DATOS → aprobados vigentes por DNI x Tema dentro del rango
+    const hBD   = ssCap.getSheetByName('B DATOS');
+    const rawBD = hBD.getLastRow() > 1 ? hBD.getRange(2, 1, hBD.getLastRow()-1, 11).getValues() : [];
+    const hoy   = new Date();
+    const desde = fechaDesde ? new Date(fechaDesde) : null;
+    const hasta = fechaHasta ? new Date(fechaHasta + 'T23:59:59') : null;
+
+    // mapa DNI → Set de temas aprobados vigentes
+    const aprobPorDni = {};
+    rawBD.forEach(function(row) {
+      const dni    = String(row[0]||'').trim().replace(/^'/,'');
+      const tema   = String(row[4]||'').trim();
+      const estado = String(row[9]||'').trim();
+      const dias   = parseInt(row[10]) || 365;
+      const fecha  = row[7];
+      if (!dni || !tema || !(fecha instanceof Date) || isNaN(fecha)) return;
+      if (estado !== 'Aprobado') return;
+      // filtro rango de fecha (fecha de evaluación)
+      if (desde && fecha < desde) return;
+      if (hasta && fecha > hasta) return;
+      // vigencia
+      const venc = new Date(fecha); venc.setDate(venc.getDate() + dias);
+      if (hoy > venc) return;
+      if (!aprobPorDni[dni]) aprobPorDni[dni] = new Set();
+      aprobPorDni[dni].add(tema);
+    });
+
+    // 4. Construir filas por trabajador
+    const q = (search || '').toLowerCase().trim();
+    const rows = personal.map(function(p) {
+      const aprobados = aprobPorDni[p.dni] ? aprobPorDni[p.dni].size : 0;
+      const previstos = prevPorCargo[p.cargo] || 0;
+      const pct = previstos > 0 ? Math.round(aprobados / previstos * 100) : 0;
+      return { dni: p.dni, nombre: p.nombre, cargo: p.cargo, empresa: p.empresa,
+               aprobados: aprobados, previstos: previstos, porcentaje: pct };
+    }).filter(function(r) {
+      if (!q) return true;
+      return r.nombre.toLowerCase().includes(q) || r.dni.includes(q) ||
+             r.cargo.toLowerCase().includes(q) || r.empresa.toLowerCase().includes(q);
+    }).sort(function(a, b) { return a.nombre.localeCompare(b.nombre); });
+
+    Logger.log('getCumplimientoPorTrabajador: ' + rows.length + ' trabajadores');
+    return JSON.stringify({
+      headers: ['DNI','Nombre','Cargo','Empresa','Aprobados','Previstos','%'],
+      data: rows
+    });
+  } catch(e) {
+    Logger.log('getCumplimientoPorTrabajador error: ' + e.message);
+    return JSON.stringify({ error: e.message, headers: [], data: [] });
+  }
+}
+
     function insertarYObtenerDatosCumplimiento(valor) {                                                                                       
       const hoja = getSpreadsheetCapacitaciones().getSheetByName("CUMPLIMIENTO🧍‍♂️");                                                          
       hoja.getRange("B3").setValue(valor);                                                                                                    

@@ -222,7 +222,8 @@ eventos/accidentes e IPERC.
 **Funciones públicas relevantes:**
 - `obtenerDatosPorDNI(dni)` — cursos asignados al trabajador según matriz (estado actual)
 - `obtenerDashboardLaboral()` — KPIs + `cumplimientoPorTrabajador` (todos activos) + incumplidores + vacunas
-- `getHistorialCapacitacionesTrabajador(dni)` — **NUEVO** todos los intentos de evaluación agrupados por tema, newest-first. Retorna `{historial:[{tema, intentos:[{puntaje, fecha, estado}]}]}`. Excluye filas ACTIVACION. Usada por el modal "Acciones" en Capacitaciones.html.
+- `getHistorialCapacitacionesTrabajador(dni)` — todos los intentos de evaluación agrupados por tema, newest-first. Retorna `JSON.stringify({historial:[{tema, intentos:[{puntaje,fecha,estado}]}]})`. Excluye filas ACTIVACION. Usada por el botón "Acciones" en BuscadorCap.html.
+- `getCumplimientoPorTrabajador(search, fechaDesde, fechaHasta)` — una fila por trabajador activo (DNI, Nombre, Cargo, Empresa, Aprobados, Previstos, %). Filtra B DATOS por rango de fecha de evaluación; calcula aprobados vigentes vs previstos de la Matriz. Retorna `JSON.stringify({headers, data:[{dni,nombre,cargo,empresa,aprobados,previstos,porcentaje}]})`. Usada por BuscadorCap.html.
 
 ---
 
