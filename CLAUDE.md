@@ -729,4 +729,56 @@ grep -B5 'appendRow' /home/user/SST/*.js | grep -E 'for|forEach|map|while'
 
 ---
 
+## 11. LECCIONES APRENDIDAS — DECISIONES CRÍTICAS DE ARQUITECTURA
+
+### L1 · HTML parciales NO procesan template directives GAS
+
+**Problema:** Se intentó dividir `ReportesLaboral.html` en `rlCss.html` + `rlScript.html` usando `<?!= include('rlCss') ?>` para evitar timeouts al subir archivos grandes.
+
+**Lo que pasó:** Las directivas `<?!=...?>` solo se procesan en el archivo raíz cargado via `HtmlService.createTemplateFromFile()` (actualmente `index.html`). Los parciales incluidos con `include()` se sirven como HTML estático — las directivas aparecen literalmente en el DOM.
+
+**Regla:** Los archivos HTML de módulos (Check.html, MovimEpp.html, ReportesLaboral.html, etc.) son **parciales estáticos**. No usar `<?!=...?>` en ellos. Todo CSS y JS debe estar autocontenido en el mismo archivo.
+
+---
+
+### L2 · Push a GitHub: el proxy CCR es de solo lectura por sesión
+
+**Problema:** El proxy local `127.0.0.1:XXXXX/git/...` cambia de puerto en cada invocación y solo permite `git fetch` (GET). `git push` devuelve 403 siempre. El MCP `create_or_update_file` también devuelve 403 (la integración de Anthropic tiene acceso de solo lectura al repo).
+
+**Solución permanente:** Configurar el remote con un PAT de GitHub al inicio de cada sesión:
+```bash
+PAT="github_pat_..."
+git remote set-url origin "https://x-access-token:${PAT}@github.com/vico-renxo/SST.git"
+```
+**IMPORTANTE:** El proxy puede sobrescribir el remote al cambiar de puerto. Ejecutar `git remote set-url` justo antes de cada push si el primero falla con 403.
+
+---
+
+### L3 · Archivos HTML grandes (>600 líneas) — estrategia de edición
+
+**Problema:** Pasar contenido de archivos grandes como parámetro de herramientas MCP causa "stream idle timeout — partial response received". El timeout ocurre durante la generación del parámetro, no durante la llamada HTTP.
+
+**Decisiones correctas:**
+1. Usar `Edit` (diff) en lugar de `Write` (archivo completo) siempre que sea posible.
+2. Nunca leer un archivo completo y pasarlo íntegro a una herramienta MCP en el mismo turno.
+3. Si se necesita reescribir un archivo grande, usar `Bash` con heredoc (`cat > archivo << 'EOF'`) — es una operación local que no genera timeout.
+4. Hacer push después de cada commit individual, no acumular commits.
+
+**Decisiones incorrectas a evitar:**
+- Intentar pasar 40KB+ como parámetro `content` a `mcp__github__create_or_update_file`.
+- Crear archivos de "split" para evitar el timeout — complica la arquitectura sin resolver el problema raíz.
+- Minificar el CSS/JS para reducir líneas — no soluciona el timeout del stream, solo oscurece el código.
+
+---
+
+### L4 · Chart.js en módulos GAS — patrón correcto
+
+**Para agregar Chart.js** a un módulo HTML de GAS:
+1. Agregar CDN al inicio del archivo: `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>`
+2. Guardar instancias de charts en variables de módulo: `let _chDonut = null`
+3. Siempre destruir antes de recrear: `function _destroyChart(ref) { if(ref) { try { ref.destroy(); } catch(e){} } return null; }`
+4. Para charts de tamaño dinámico (basado en número de filas), ajustar `canvas.style.height` antes de crear el chart y usar `maintainAspectRatio: false`.
+
+---
+
 *Fin de CLAUDE.md — Actualizar después de cada cambio estructural.*
