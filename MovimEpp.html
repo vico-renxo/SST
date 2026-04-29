@@ -201,14 +201,11 @@
         <div><strong>DNI:</strong> <span id="p_dniEPP">—</span> &nbsp;|&nbsp; <strong>Condición:</strong> <span id="p_condicionEPP">—</span></div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <span class="small text-muted">Previstos primero</span>
-        <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" id="swAsignadosEPP" checked></div>
         <button id="btnQuitarPersonaEPP" class="btn btn-sm btn-outline-secondary">Quitar</button>
       </div>
     </div>
     <div class="mt-2 d-flex align-items-center gap-2">
       <button class="btn btn-sm btn-outline-secondary" id="btnToggleHistEPP">Historial</button>
-      <button class="btn btn-sm btn-outline-primary" id="btnExportHistEPP"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
       <button class="btn btn-sm btn-danger" id="btnExportRegistroPDF"><i class="fa-solid fa-file-pdf"></i> Exportar Registro</button>
       <span class="small text-muted">Almacén actual: <b id="cartAlmEPP">—</b></span>
       <span id="badgeEstadosAdmin" class="ms-auto"></span>
@@ -473,9 +470,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('btnCartClear').addEventListener('click', cartClear);
   document.getElementById('btnCartExec').addEventListener('click', cartExec);
   document.getElementById('btnQuitarPersonaEPP').addEventListener('click', quitarPersona);
-  document.getElementById('swAsignadosEPP').addEventListener('change', renderCards);
   document.getElementById('btnToggleHistEPP').addEventListener('click', ()=> document.getElementById('historialBoxEPP').classList.toggle('d-none'));
-  document.getElementById('btnExportHistEPP').addEventListener('click', exportHistorialXlsx);
   document.getElementById('btnExportRegistroPDF').addEventListener('click', exportarRegistroPDF);
   document.getElementById('productSearch').addEventListener('input', (e)=>{ stateEPP.searchTerm=(e.target.value||'').toLowerCase(); renderCards(); });
   document.getElementById('btnClearSearch').addEventListener('click', ()=>{ document.getElementById('productSearch').value=''; stateEPP.searchTerm=''; renderCards(); });
@@ -908,79 +903,6 @@ function xlsxDownload(filename, aoa, sheetName='Hoja1'){
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   XLSX.writeFile(wb, filename);
 }
-function exportHistorialXlsx(){
-  if (!stateEPP.persona){ Swal.fire('Primero busca un trabajador','','info'); return; }
-
-  // Preferimos la lista colapsada; si aún no existe, colapsamos al vuelo desde el raw
-  const list = (stateEPP.historialCollapsed && stateEPP.historialCollapsed.length)
-    ? stateEPP.historialCollapsed
-    : collapseHistorial(stateEPP.historialRaw || []);
-
-  if (!list.length){ Swal.fire('Sin historial para exportar','','info'); return; }
-
-  const headers = ['Fecha','Tipo','Producto','Variante','Cantidad','Costo Unit.','Importe','Moneda','Devolvible','Estado','Firma'];
-  const rows = list.map(x=>{
-    const dev = (String(x.DEVOLVIBLE||'').trim().toLowerCase().startsWith('s')?'Sí':'No');
-    return [
-      x.FECHA||'',
-      x.OPERACION||'',
-      x.PRODUCTO||'',
-      x.VARIANTE||'',
-      x.CANTIDAD||0,
-      x.COSTO_UNITARIO||0,
-      x.IMPORTE||0,
-      x.MONEDA||'PEN',
-      dev,
-      x.STATUS||'',
-      x.FIRMA_URL || '' // ← guardamos la url cruda, luego la convertimos a link
-    ];
-  });
-
-  // Construir hoja
-  const aoa = [headers, ...rows];
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-  // Hipervínculos en la última columna (Firma)
-  const sigColIdx = headers.length - 1;
-  for (let i = 0; i < rows.length; i++){
-    const url = rows[i][sigColIdx];
-    if (url){
-      const cellAddr = XLSX.utils.encode_cell({ r: i+1, c: sigColIdx }); // +1 por cabecera
-      // Texto visible
-      ws[cellAddr] = ws[cellAddr] || {};
-      ws[cellAddr].t = 's';
-      ws[cellAddr].v = 'Ver firma';
-      // Hyperlink nativo
-      ws[cellAddr].l = { Target: url };
-      // Fallback universal (Excel/Sheets): fórmula HYPERLINK
-      ws[cellAddr].f = `HYPERLINK("${url}","Ver firma")`;
-    }
-  }
-
-  // Anchos de columna y autofiltro
-  ws['!cols'] = [
-    { wch:12 }, // Fecha
-    { wch:12 }, // Tipo
-    { wch:26 }, // Producto
-    { wch:18 }, // Variante
-    { wch:8  }, // Cantidad
-    { wch:12 }, // Costo Unit.
-    { wch:12 }, // Importe
-    { wch:8  }, // Moneda
-    { wch:10 }, // Devolvible
-    { wch:18 }, // Estado
-    { wch:12 }  // Firma
-  ];
-  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:rows.length,c:sigColIdx}}) };
-
-  // Libro y descarga
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Historial');
-
-  const ts = new Date(); const pad=n=>String(n).padStart(2,'0');
-  const name = `Historial_${stateEPP.persona.DNI}_${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}.xlsx`;
-  XLSX.writeFile(wb, name);
-}
 
 
 function exportarRegistroPDF() {
@@ -1077,7 +999,7 @@ function renderCards(){
 
   const hasPersona = !!stateEPP.persona;
   const cargo = stateEPP.persona?.CARGO || '';
-  const asignadosFirst = document.getElementById('swAsignadosEPP')?.checked ?? true;
+
 
   const activeChip=document.querySelector('#chipCats .chip.active'); 
   const cat=activeChip?activeChip.dataset.cat:'Todos';

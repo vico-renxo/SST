@@ -2556,7 +2556,7 @@ function _fmtFechaPDF(val) {
   try {
     var d = (val instanceof Date) ? val : new Date(val);
     if (isNaN(d)) return String(val);
-    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
   } catch (e) { return String(val || ''); }
 }
 
@@ -2601,25 +2601,44 @@ function generarRegistroEPP(dni) {
     if (!regRaw.length) throw new Error('Sin registros de entrega para DNI: ' + dni);
 
     // ── 4. Responsable del registro (USUARIO del registro más reciente) ───
+    // USUARIO almacena el nombre resuelto por _resolveUsuarioNombre() —
+    // comparar contra col C (nombre) e-insensitive; fallback: sesión activa
     var respNombre = '', respCargo = '', respFirmaB64 = '';
     try {
-      var lastRow = regRaw[regRaw.length - 1];
-      var usuarioEmail = _str(lastRow[IDX.REG.USUARIO - 1]);
-      if (usuarioEmail) {
-        var hP = getSpreadsheetPersonal().getSheetByName('PERSONAL');
-        var pData = hP.getRange(2, 1, hP.getLastRow() - 1, 18).getDisplayValues();
-        for (var pi = 0; pi < pData.length; pi++) {
-          var emailFila  = _str(pData[pi][12]).toLowerCase();
-          var nombreFila = _str(pData[pi][2]).toLowerCase();
-          if (emailFila === usuarioEmail.toLowerCase() || nombreFila === usuarioEmail.toLowerCase()) {
-            respNombre   = _str(pData[pi][2]).toUpperCase();
-            respCargo    = _str(pData[pi][6]).toUpperCase();
-            respFirmaB64 = _eppUrlToB64(_str(pData[pi][17]));
-            break;
+      var lastRawRow = regRaw[regRaw.length - 1];
+      var usuarioStr = _str(lastRawRow[IDX.REG.USUARIO - 1]).trim().toLowerCase();
+      // Fallback: usuario GAS activo
+      if (!usuarioStr) {
+        try { usuarioStr = Session.getActiveUser().getEmail().toLowerCase(); } catch(e2) {}
+      }
+      var hP = getSpreadsheetPersonal().getSheetByName('PERSONAL');
+      var pData = hP.getRange(2, 1, hP.getLastRow() - 1, 18).getDisplayValues();
+      for (var pi = 0; pi < pData.length; pi++) {
+        var emailFila  = _str(pData[pi][12]).trim().toLowerCase();
+        var nombreFila = _str(pData[pi][2]).trim().toLowerCase();
+        if (usuarioStr && (emailFila === usuarioStr || nombreFila === usuarioStr)) {
+          respNombre   = _str(pData[pi][2]).toUpperCase();
+          respCargo    = _str(pData[pi][6]).toUpperCase();
+          respFirmaB64 = _eppUrlToB64(_str(pData[pi][17]));
+          break;
+        }
+      }
+      // Segundo fallback: sesión activa si el primer lookup no dio firma
+      if (!respFirmaB64) {
+        var sesEmail = '';
+        try { sesEmail = Session.getActiveUser().getEmail().toLowerCase(); } catch(e3) {}
+        if (sesEmail) {
+          for (var pi2 = 0; pi2 < pData.length; pi2++) {
+            if (_str(pData[pi2][12]).trim().toLowerCase() === sesEmail) {
+              if (!respNombre) respNombre = _str(pData[pi2][2]).toUpperCase();
+              if (!respCargo)  respCargo  = _str(pData[pi2][6]).toUpperCase();
+              respFirmaB64 = _eppUrlToB64(_str(pData[pi2][17]));
+              break;
+            }
           }
         }
       }
-    } catch (e) {}
+    } catch (e) { Logger.log('generarRegistroEPP lookup supervisor: ' + e.message); }
 
     // ── 5. Construir filas de la tabla ────────────────────────────────────
     var today = _today();
