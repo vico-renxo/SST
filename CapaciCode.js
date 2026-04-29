@@ -2285,6 +2285,58 @@ function obtenerDashboardLaboral() {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────
+// getHistorialCapacitacionesTrabajador(dni)
+// Retorna todos los intentos de evaluación de un trabajador,
+// agrupados por tema, ordenados del más reciente al más antiguo.
+// ─────────────────────────────────────────────────────────────────
+function getHistorialCapacitacionesTrabajador(dni) {
+  try {
+    const ssCap  = getSpreadsheetCapacitaciones();
+    const hojaBD = ssCap.getSheetByName('B DATOS');
+    if (!hojaBD || hojaBD.getLastRow() < 2)
+      return JSON.stringify({ historial: [] });
+
+    const dniClean = String(dni).trim().replace(/^'/, '');
+    const rows = hojaBD.getRange(2, 1, hojaBD.getLastRow() - 1, 11).getValues();
+    const tz   = Session.getScriptTimeZone();
+
+    const porTema = {};
+    rows.forEach(function(row) {
+      const rowDni = String(row[0] || '').trim().replace(/^'/, '');
+      if (rowDni !== dniClean) return;
+      const estadoRaw = String(row[9] || '').trim().toUpperCase();
+      if (estadoRaw === 'ACTIVACION') return;
+
+      const tema    = String(row[4] || '').trim();
+      if (!tema) return;
+      const puntaje = parseFloat(row[6]) || 0;
+      const estado  = String(row[9] || '').trim();
+      const fechaRaw = row[7];
+      let fecha = '';
+      if (fechaRaw instanceof Date && !isNaN(fechaRaw))
+        fecha = Utilities.formatDate(fechaRaw, tz, 'dd/MM/yyyy HH:mm');
+
+      if (!porTema[tema]) porTema[tema] = [];
+      porTema[tema].push({ puntaje: puntaje, fecha: fecha, estado: estado });
+    });
+
+    // Sort each topic's attempts newest-first
+    const historial = Object.keys(porTema).sort().map(function(tema) {
+      const intentos = porTema[tema].sort(function(a, b) {
+        return b.fecha.localeCompare(a.fecha);
+      });
+      return { tema: tema, intentos: intentos };
+    });
+
+    Logger.log('getHistorialCapacitacionesTrabajador: dni=' + dniClean + ' temas=' + historial.length);
+    return JSON.stringify({ historial: historial });
+  } catch(e) {
+    Logger.log('getHistorialCapacitacionesTrabajador error: ' + e.message);
+    return JSON.stringify({ error: e.message, historial: [] });
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // ASISTENTE DE VOZ — funciones de consulta para Cloudflare Worker
 // ═══════════════════════════════════════════════════════════════════

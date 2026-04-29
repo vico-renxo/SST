@@ -219,6 +219,10 @@ eventos/accidentes e IPERC.
 **Hojas:** Matriz, B DATOS, LIST
 **Carpetas Drive:** foldercharlas (charlas), foldefirmascap (firmas cap)
 **Dependencias:** getSpreadsheetPersonal() (Code.js)
+**Funciones públicas relevantes:**
+- `obtenerDatosPorDNI(dni)` — cursos asignados al trabajador según matriz (estado actual)
+- `obtenerDashboardLaboral()` — KPIs + `cumplimientoPorTrabajador` (todos activos) + incumplidores + vacunas
+- `getHistorialCapacitacionesTrabajador(dni)` — **NUEVO** todos los intentos de evaluación agrupados por tema, newest-first. Retorna `{historial:[{tema, intentos:[{puntaje, fecha, estado}]}]}`. Excluye filas ACTIVACION. Usada por el modal "Acciones" en Capacitaciones.html.
 
 ---
 
