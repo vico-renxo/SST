@@ -8,7 +8,7 @@
 //    - PUSH_AUTH_TOKEN  (token secreto que GAS envía para autenticarse)
 // ============================================================
 
-const VAPID_PUBLIC  = 'BGivQjFutLF_ixAlil_Q2ntGtM1RgRcLEuxtlwXLknRXN_GOogO26oCOcm9aTfhYfrKPicrhUQP7AqBk4Q1PpRY';
+const VAPID_PUBLIC  = 'B*GivQjFutLF_ixAlil_Q2ntGtM1RgRcLEuxtlwXLknRXN_GOogO26oCOcm9aTfhYfrKPicrhUQP7AqBk4Q1PpRY';
 const VAPID_SUBJECT = 'mailto:victorcaracela@gmail.com';
 const GAS_URL       = 'https://script.google.com/macros/s/AKfycbwJrer0KO6jEd9HFso-AKzARyzlVdRrblJzm1H2i2ylWCbsCS9XzLGAfuQio2EPMzg/exec';
 const AUTH_TOKEN_FALLBACK = 'adecco_push_2026_secret_token_xyz123';
