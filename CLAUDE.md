@@ -224,6 +224,7 @@ eventos/accidentes e IPERC.
 - `obtenerDashboardLaboral()` — KPIs + `cumplimientoPorTrabajador` (todos activos) + incumplidores + vacunas
 - `getHistorialCapacitacionesTrabajador(dni)` — todos los intentos de evaluación agrupados por tema, newest-first. Retorna `JSON.stringify({historial:[{tema, intentos:[{puntaje,fecha,estado}]}]})`. Excluye filas ACTIVACION. Usada por el botón "Acciones" en BuscadorCap.html.
 - `getCumplimientoPorTrabajador(search, fechaDesde, fechaHasta)` — una fila por trabajador activo (DNI, Nombre, Cargo, Empresa, Aprobados, Previstos, %). Filtra B DATOS por rango de fecha de evaluación; calcula aprobados vigentes vs previstos de la Matriz. Retorna `JSON.stringify({headers, data:[{dni,nombre,cargo,empresa,aprobados,previstos,porcentaje}]})`. Usada por BuscadorCap.html.
+- `generarRegistroCap(codigo)` — genera PDF "REGISTRO DE INDUCCIÓN, CAPACITACIÓN, ENTRENAMIENTO Y SIMULACROS DE EMERGENCIA" (SSOMA-FR006). Lee TEMAS por código → lee REGISTRO FIRMAS por Código Registro (col 11) → obtiene info empresa → busca firma capacitador en PERSONAL. Mapea área+tema a checkboxes TIPO (actividad/materia). Convierte firmas Drive a base64. Genera HTML → PDF via `Utilities.newBlob().getAs(MimeType.PDF)` → guarda en foldercharlas. Retorna `JSON.stringify({url})`. Usada por RegistrosCap.html botón PDF.
 
 ---
 

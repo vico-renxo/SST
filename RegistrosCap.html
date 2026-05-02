@@ -192,6 +192,13 @@
             }
           }
 
+          const btnPDF = document.createElement("button");
+          btnPDF.innerHTML = '<i class="fa-solid fa-file-pdf"></i>';
+          btnPDF.className = "btn btn-sm btn-success ms-1";
+          btnPDF.title = "Descargar registro de asistencia";
+          btnPDF.onclick = () => descargarRegistroCap(fila[0]);
+          btnTd.appendChild(btnPDF);
+
           // Celda de progreso (se rellena luego con cargarProgreso)
           const tdProgreso = document.createElement("td");
           tdProgreso.id = `progreso-${fila[0]}`;
@@ -495,6 +502,32 @@
             }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).eliminarTemaPorCodigo(codigo);
           }
         });
+      }
+
+      function descargarRegistroCap(codigo) {
+        if (!codigo) return;
+        Swal.fire({
+          title: 'Generando PDF...',
+          text: 'Preparando registro de asistencia',
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+        google.script.run
+          .withSuccessHandler(function(raw) {
+            Swal.close();
+            const res = JSON.parse(raw);
+            if (res.error) {
+              Swal.fire('Error', res.error, 'error');
+              return;
+            }
+            window.open(res.url, '_blank');
+          })
+          .withFailureHandler(function(err) {
+            Swal.close();
+            Swal.fire('Error', err.message || String(err), 'error');
+          })
+          .generarRegistroCap(codigo);
       }
 
       document.addEventListener("DOMContentLoaded", function () {

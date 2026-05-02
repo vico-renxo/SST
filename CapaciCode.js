@@ -2378,7 +2378,346 @@ function obtenerDashboardLaboral() {
 // getHistorialCapacitacionesTrabajador(dni)
 // Retorna todos los intentos de evaluación de un trabajador,
 // agrupados por tema, ordenados del más reciente al más antiguo.
-// ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// generarRegistroCap(codigo)
+// Genera PDF "REGISTRO DE INDUCCIÓN, CAPACITACIÓN, ENTRENAMIENTO Y SIMULACROS"
+// a partir de un código de registro (hoja TEMAS + REGISTRO FIRMAS).
+// Guarda en foldercharlas y retorna JSON.stringify({url}) o {error}.
+// ─────────────────────────────────────────────────────────────────────────────
+function generarRegistroCap(codigo) {
+  try {
+    var ssCap      = getSpreadsheetCapacitaciones();
+    var ssPersonal = getSpreadsheetPersonal();
+    var tz         = Session.getScriptTimeZone();
+
+    // ── 1. Leer fila TEMAS ──────────────────────────────────────────────────
+    var hTemas   = ssCap.getSheetByName('TEMAS');
+    var lastRowT = hTemas.getLastRow();
+    if (lastRowT < 2) throw new Error('Hoja TEMAS vacía');
+    var temasRaw = hTemas.getRange(2, 1, lastRowT - 1, Math.max(hTemas.getLastColumn(), 13)).getDisplayValues();
+    var temaFila = null;
+    for (var ti = 0; ti < temasRaw.length; ti++) {
+      if (String(temasRaw[ti][0]).trim() === String(codigo).trim()) {
+        temaFila = temasRaw[ti]; break;
+      }
+    }
+    if (!temaFila) throw new Error('Código no encontrado: ' + codigo);
+
+    var tema       = String(temaFila[1] || '').trim();
+    var area       = String(temaFila[2] || '').trim();
+    var capacitador= String(temaFila[3] || '').trim();
+    var duracion   = String(temaFila[4] || '').trim();
+    var fechaRaw   = temaFila[8];   // HoraInicio
+
+    var fechaEvento = '';
+    if (fechaRaw) {
+      try {
+        var dEvt = new Date(fechaRaw);
+        if (!isNaN(dEvt)) fechaEvento = Utilities.formatDate(dEvt, tz, 'dd/MM/yyyy');
+      } catch(e2) { fechaEvento = String(fechaRaw); }
+    }
+
+    // ── 2. Firmantes desde REGISTRO FIRMAS ────────────────────────────────
+    var hRF   = ssCap.getSheetByName('REGISTRO FIRMAS');
+    var rfRows = [];
+    if (hRF && hRF.getLastRow() > 1) {
+      var numCols = Math.max(hRF.getLastColumn(), 12);
+      var rfAll   = hRF.getRange(2, 1, hRF.getLastRow() - 1, numCols).getValues();
+      var codigoNorm = String(codigo).trim().toUpperCase();
+      var temaNorm   = tema.toLowerCase();
+      rfRows = rfAll.filter(function(r) {
+        var rCod = String(r[11] || '').trim().toUpperCase();
+        return rCod ? rCod === codigoNorm : String(r[1] || '').trim().toLowerCase() === temaNorm;
+      });
+    }
+
+    // ── 3. Datos empresa ──────────────────────────────────────────────────
+    var razonSocial = 'ADECCO PERU S.A.';
+    var rucEmp = '20382984537', domicilioEmp = '', actividadEmp = 'OTRAS ACTIVIDADES DE DOTACIÓN DE RECURSOS HUMANOS';
+    var numTrab = '';
+    try {
+      var ieSh = ssPersonal.getSheetByName('INFO EMPRESA');
+      if (ieSh && ieSh.getLastRow() > 1) {
+        var ieData = ieSh.getRange(2, 1, ieSh.getLastRow()-1, 7).getDisplayValues();
+        if (ieData[0]) {
+          rucEmp       = ieData[0][1] || rucEmp;
+          actividadEmp = ieData[0][2] || actividadEmp;
+          domicilioEmp = ieData[0][3] || domicilioEmp;
+          razonSocial  = ieData[0][0] || razonSocial;
+        }
+      }
+    } catch(e3) {}
+    try {
+      var hP2  = ssPersonal.getSheetByName('PERSONAL');
+      var nAct = 0;
+      if (hP2.getLastRow() > 1) {
+        var ests = hP2.getRange(2, 12, hP2.getLastRow()-1, 1).getDisplayValues();
+        ests.forEach(function(r) { var s = String(r[0]||'').toUpperCase(); if(s==='ACTIVO'||s==='SI') nAct++; });
+      }
+      numTrab = nAct;
+    } catch(e4) {}
+
+    // ── 4. Responsable (capacitador → buscar firma en PERSONAL) ──────────
+    var respNombre = capacitador.toUpperCase();
+    var respCargo  = '';
+    var respFirmaB64 = '';
+    try {
+      var hPers  = ssPersonal.getSheetByName('PERSONAL');
+      var pRows  = hPers.getRange(2, 1, hPers.getLastRow()-1, 18).getDisplayValues();
+      var capLow = capacitador.toLowerCase();
+      for (var pi = 0; pi < pRows.length; pi++) {
+        var nomFila = String(pRows[pi][2]||'').toLowerCase();
+        var eml     = String(pRows[pi][12]||'').toLowerCase();
+        if (nomFila === capLow || eml === capLow) {
+          respNombre   = String(pRows[pi][2]||'').toUpperCase();
+          respCargo    = String(pRows[pi][6]||'').toUpperCase();
+          var firmaURL = String(pRows[pi][17]||'');
+          if (firmaURL) {
+            try {
+              var match = firmaURL.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+              if (match) {
+                var fBlob = DriveApp.getFileById(match[1]).getBlob();
+                respFirmaB64 = 'data:' + (fBlob.getContentType()||'image/png') + ';base64,' + Utilities.base64Encode(fBlob.getBytes());
+              }
+            } catch(ef) {}
+          }
+          break;
+        }
+      }
+    } catch(e5) { Logger.log('generarRegistroCap lookup resp: ' + e5.message); }
+
+    // ── 5. Checkboxes TIPO ────────────────────────────────────────────────
+    var areaUp = area.toUpperCase();
+    var temaUp = tema.toUpperCase();
+
+    var chkLeft = {
+      'CAPACITACION': false, 'INDUCCION': false, 'ENTRENAMIENTO': false,
+      'CHARLA': false, 'SIMULACRO DE EMERGENCIA': false,
+      'INDUCCION AL PUESTO DE TRABAJO': false, 'REINDUCCION': false,
+      'DIFUSION': false, 'BOLETIN': false
+    };
+    var chkRight = {
+      'SALUD': false, 'SEGURIDAD': false, 'MEDIO AMBIENTE': false,
+      'OPERACIONES': false, 'COMITE DE SST': false,
+      'ALTA DIRECCION': false, 'OTRO': false
+    };
+    // Mapeo desde area/tema al checkbox
+    var leftKeys  = ['INDUCCION AL PUESTO DE TRABAJO','SIMULACRO DE EMERGENCIA','REINDUCCION','ENTRENAMIENTO','CAPACITACION','INDUCCION','DIFUSION','BOLETIN','CHARLA'];
+    var rightKeys = ['COMITE DE SST','MEDIO AMBIENTE','ALTA DIRECCION','SEGURIDAD','OPERACIONES','SALUD'];
+    var combined  = (areaUp + ' ' + temaUp).normalize('NFD').replace(/[̀-ͯ]/g,'');
+    leftKeys.forEach(function(k) {
+      var kn = k.normalize('NFD').replace(/[̀-ͯ]/g,'');
+      if (combined.includes(kn)) chkLeft[k] = true;
+    });
+    rightKeys.forEach(function(k) {
+      var kn = k.normalize('NFD').replace(/[̀-ͯ]/g,'');
+      if (combined.includes(kn)) chkRight[k] = true;
+    });
+    // Default: si ninguno del lado izquierdo → marcar CAPACITACION
+    if (!Object.values(chkLeft).some(Boolean)) chkLeft['CAPACITACION'] = true;
+
+    function chk(val) { return val ? '&#9745;' : '&#9744;'; }
+
+    // ── 6. Filas participantes ────────────────────────────────────────────
+    var rowsHtml = '';
+    var MIN_ROWS = 15;
+    rfRows.forEach(function(r, idx) {
+      var nombre    = String(r[3]||'').toUpperCase();
+      var dni       = String(r[2]||'').replace(/^'/,'');
+      var empresa   = String(r[5]||'');
+      var cargo     = String(r[4]||'');
+      var firmaURL  = String(r[10]||'');
+      var firmaImg  = '';
+      if (firmaURL) {
+        try {
+          var fm = firmaURL.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+          if (!fm) fm = firmaURL.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{10,})/);
+          if (fm) {
+            var fb = DriveApp.getFileById(fm[1]).getBlob();
+            var b64 = 'data:' + (fb.getContentType()||'image/png') + ';base64,' + Utilities.base64Encode(fb.getBytes());
+            firmaImg = '<img src="' + b64 + '" style="max-width:90px;max-height:35px;display:block;margin:auto">';
+          }
+        } catch(ef2) {}
+      }
+      rowsHtml +=
+        '<tr>' +
+          '<td style="text-align:center;width:4%">' + (idx+1) + '</td>' +
+          '<td style="width:28%;font-weight:bold;font-size:8pt">' + nombre + '</td>' +
+          '<td style="width:12%;text-align:center">' + dni + '</td>' +
+          '<td style="width:20%">' + empresa + '</td>' +
+          '<td style="width:20%">' + cargo + '</td>' +
+          '<td style="width:16%;text-align:center;height:30px">' + firmaImg + '</td>' +
+        '</tr>';
+    });
+    var emptyNeeded = Math.max(0, MIN_ROWS - rfRows.length);
+    for (var ei = 0; ei < emptyNeeded; ei++) {
+      rowsHtml += '<tr><td style="height:28px">&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>';
+    }
+
+    // ── 7. HTML completo ──────────────────────────────────────────────────
+    var fechaHoy = Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy');
+    var css =
+      '<style>' +
+      '* { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; box-sizing:border-box; margin:0; padding:0 }' +
+      'body { font-family:Arial,sans-serif; font-size:8pt; color:#222; padding:8px }' +
+      'table { border-collapse:collapse; width:100%; margin-bottom:3px }' +
+      'td,th { border:1px solid #888; padding:3px 5px; vertical-align:middle }' +
+      '.lbl { background:#d9d9d9; font-weight:bold; font-size:7.5pt; text-align:center }' +
+      '.sec { background:#c8c8c8; font-weight:bold; font-size:8.5pt; text-align:center }' +
+      'th  { background:#3d6ea0; color:#fff; text-align:center; font-size:8pt }' +
+      '@media print { @page { size:A4 portrait; margin:8mm } tr { page-break-inside:avoid } }' +
+      '</style>';
+
+    // Header
+    var hdr =
+      '<table>' +
+        '<tr>' +
+          '<td rowspan="2" style="width:12%;text-align:center;font-size:24pt;font-weight:bold;color:#e2001a;letter-spacing:-1px;padding:10px">Adecco</td>' +
+          '<td rowspan="2" style="text-align:center;font-weight:bold;font-size:9.5pt;padding:8px">REGISTRO DE INDUCCIÓN, CAPACITACIÓN,<br>ENTRENAMIENTO Y SIMULACROS DE EMERGENCIA</td>' +
+          '<td class="lbl" style="width:10%;font-size:7pt">Código:</td>' +
+          '<td style="width:15%;font-size:7.5pt">SSOMA-FR006</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td class="lbl" style="font-size:7pt">Versión:</td>' +
+          '<td style="font-size:7.5pt">V.09 &nbsp; Aprobación: 02/05/2025</td>' +
+        '</tr>' +
+      '</table>';
+
+    // Datos empleador
+    var emp =
+      '<table>' +
+        '<tr><td colspan="5" class="sec">DATOS DEL EMPLEADOR</td></tr>' +
+        '<tr>' +
+          '<td class="lbl" style="width:16%">RAZÓN SOCIAL</td>' +
+          '<td class="lbl" style="width:10%">RUC</td>' +
+          '<td class="lbl" style="width:30%">DOMICILIO</td>' +
+          '<td class="lbl" style="width:30%">ACTIVIDAD ECONÓMICA</td>' +
+          '<td class="lbl" style="width:14%">NRO TRABAJADORES EN EL CENTRO LABORAL</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-weight:bold">' + razonSocial + '</td>' +
+          '<td style="text-align:center">' + rucEmp + '</td>' +
+          '<td style="font-size:7.5pt">' + (domicilioEmp || '—') + '</td>' +
+          '<td style="font-size:7pt">' + actividadEmp + '</td>' +
+          '<td style="text-align:center;font-weight:bold;font-size:11pt">' + numTrab + '</td>' +
+        '</tr>' +
+      '</table>';
+
+    // Sección TIPO + TEMA
+    var tipoTema =
+      '<table>' +
+        '<tr>' +
+          '<td colspan="4" class="lbl" style="width:55%">1. TIPO</td>' +
+          '<td colspan="2" class="lbl">2. TEMA(S):</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="width:20%;font-size:7.5pt">' + chk(chkLeft['CAPACITACION']) + ' CAPACITACION</td>' +
+          '<td style="width:7%;text-align:center">&nbsp;</td>' +
+          '<td style="width:20%;font-size:7.5pt">' + chk(chkRight['SALUD']) + ' SALUD</td>' +
+          '<td style="width:8%;text-align:center">&nbsp;</td>' +
+          '<td colspan="2" rowspan="9" style="vertical-align:middle;font-weight:bold;text-align:center;font-size:9pt">' + tema + '</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['INDUCCION']) + ' INDUCCION</td><td></td>' +
+          '<td style="font-size:7.5pt">' + chk(chkRight['SEGURIDAD']) + ' SEGURIDAD</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['ENTRENAMIENTO']) + ' ENTRENAMIENTO</td><td></td>' +
+          '<td style="font-size:7.5pt">' + chk(chkRight['MEDIO AMBIENTE']) + ' MEDIO AMBIENTE</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['CHARLA']) + ' CHARLA</td><td></td>' +
+          '<td style="font-size:7.5pt">' + chk(chkRight['OPERACIONES']) + ' OPERACIONES</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7pt">' + chk(chkLeft['SIMULACRO DE EMERGENCIA']) + ' SIMULACRO DE EMERGENCIA</td><td></td>' +
+          '<td style="font-size:7pt">' + chk(chkRight['COMITE DE SST']) + ' COMITÉ DE SST:</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7pt">' + chk(chkLeft['INDUCCION AL PUESTO DE TRABAJO']) + ' INDUCCIÓN AL PUESTO DE TRABAJO</td><td></td>' +
+          '<td style="font-size:7pt">' + chk(chkRight['ALTA DIRECCION']) + ' ALTA DIRECCIÓN</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['REINDUCCION']) + ' REINDUCCIÓN</td><td></td>' +
+          '<td style="font-size:7.5pt">' + chk(chkRight['OTRO']) + ' OTRO: ___________</td><td></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['DIFUSION']) + ' DIFUSIÓN</td><td colspan="3"></td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="font-size:7.5pt">' + chk(chkLeft['BOLETIN']) + ' BOLETÍN</td><td colspan="3"></td>' +
+        '</tr>' +
+      '</table>';
+
+    // Fila expositor / fecha / duración
+    var expFecha =
+      '<table>' +
+        '<tr>' +
+          '<td class="lbl" style="width:18%">3. EXPOSITOR(A):</td>' +
+          '<td style="width:42%;font-weight:bold">' + respNombre + '</td>' +
+          '<td class="lbl" style="width:10%">4. FECHA:</td>' +
+          '<td style="width:15%;text-align:center">' + (fechaEvento || fechaHoy) + '</td>' +
+          '<td class="lbl" style="width:8%">5. DURACIÓN:</td>' +
+          '<td style="width:7%;text-align:center">' + (duracion ? duracion + ' min' : '') + '</td>' +
+        '</tr>' +
+      '</table>';
+
+    // Tabla de participantes
+    var partTable =
+      '<table>' +
+        '<thead><tr>' +
+          '<th style="width:4%">N</th>' +
+          '<th style="width:30%">Nombre y Apellido</th>' +
+          '<th style="width:12%">ID/DNI</th>' +
+          '<th style="width:20%">Empresa</th>' +
+          '<th style="width:20%">Cargo</th>' +
+          '<th style="width:14%">Firma</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsHtml + '</tbody>' +
+      '</table>';
+
+    // Footer
+    var footer =
+      '<table>' +
+        '<tr>' +
+          '<td class="lbl" style="width:50%">6. OBSERVACIONES O ANOTACIONES</td>' +
+          '<td class="lbl" style="width:50%">7. RESPONSABLE DEL REGISTRO</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td style="height:80px;vertical-align:top">&nbsp;</td>' +
+          '<td style="vertical-align:bottom;padding:4px">' +
+            '<div style="text-align:right;margin-bottom:4px">' +
+              (respFirmaB64 ? '<img src="' + respFirmaB64 + '" style="max-width:110px;max-height:55px">' : '') +
+            '</div>' +
+            '<div><b>Firma:</b>&nbsp;</div>' +
+            '<div><b>Nombre:</b> ' + respNombre + '</div>' +
+            '<div><b>Cargo:</b> ' + respCargo + '</div>' +
+          '</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td colspan="2" class="lbl">8. FECHA: ' + fechaHoy + '</td>' +
+        '</tr>' +
+      '</table>';
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' + css + '</head><body>' +
+               hdr + emp + tipoTema + expFecha + partTable + footer + '</body></html>';
+
+    // ── 8. Convertir a PDF y guardar ─────────────────────────────────────
+    var fileName = 'REGISTRO_CAP_' + String(codigo).replace(/\s+/g,'_') + '_' + Utilities.formatDate(new Date(), tz, 'yyyyMMdd') + '.pdf';
+    var pdfBlob  = Utilities.newBlob(html, 'text/html', 'registro.html').getAs(MimeType.PDF).setName(fileName);
+    var folder   = DriveApp.getFolderById(foldercharlas);
+    var file     = folder.createFile(pdfBlob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    Logger.log('generarRegistroCap OK: ' + file.getUrl());
+    return JSON.stringify({ url: file.getUrl() });
+
+  } catch(e) {
+    Logger.log('generarRegistroCap error: ' + e.message);
+    return JSON.stringify({ error: e.message });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 function getHistorialCapacitacionesTrabajador(dni) {
   try {
     const ssCap  = getSpreadsheetCapacitaciones();
