@@ -2005,3 +2005,87 @@ function _diasVencidoInsp(freq, ultimaDate, hoyDate) {
   nextDue.setDate(nextDue.getDate() + freq);
   return Math.floor((hoyDate - nextDue) / 86400000);
 }
+
+// =============================================
+// GENERACIÓN MASIVA DE PDFs — por mes y/o equipo
+// Crea una carpeta Drive con todos los PDFs del filtro
+// Retorna JSON.stringify({url, total, exitosos, fallidos})
+// =============================================
+function generarPDFsMasivosCheck(filtroMes, filtroEquipo) {
+  try {
+    var sheet = getCheckSpreadsheet().getSheetByName('B DATOS');
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return JSON.stringify({ error: 'No hay registros en B DATOS.' });
+
+    var data = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
+
+    var mesNum = (filtroMes && filtroMes !== 'Todos') ? parseInt(filtroMes, 10) : null;
+    var equipoFiltro = (filtroEquipo && filtroEquipo !== 'Todos') ? String(filtroEquipo).trim().toLowerCase() : null;
+
+    var filtered = data.filter(function(row) {
+      if (!row[0]) return false; // sin ID
+      var equipoRow = String(row[2] || '').trim();
+      var fechaRow  = row[9]; // col J = Fecha (Date object)
+
+      if (equipoFiltro && equipoRow.toLowerCase() !== equipoFiltro) return false;
+      if (mesNum) {
+        var d = (fechaRow instanceof Date) ? fechaRow : new Date(fechaRow);
+        if (isNaN(d.getTime()) || d.getMonth() + 1 !== mesNum) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      return JSON.stringify({ error: 'No hay registros para el filtro seleccionado.' });
+    }
+    if (filtered.length > 60) {
+      return JSON.stringify({
+        error: 'Hay ' + filtered.length + ' registros. Aplica filtros más específicos (ej. mes + equipo) para reducir el lote (máx. 60).'
+      });
+    }
+
+    // Crear carpeta destino dentro del mismo folder de PDFs
+    var mesesNombres = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var mesLabel   = mesNum ? mesesNombres[mesNum] : 'TodosMeses';
+    var equipoLabel = filtroEquipo !== 'Todos' ? filtroEquipo.replace(/[^\w\sáéíóúÁÉÍÓÚñÑ-]/g, '').trim() : 'TodosEquipos';
+    var hoy = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    var nombreCarpeta = 'PDF_Masivo_' + mesLabel + '_' + equipoLabel + '_' + hoy;
+
+    var carpetaDestino = DriveApp.getFolderById(folderpdfcheck).createFolder(nombreCarpeta);
+    carpetaDestino.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    var exitosos = 0;
+    var fallidos = [];
+
+    filtered.forEach(function(row) {
+      var recordId = row[0];
+      try {
+        var url = generarPDFdesdeHTML(recordId);
+        // Extraer fileId de la URL Drive
+        var match = String(url).match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+          var file = DriveApp.getFileById(match[1]);
+          file.makeCopy(file.getName(), carpetaDestino);
+          exitosos++;
+        } else {
+          fallidos.push(String(recordId));
+        }
+      } catch (e) {
+        Logger.log('Error PDF masivo record ' + recordId + ': ' + e.message);
+        fallidos.push(String(recordId));
+      }
+    });
+
+    Logger.log('PDF Masivo: ' + exitosos + '/' + filtered.length + ' exitosos. Carpeta: ' + carpetaDestino.getUrl());
+    return JSON.stringify({
+      url:      carpetaDestino.getUrl(),
+      total:    filtered.length,
+      exitosos: exitosos,
+      fallidos: fallidos.length
+    });
+
+  } catch (e) {
+    Logger.log('Error generarPDFsMasivosCheck: ' + e.message);
+    return JSON.stringify({ error: e.message });
+  }
+}

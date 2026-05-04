@@ -161,6 +161,7 @@ eventos/accidentes e IPERC.
 - `agregarChecklist(data)` / `eliminarChecklist(rowIndex)` / `actualizarChecklistPorEquipo(...)`
 - `obtenerInventarioServerSide(...)` / `agregarInventario(data)` / `actualizarInventario(data)` / `eliminarInventarioPorNum(num)`
 - `generarItemsConGemini(base64DataUrl, textoBase, numItems)` — genera ítems con IA
+- `generarPDFsMasivosCheck(filtroMes, filtroEquipo)` — genera PDFs de todos los registros filtrados por mes (1-12 o "Todos") y equipo, los copia a una subcarpeta de `folderpdfcheck`, la comparte como pública y retorna `JSON.stringify({url, total, exitosos, fallidos})`. Límite: 60 registros por lote. Usada por el botón "PDF Masivo" en IndexCheck.html.
 
 **Funciones privadas:**
 - `_parseFechaCheck(txt)` — parsea fecha texto a timestamp
