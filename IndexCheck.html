@@ -482,7 +482,8 @@ function renderizarTablaCheck(respuesta, searchId = currentSearchIdCheck) {
       
            ${(() => {
         const totalRespuestas = siCount + noCount;
-        const cumplimiento = totalRespuestas > 0 ? Math.round((siCount / totalRespuestas) * 100) : 0;
+        // Si no hay ítems Si ni No (todo N/A), no hay observaciones → 100 % de cumplimiento
+        const cumplimiento = totalRespuestas > 0 ? Math.round((siCount / totalRespuestas) * 100) : 100;
         const estado = fila[12] || 'Sin estado';
 
         // Color del estado

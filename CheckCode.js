@@ -301,7 +301,8 @@ function saveDataCheck(obj) {
     // 2) Registrar fila en "B DATOS"
     var timestamp = Math.floor(new Date().getTime() / 1000);
     var newValue = timestamp;
-    var status = obj.checked.includes("No") ? "Abierto" : "Conforme";
+    var checkedTokens = (obj.checked || '').split(',').map(function(s) { return s.trim(); });
+    var status = checkedTokens.some(function(v) { return v === 'No'; }) ? 'Abierto' : 'Conforme';
 
     // Tipo de inspección (Planeada / No Planeada) — campo N
     var tipoInspeccion = (obj.tipoInspeccion && obj.tipoInspeccion.trim()) ? obj.tipoInspeccion.trim() : 'Planeada';
@@ -365,7 +366,7 @@ function saveDataCheck(obj) {
 
     setFormula();
 
-    if (obj.checked.includes("No")) {
+    if (status === 'Abierto') {
       sendChecklistEmail(obj, newValue, imageUrl, status);
     }
 
