@@ -83,17 +83,52 @@ eventos/accidentes e IPERC.
 ├── CodeMapa.js          # Mapa de Riesgos CRUD
 ├── ComunicadosCode.js   # Comunicados internos (usa PERSONAL SS)
 ├── Homecode.js          # Avisos ERP (hoja AVISOS en PERSONAL SS)
-├── index.html           # SPA: login + router de módulos
-├── home.html            # Dashboard post-login
-├── css.html             # Estilos globales Bootstrap 5.3 + FA icons
-├── Check.html           # UI checklist inspecciones
-├── MovimEpp.html        # UI movimientos EPP
-├── Asignaciones.html    # UI firma EPP por trabajador
-├── Capacitaciones.html  # UI capacitaciones
-├── IndexDesvios.html    # UI desvíos
-├── MapaRiesgos.html     # UI mapa de riesgos
-├── Usuarios.html        # UI administración usuarios
-├── Rol.html             # UI rol de turnos
+├── index.html           # SPA: login + router de módulos + tema Neo Brutalism toggle
+├── home.html            # Dashboard post-login (KPIs, avisos, comunicados)
+├── css.html             # Estilos globales: Bootstrap 5.3, sidebar, tema Neo Brutalism
+│
+│   ── CHECKLIST ──────────────────────────────────────────────────────────────
+├── Check.html           # Formulario de inspección checklist (main v1)
+├── Test.html            # Formulario de inspección checklist (v2/test con IA)
+├── IndexCheck.html      # Vista de tarjetas de registros + PDF Masivo
+├── ActualCheck.html     # Estado actual de checklist (resumen rápido)
+├── EditCheck.html       # Edición de registro de checklist existente
+├── ListaCheck.html      # Lista tabular de checklists (sin tarjetas)
+├── TestCheck.html       # Variante de Test en tabla
+├── CheckTest.html       # Vista alternativa de Test
+├── InventarioCheck.html # Gestión del inventario de equipos (main)
+├── InventarioTest.html  # Gestión del inventario de equipos (v2)
+│
+│   ── EPP ────────────────────────────────────────────────────────────────────
+├── MovimEpp.html        # UI movimientos EPP (ingresos/salidas de almacén)
+├── Asignaciones.html    # UI firma EPP por trabajador (confirmar entrega)
+├── MatrizEpp.html       # Configuración de reglas EPP por cargo/producto
+├── EPPMaestro.html      # Gestión maestra de productos y almacenes
+│
+│   ── CAPACITACIONES ─────────────────────────────────────────────────────────
+├── Capacitaciones.html  # Gestión de capacitaciones y charlas (módulo principal)
+├── RegistrosCap.html    # Registros de capacitación con PDF descargable (SSOMA-FR006)
+├── BuscadorCap.html     # Cumplimiento por trabajador (una fila/trabajador + historial)
+├── BuscadorCharlas.html # Buscador de charlas registradas
+├── Cursos.html          # Catálogo de cursos/temas de capacitación
+├── Evaluacion.html      # Módulo de evaluación/examen online
+├── Examen.html          # Formulario de examen individual
+├── Matriz.html          # Vista de la matriz de capacitación por cargo
+├── ReportesLaboral.html # Reportes laborales de capacitación (PDF/Excel)
+│
+│   ── OTROS MÓDULOS ───────────────────────────────────────────────────────────
+├── IndexDesvios.html    # UI desvíos y observaciones
+├── MapaRiesgos.html     # UI mapa de riesgos (con mapa Leaflet/Google)
+├── Inspecciones.html    # UI inspecciones PASSO
+├── PASSO.html           # UI programa PASSO (inspecciones + reuniones)
+├── Usuarios.html        # UI administración usuarios (solo admin)
+├── Rol.html             # UI rol de turnos (planner semanal)
+├── Graficosindex.html   # UI KPIs y gráficos (Chart.js + Gemini pronóstico)
+├── Eventos.html         # UI eventos y accidentes
+├── Iperc.html           # UI matriz IPERC
+├── Hht.html             # UI Horas Hombre Trabajadas
+├── Listas.html          # Gestión de listas maestras (dropdowns del sistema)
+├── Comunicados.html     # Comunicados internos con imagen
 └── Pagina web/
     ├── cloudflare-worker.js  # Worker push notifications
     └── worker.js
@@ -696,7 +731,45 @@ ls -la /home/user/SST/*.js /home/user/SST/*.html
 
 ---
 
-## 9. ANTI-PATRONES DETECTADOS (no reproducir)
+## 9. SISTEMA DE TEMAS (Design Themes)
+
+### 9.1 Tema Normal (por defecto)
+- Fuente: Inter, system-ui, sans-serif
+- Colores: Bootstrap 5.3 + azul primario #0d6efd
+- Bordes redondeados: 10-12px en botones e inputs
+- Sombras suaves (box-shadow blur)
+- Sidebar: fondo blanco, links azul en hover
+
+### 9.2 Tema Neo Brutalism
+- Activado con clase CSS `body.neo-brutalism`
+- Fuente: Space Grotesk (cargada via Google Fonts en css.html)
+- Paleta: amarillo #FFDD00, negro #000, naranja #FF5F1F, fondo crema #F5F0E8
+- Bordes: 2.5-3px sólidos #000, `border-radius: 0`
+- Sombras: offset sólido sin blur `3px 3px 0 #000`
+- Sidebar: fondo amarillo #FFDD00, links negros → hover negro/amarillo
+- Navbar: fondo negro, borde inferior amarillo
+- SweetAlert2: mismo estilo brutalist (popup square + box-shadow)
+
+### 9.3 Toggle del tema
+- **Botón**: `#btn-theme-toggle` en la navbar (ícono ⚡ normal / 🎨 neo)
+- **Persistencia**: `localStorage('sst-theme')` → valores: `'default'` | `'neo-brutalism'`
+- **Init**: `_initTheme()` se ejecuta en `DOMContentLoaded` (index.html)
+- **Función toggle**: `toggleNeoTheme()` en index.html
+- **CSS override**: todos los overrides en `css.html` bajo el selector `body.neo-brutalism`
+
+### 9.4 Cómo agregar estilos Neo Brutalism a un módulo nuevo
+```css
+/* En css.html, dentro del bloque body.neo-brutalism */
+body.neo-brutalism .mi-nuevo-componente {
+  border: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+}
+```
+
+---
+
+## 10. ANTI-PATRONES DETECTADOS (no reproducir)
 
 | Anti-patrón | Dónde aparece | Correcto |
 |---|---|---|
@@ -713,7 +786,7 @@ ls -la /home/user/SST/*.js /home/user/SST/*.html
 
 ---
 
-## 10. CHECKEOS DE VALIDACIÓN
+## 11. CHECKEOS DE VALIDACIÓN
 
 Antes de hacer commit, verificar:
 
@@ -736,7 +809,7 @@ grep -B5 'appendRow' /home/user/SST/*.js | grep -E 'for|forEach|map|while'
 
 ---
 
-## 11. LECCIONES APRENDIDAS — DECISIONES CRÍTICAS DE ARQUITECTURA
+## 12. LECCIONES APRENDIDAS — DECISIONES CRÍTICAS DE ARQUITECTURA
 
 ### L1 · HTML parciales NO procesan template directives GAS
 

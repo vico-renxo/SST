@@ -396,6 +396,11 @@
 
         <div class="d-flex align-items-center ms-auto gap-2">
 
+          <!-- 🎨 Botón Neo Brutalism theme -->
+          <button id="btn-theme-toggle" onclick="toggleNeoTheme()" title="Neo Brutalism / Normal">
+            <i class="fa-solid fa-bolt"></i>
+          </button>
+
           <!-- 🤖 Botón Asistente IA (solo admin) -->
           <button id="btnAsistente" onclick="toggleAsistente()"
             title="Asistente SSOMA-OP"
@@ -1005,6 +1010,43 @@ function login(obj) {
 }
 
 
+
+// ── Neo Brutalism theme toggle ────────────────────────────────
+function toggleNeoTheme() {
+  const isNeo = document.body.classList.toggle('neo-brutalism');
+  localStorage.setItem('sst-theme', isNeo ? 'neo-brutalism' : 'default');
+  const btn = document.getElementById('btn-theme-toggle');
+  if (btn) {
+    btn.innerHTML = isNeo
+      ? '<i class="fa-solid fa-palette"></i>'
+      : '<i class="fa-solid fa-bolt"></i>';
+    btn.title = isNeo ? 'Volver al tema normal' : 'Neo Brutalism';
+  }
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: isNeo ? '⚡ Neo Brutalism activado' : '✨ Tema normal restaurado',
+    showConfirmButton: false,
+    timer: 1800,
+    timerProgressBar: true
+  });
+}
+
+function _initTheme() {
+  const saved = localStorage.getItem('sst-theme');
+  if (saved === 'neo-brutalism') {
+    document.body.classList.add('neo-brutalism');
+    const btn = document.getElementById('btn-theme-toggle');
+    if (btn) {
+      btn.innerHTML = '<i class="fa-solid fa-palette"></i>';
+      btn.title = 'Volver al tema normal';
+    }
+  }
+}
+// Aplicar tema guardado tan pronto carga el DOM
+document.addEventListener('DOMContentLoaded', _initTheme);
+// ─────────────────────────────────────────────────────────────
 
 function logout() {
   Swal.fire({

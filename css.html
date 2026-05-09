@@ -1,6 +1,7 @@
 
 <link href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -722,7 +723,276 @@ button.btn:hover {
   to { opacity: 0; transform: translate(-50%, -20px); }
 }
 
+</style>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMA NEO BRUTALISM
+     Activo cuando <body> tiene la clase "neo-brutalism"
+     Toggle guardado en localStorage('sst-theme')
+════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Fuente y fondo general ────────────────────────────────── */
+body.neo-brutalism {
+  font-family: 'Space Grotesk', 'IBM Plex Mono', monospace !important;
+  background: #F5F0E8 !important;
+}
 
+/* ── Navbar ─────────────────────────────────────────────────── */
+body.neo-brutalism .navbar {
+  background: #000 !important;
+  border-bottom: 3px solid #000 !important;
+  box-shadow: 0 4px 0 #FFDD00 !important;
+}
+body.neo-brutalism .morphing-menu svg { color: #FFDD00 !important; }
+body.neo-brutalism .dropdown-menu {
+  border: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 5px 5px 0 #000 !important;
+}
 
+/* ── Wrapper / contenido ────────────────────────────────────── */
+body.neo-brutalism #miVista2 #wrapper { background: #F5F0E8 !important; }
+body.neo-brutalism #miVista2 #page-content-wrapper { background: #F5F0E8 !important; }
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+body.neo-brutalism #miVista2 #sidebar-wrapper.sidebar-shell {
+  background: #FFDD00 !important;
+  border-right: 3px solid #000 !important;
+  box-shadow: 4px 0 0 #000 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-section-title {
+  color: #000 !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+}
+body.neo-brutalism #miVista2 .sidebar-link {
+  color: #000 !important;
+  border-radius: 0 !important;
+  border-left-color: transparent !important;
+  font-weight: 600 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-link:hover {
+  background: #000 !important;
+  color: #FFDD00 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-link.active {
+  background: #000 !important;
+  color: #FFDD00 !important;
+  border-left-color: #FF5F1F !important;
+  font-weight: 800 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-group-toggle {
+  color: #000 !important;
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-group-toggle:hover {
+  background: #000 !important;
+  color: #FFDD00 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-group-toggle.open {
+  background: rgba(0,0,0,.08) !important;
+  border-left-color: #000 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-sublink {
+  color: #000 !important;
+  border-radius: 0 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-sublink:hover {
+  background: #000 !important;
+  color: #FFDD00 !important;
+}
+body.neo-brutalism #miVista2 .sidebar-sublink.active {
+  background: #FF5F1F !important;
+  color: #fff !important;
+  border-left-color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* ── Botones ─────────────────────────────────────────────────── */
+body.neo-brutalism .btn {
+  border: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  font-weight: 700 !important;
+  transition: transform .07s ease, box-shadow .07s ease !important;
+}
+body.neo-brutalism .btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 5px 5px 0 #000 !important;
+}
+body.neo-brutalism .btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 #000 !important;
+}
+body.neo-brutalism .rounded-pill { border-radius: 0 !important; }
+
+/* ── Inputs / selects ────────────────────────────────────────── */
+body.neo-brutalism input.form-control,
+body.neo-brutalism select.form-control,
+body.neo-brutalism select.form-select,
+body.neo-brutalism textarea.form-control {
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  background: #fff !important;
+  transition: none !important;
+}
+body.neo-brutalism input.form-control:focus,
+body.neo-brutalism select.form-control:focus,
+body.neo-brutalism select.form-select:focus,
+body.neo-brutalism textarea.form-control:focus {
+  border-color: #FF5F1F !important;
+  box-shadow: 3px 3px 0 #FF5F1F !important;
+  outline: none !important;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+body.neo-brutalism .card {
+  border: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 5px 5px 0 #000 !important;
+  background: #fff !important;
+}
+body.neo-brutalism .card-header {
+  border-bottom: 2px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  color: #FFDD00 !important;
+  font-weight: 800 !important;
+}
+
+/* ── Modales ─────────────────────────────────────────────────── */
+body.neo-brutalism .modal-content {
+  border: 3px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 8px 8px 0 #000 !important;
+}
+body.neo-brutalism .modal-header {
+  border-bottom: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  color: #FFDD00 !important;
+}
+body.neo-brutalism .modal-footer {
+  border-top: 2px solid #000 !important;
+}
+
+/* ── Tablas ──────────────────────────────────────────────────── */
+body.neo-brutalism table {
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+}
+body.neo-brutalism th {
+  background: #000 !important;
+  color: #FFDD00 !important;
+  border: 1.5px solid #000 !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em;
+}
+body.neo-brutalism td { border: 1px solid #000 !important; }
+body.neo-brutalism tbody tr:hover { background: rgba(255,221,0,.15) !important; }
+
+/* ── Alerts ──────────────────────────────────────────────────── */
+body.neo-brutalism .alert {
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+body.neo-brutalism .badge {
+  border: 1.5px solid #000 !important;
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+}
+
+/* ── Nav pills ───────────────────────────────────────────────── */
+body.neo-brutalism .nav-pills .nav-link {
+  border-radius: 0 !important;
+  border: 2px solid transparent !important;
+  font-weight: 600 !important;
+}
+body.neo-brutalism .nav-pills .nav-link.active {
+  background: #000 !important;
+  color: #FFDD00 !important;
+  border: 2px solid #000 !important;
+}
+
+/* ── Chips (IndexCheck) ──────────────────────────────────────── */
+body.neo-brutalism .check-chip {
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+}
+body.neo-brutalism .check-chip.active {
+  background: #000 !important;
+  color: #FFDD00 !important;
+  border-color: #000 !important;
+}
+
+/* ── Tarjetas checklist (tiktok-style) ───────────────────────── */
+body.neo-brutalism .tiktok-card,
+body.neo-brutalism [class*="col-"] > div {
+  border-radius: 0 !important;
+}
+
+/* ── SweetAlert2 ─────────────────────────────────────────────── */
+body.neo-brutalism .swal2-popup {
+  border: 3px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 8px 8px 0 #000 !important;
+  font-family: 'Space Grotesk', monospace !important;
+}
+body.neo-brutalism .swal2-confirm,
+body.neo-brutalism .swal2-cancel,
+body.neo-brutalism .swal2-deny {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  font-weight: 700 !important;
+}
+body.neo-brutalism .swal2-confirm:hover {
+  transform: translate(-1px,-1px);
+  box-shadow: 4px 4px 0 #000 !important;
+}
+
+/* ── Spinner / loader ────────────────────────────────────────── */
+body.neo-brutalism .spinner-border { color: #000 !important; }
+
+/* ── Alerta modal campana ────────────────────────────────────── */
+body.neo-brutalism .alerta-modal,
+body.neo-brutalism .alerta-modal-grande {
+  border: 3px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 7px 7px 0 #000 !important;
+}
+body.neo-brutalism .item-alerta {
+  border-left: 5px solid #000 !important;
+  background: #FFDD0030 !important;
+  border-radius: 0 !important;
+}
+
+/* ── Botón toggle tema (en navbar) ──────────────────────────── */
+#btn-theme-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background .2s;
+  color: inherit;
+}
+body.neo-brutalism #btn-theme-toggle {
+  background: #FFDD00;
+  color: #000;
+  border: 2px solid #FFDD00;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 #fff;
+}
 </style>
