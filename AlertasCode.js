@@ -10,7 +10,7 @@ function obtenerAlertasVencimientos(dniLogin) {
     const shReg = ss.getSheetByName(SHEPP.REGISTRO);
     const correoActual = Session.getActiveUser().getEmail();
 
-    const ADMIN_EMAIL = "tu_correo_admin@gmail.com";
+    const ADMIN_EMAIL = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || Session.getActiveUser().getEmail();
     const esAdmin = (correoActual === ADMIN_EMAIL || !dniLogin);
 
     const data = shReg.getDataRange().getValues();

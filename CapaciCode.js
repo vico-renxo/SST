@@ -928,22 +928,24 @@ function guardarPreguntasMultiples(lista, idsOriginales, esEdicion) {
   }
 
   // 🔸 Actualizar o insertar cada pregunta
+  const nuevasFilas = [];
   lista.forEach(data => {
     if (!data[0]) {
-      // Nueva pregunta → generar ID único
       const idUnico = "E" + Date.now().toString().slice(-7) + Math.floor(Math.random() * 100);
       data[0] = idUnico;
-      hoja.appendRow(data);
+      nuevasFilas.push(data);
     } else {
-      // Buscar y actualizar si existe
       const index = dataExistente.findIndex(r => r[0] === data[0]);
       if (index >= 0) {
         hoja.getRange(index + 2, 1, 1, data.length).setValues([data]);
       } else {
-        hoja.appendRow(data);
+        nuevasFilas.push(data);
       }
     }
   });
+  if (nuevasFilas.length > 0) {
+    hoja.getRange(hoja.getLastRow() + 1, 1, nuevasFilas.length, nuevasFilas[0].length).setValues(nuevasFilas);
+  }
 
   return true;
 }

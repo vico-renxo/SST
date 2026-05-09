@@ -499,6 +499,52 @@
             }
         }
 
+        /* ========== VACUNAS PANEL ========== */
+        .vacunas-section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem 1.5rem 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .vacunas-section-title {
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .vacuna-badge {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 0.8rem 0.4rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .vacuna-badge:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+            transform: translateY(-2px);
+        }
+
+        .vacuna-pct { font-size: 1.25rem; font-weight: 700; line-height: 1; }
+        .vacuna-label { font-size: 0.62rem; color: #64748b; line-height: 1.3; margin-top: 0.3rem; }
+        .vacuna-count { font-size: 0.6rem; color: #94a3b8; margin-top: 0.15rem; }
+        .pct-high { color: #10b981; }
+        .pct-med  { color: #f59e0b; }
+        .pct-low  { color: #ef4444; }
+
+        .vacuna-pending-row {
+            padding: 0.45rem 0.85rem;
+            border-radius: 8px;
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
+            margin-bottom: 0.35rem;
+            font-size: 0.78rem;
+        }
+
         /* Scrollbar personalizado para submenú */
         .submenu-avisos::-webkit-scrollbar {
             width: 6px;
@@ -543,6 +589,27 @@
         </div>
         <!-- Avisos Container -->
         <div id="avisosContainer" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4"></div>
+
+        <!-- Vacunas / EMO Panel -->
+        <div class="vacunas-section mt-5" id="vacunasSection">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="vacunas-section-title fw-bold mb-0">
+                    <i class="fa-solid fa-syringe me-2 text-danger"></i>Cobertura de Vacunas y EMO
+                    <span class="badge bg-light text-secondary ms-2 border small" id="vacunasTotalBadge" style="font-size:0.7rem;">Cargando...</span>
+                </h6>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" id="btnVacunasDetalle" onclick="toggleVacunasDetalle()">
+                    <i class="fa-solid fa-chevron-down me-1" id="iconVacunas"></i>Sin vacunas
+                </button>
+            </div>
+            <div id="vacunasGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-7 g-2">
+                <div class="col-12 text-center py-3">
+                    <div class="loading-spinner mx-auto" style="width:24px;height:24px;border-width:3px;"></div>
+                </div>
+            </div>
+            <div id="vacunasDetalle" style="display:none;" class="mt-3">
+                <div id="vacunasPendientesList"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -910,7 +977,86 @@ function abrirMarcadorAsistencia() {
 
     // Cargar al inicio
     refrescarAvisos();
-    
+
+    // ── VACUNAS PANEL ───────────────────────────────────────────────
+    let vacunasCache = null;
+    let vacunasDetalleVisible = false;
+
+    function cargarVacunas() {
+        google.script.run
+            .withSuccessHandler(function(data) {
+                vacunasCache = data;
+                renderVacunasGrid(data);
+            })
+            .withFailureHandler(function(err) {
+                document.getElementById('vacunasGrid').innerHTML =
+                    '<div class="col-12 text-muted small py-2"><i class="fa-solid fa-circle-info me-1"></i>No se pudieron cargar datos de vacunas.</div>';
+            })
+            .obtenerDashboardLaboral();
+    }
+
+    function renderVacunasGrid(data) {
+        const grid = document.getElementById('vacunasGrid');
+        const resumen = data.resumenVacunas || [];
+        const total = (data.kpis && data.kpis.totalTrabajadores) || 1;
+
+        const badge = document.getElementById('vacunasTotalBadge');
+        if (badge) badge.textContent = total + ' trabajadores activos';
+
+        grid.innerHTML = resumen.map(function(v) {
+            const pct = total > 0 ? Math.round((v.conVacuna / total) * 100) : 0;
+            const cls = pct >= 80 ? 'pct-high' : pct >= 50 ? 'pct-med' : 'pct-low';
+            return '<div class="col"><div class="vacuna-badge" title="' + v.vacuna + ': ' + v.conVacuna + ' de ' + total + '">' +
+                '<div class="vacuna-pct ' + cls + '">' + pct + '%</div>' +
+                '<div class="vacuna-label">' + v.vacuna + '</div>' +
+                '<div class="vacuna-count">' + v.conVacuna + '/' + total + '</div>' +
+                '</div></div>';
+        }).join('');
+    }
+
+    function toggleVacunasDetalle() {
+        const det = document.getElementById('vacunasDetalle');
+        const icon = document.getElementById('iconVacunas');
+        const btn = document.getElementById('btnVacunasDetalle');
+        vacunasDetalleVisible = !vacunasDetalleVisible;
+        det.style.display = vacunasDetalleVisible ? 'block' : 'none';
+        icon.className = vacunasDetalleVisible ? 'fa-solid fa-chevron-up me-1' : 'fa-solid fa-chevron-down me-1';
+        btn.innerHTML = (vacunasDetalleVisible ? '<i class="fa-solid fa-chevron-up me-1" id="iconVacunas"></i>Ocultar' : '<i class="fa-solid fa-chevron-down me-1" id="iconVacunas"></i>Sin vacunas');
+        if (vacunasDetalleVisible && vacunasCache) renderVacunasPendientes(vacunasCache);
+    }
+
+    function renderVacunasPendientes(data) {
+        const cont = document.getElementById('vacunasPendientesList');
+        const vacunasData = data.vacunasData || [];
+        const headers = data.vacunasHeaders || [];
+
+        const conPendientes = vacunasData
+            .map(function(w) {
+                return {
+                    nombre: w.nombre,
+                    dni: w.dni,
+                    faltantes: headers.filter(function(h) { return !w.vacunas[h] || !w.vacunas[h].tiene; })
+                };
+            })
+            .filter(function(w) { return w.faltantes.length > 0; })
+            .sort(function(a, b) { return b.faltantes.length - a.faltantes.length; })
+            .slice(0, 20);
+
+        if (conPendientes.length === 0) {
+            cont.innerHTML = '<div class="text-success small py-2"><i class="fa-solid fa-circle-check me-1"></i>Todos los trabajadores tienen sus registros al día.</div>';
+            return;
+        }
+
+        cont.innerHTML = '<div class="text-muted small fw-bold mb-2">Trabajadores con registros pendientes (' + conPendientes.length + ' mostrados):</div>' +
+            conPendientes.map(function(w) {
+                return '<div class="vacuna-pending-row"><strong>' + w.nombre + '</strong> <span class="text-muted">(' + w.dni + ')</span>' +
+                    '<span class="ms-2 text-danger">Falta: ' + w.faltantes.join(', ') + '</span></div>';
+            }).join('');
+    }
+
+    // Carga diferida — espera que los avisos carguen primero
+    setTimeout(cargarVacunas, 2000);
+
 </script>
 
 </body>

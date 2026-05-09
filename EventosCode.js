@@ -8,42 +8,6 @@ function getSpreadsheetAccidentes() {
   return cachedAccidentes;
 }
 
-function saveFormDataAccidentes(recordID, name, nombres, cargos, empresa, lugar, proceso, evento, tipo, area, comment, descanso1, descanso2, responsable, origen, detalle, estado, x, y) {
-  const hojaevento = getSpreadsheetAccidentes().getSheetByName("B DATOS");
-  const ultimaCol = 21;
-
-  const ids = hojaevento.getRange(2, 1, hojaevento.getLastRow() - 1, 1).getValues().flat();
-  const isEdit = recordID && recordID !== '';
-  const index = isEdit ? ids.findIndex(id => String(id) === String(recordID)) : -1;
-
-  let coordX = x;
-  let coordY = y;
-
-  if (isEdit && index !== -1) {
-    const coordRango = hojaevento.getRange(index + 2, 20, 1, 2).getValues()[0];
-    coordX = coordRango[0];
-    coordY = coordRango[1];
-  }
-
-  const fecha1 = new Date(descanso1);
-  const fecha2 = new Date(descanso2);
-  const dias = Math.ceil((fecha2 - fecha1) / (1000 * 60 * 60 * 24)) + 1;
-
-  const finalID = isEdit ? recordID : generateUniqueID();
-
-  const fila = [
-    finalID,
-    new Date(), name, nombres, cargos, empresa, lugar, proceso, evento,
-    tipo, area, comment, descanso1, descanso2, dias, responsable, origen,
-    detalle, estado, coordX, coordY
-  ];
-
-  if (isEdit && index !== -1) {
-    hojaevento.getRange(index + 2, 1, 1, ultimaCol).setValues([fila]);
-  } else {
-    hojaevento.appendRow(fila);
-  }
-}
 
 function generateUniqueID() {
   const props = PropertiesService.getScriptProperties();
@@ -193,15 +157,6 @@ function getParte() {
   return { parte, atencion };
 }
 
-
-function getTiposEvento() {
-  const hojaevento = getSpreadsheetAccidentes().getSheetByName("B DATOS");
-  const ultimaFila = hojaevento.getLastRow();
-  const datos = hojaevento.getRange(2, 9, ultimaFila - 1, 1).getValues().flat();
-
-  const tipos = [...new Set(datos.filter(Boolean))];
-  return tipos.sort();
-}
 
 
 let stockCache = null;

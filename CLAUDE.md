@@ -84,7 +84,7 @@ eventos/accidentes e IPERC.
 ├── ComunicadosCode.js   # Comunicados internos (usa PERSONAL SS)
 ├── Homecode.js          # Avisos ERP (hoja AVISOS en PERSONAL SS)
 ├── index.html           # SPA: login + router de módulos + tema Neo Brutalism toggle
-├── home.html            # Dashboard post-login (KPIs, avisos, comunicados)
+├── home.html            # Dashboard post-login: avisos ERP + panel cobertura Vacunas/EMO (llama obtenerDashboardLaboral con delay 2s)
 ├── css.html             # Estilos globales: Bootstrap 5.3, sidebar, tema Neo Brutalism
 │
 │   ── CHECKLIST ──────────────────────────────────────────────────────────────
@@ -277,6 +277,16 @@ eventos/accidentes e IPERC.
 **Spreadsheet:** EVENTOS (1Xo5HgaHfskg_mkguGTuuR_AcKeQUoRoG--ch-V8KTpw)
 **Hojas:** B DATOS, Listas, Stock
 **Dependencias:** getSpreadsheetPersonal() (Code.js)
+**Funciones públicas:**
+- `searchByCoordinates(x, y)` — búsqueda por coordenadas GPS
+- `getAllPoints()` — todos los puntos del mapa
+- `deleteByIDAccindentes(id)` — eliminar registro por ID
+- `getNombreEmpleado(idEnfermo)` — nombre completo desde PERSONAL
+- `getParte()` — listas Parte/Atención desde hoja Listas
+- `getStockData()` — stock de medicamentos (hoja Stock)
+- `salvar(pedido)` — guardar despacho de medicamentos
+- `saveFormDataAccidentesV2(...)` — guardar/editar evento accidente (función principal)
+- `generateUniqueID()` — genera ID correlativo vía PropertiesService
 
 ---
 
@@ -364,6 +374,7 @@ eventos/accidentes e IPERC.
 ### AlertasCode.js — Alertas EPP
 **Responsabilidad:** Detectar EPP vencidos o próximos a vencer.
 **Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP (EppCode.js)
+**PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (fallback: Session.getActiveUser().getEmail())
 **Funciones públicas:**
 - `obtenerAlertasVencimientos(dniLogin)` — alertas para un trabajador
 - `verificarAlertasCompletas(dniLogin)` — resumen tieneVencimientos + tienePendientes
@@ -779,7 +790,7 @@ body.neo-brutalism .mi-nuevo-componente {
 | 3 patrones distintos de llamada a Gemini | Varios archivos | Usar _callGemini() |
 | Variables globales como cache | Varios archivos | Usar CacheService |
 | IDs hardcodeados en múltiples archivos | 9 archivos .js | Solo en Code.js |
-| `appendRow()` en loop | Varios | Batch setValues() |
+| `appendRow()` en loop | ~~CapaciCode.js guardarPreguntasMultiples — CORREGIDO~~ | Batch setValues() |
 | `google.script.run` sin withFailureHandler | 40 archivos HTML | Siempre incluir |
 | Redefine _norm() local | NotificacionesCode.js, CodeMapa.js | Usar global de Code.js |
 | Mezcla Bootstrap 4/5.1/5.3 | Varios HTML | Usar solo 5.3.x |
