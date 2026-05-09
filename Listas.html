@@ -3,49 +3,6 @@
   <head>
     <base target="_top">
 
-<style>
-#miVista table {
-  border-collapse: collapse;
-}
-  #miVista input {
-  width: calc(100% - 28px); /* deja espacio al botón ❌ */
-  box-sizing: border-box;
-  border: none;
-  background: transparent;
-  padding-right: 4px; /* menos relleno interno para no chocar con el botón */
-}
-
-
-#miVista .delete-btn {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #d00;
-  font-size: 14px;
-  visibility: hidden;
-  z-index: 3;
-}
-
-
-  #miVista input:focus {
-    outline: none;
-  }
-
-  #miVista #searchInput {
-    padding: 5px;
-    width: 200px;
-    margin-bottom: 10px;
-  }
-
-  #miVista td:has(input:focus) .delete-btn {
-  visibility: visible;
-}
-
-</style>
 
   </head>
   <body>

@@ -85,7 +85,8 @@ eventos/accidentes e IPERC.
 ├── Homecode.js          # Avisos ERP (hoja AVISOS en PERSONAL SS)
 ├── index.html           # SPA: login + router de módulos + tema Neo Brutalism toggle
 ├── home.html            # Dashboard post-login: avisos ERP + marcador de asistencia (iframe externo)
-├── css.html             # Estilos globales: Bootstrap 5.3, sidebar, tema Neo Brutalism
+├── css.html             # Estilos GLOBALES: Bootstrap 5.3, sidebar, navbar, tema Neo Brutalism, panel IA
+├── css-modulos.html     # Estilos ESPECÍFICOS de cada módulo (home, Check, Rol, EPP, etc.) — cargado en index.html tras css.html
 │
 │   ── CHECKLIST ──────────────────────────────────────────────────────────────
 ├── Check.html           # Formulario de inspección checklist (main v1)
@@ -768,6 +769,11 @@ ls -la /home/user/SST/*.js /home/user/SST/*.html
 - **Función toggle**: `toggleNeoTheme()` en index.html
 - **CSS override**: todos los overrides en `css.html` bajo el selector `body.neo-brutalism`
 
+### 9.5 Dónde agregar CSS nuevo
+- **Estilos globales** (sidebar, navbar, componentes compartidos, tema): → `css.html`
+- **Estilos de un módulo específico** (Check, Rol, EPP, Eventos, etc.): → `css-modulos.html` en la sección del módulo correspondiente
+- **NUNCA** agregar `<style>` dentro de un archivo `.html` de módulo — todos los módulos HTML deben estar libres de bloques `<style>`
+
 ### 9.4 Cómo agregar estilos Neo Brutalism a un módulo nuevo
 ```css
 /* En css.html, dentro del bloque body.neo-brutalism */
@@ -828,7 +834,7 @@ grep -B5 'appendRow' /home/user/SST/*.js | grep -E 'for|forEach|map|while'
 
 **Lo que pasó:** Las directivas `<?!=...?>` solo se procesan en el archivo raíz cargado via `HtmlService.createTemplateFromFile()` (actualmente `index.html`). Los parciales incluidos con `include()` se sirven como HTML estático — las directivas aparecen literalmente en el DOM.
 
-**Regla:** Los archivos HTML de módulos (Check.html, MovimEpp.html, ReportesLaboral.html, etc.) son **parciales estáticos**. No usar `<?!=...?>` en ellos. Todo CSS y JS debe estar autocontenido en el mismo archivo.
+**Regla:** Los archivos HTML de módulos (Check.html, MovimEpp.html, ReportesLaboral.html, etc.) son **parciales estáticos**. No usar `<?!=...?>` en ellos. El JS de cada módulo permanece en su archivo HTML. El CSS de los módulos vive en `css-modulos.html` (NO en el HTML del módulo).
 
 ---
 

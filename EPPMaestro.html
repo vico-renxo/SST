@@ -1,54 +1,3 @@
-<style>
-  /* ========== MAESTRO EPP ========== */
-  .scroll-horizontal{overflow-x:auto;overflow-y:hidden;border-radius:8px;border:1px solid var(--gray-border,#dee2e6);background:#fff}
-  .tabla-horizontal{display:inline-flex;font-size:11px;min-width:100%}
-  .columna-trabajador{display:flex;flex-direction:column;background:#fff;border-right:2px solid var(--gray-border,#dee2e6);position:sticky;left:0;z-index:10}
-  .header-trabajador{background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:10px;text-align:center;font-weight:600;border-bottom:2px solid var(--gray-border,#dee2e6);height:72px;display:flex;align-items:center;justify-content:center}
-  .celda-trabajador{padding:8px 12px;border-bottom:1px solid var(--gray-border,#dee2e6);height:40px;display:flex;flex-direction:column;justify-content:center;min-width:200px}
-  .celda-trabajador:hover{background:#f8f9fa}
-  .nombre-trabajador{font-weight:600;font-size:11px;color:#111827}
-  .cargo-trabajador{font-size:10px;color:#6c757d}
-  .columna-epp{display:flex;flex-direction:column;border-right:1px solid var(--gray-border,#dee2e6);min-width:75px}
-  .header-epp{background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:6px;text-align:center;font-weight:600;border-bottom:2px solid var(--gray-border,#dee2e6);height:72px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .header-epp:hover{background:#e2e6ea}
-  .header-epp-img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-border,#dee2e6);background:#fff;transition:opacity .3s}
-  .celda-epp{padding:8px;border-bottom:1px solid var(--gray-border,#dee2e6);text-align:center;height:40px;display:flex;align-items:center;justify-content:center}
-  .celda-epp:hover{background:#f8f9fa}
-  .semaforo{width:22px;height:22px;border-radius:50%;display:inline-block;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .2s}
-  .semaforo:hover{transform:scale(1.3)}
-  .st-OK{background:#198754;border:2px solid #146c43}
-  .st-NOTIF{background:#ffc107;border:2px solid #e0a800}
-  .st-ENTR{background:#dc3545;border:2px solid #b02a37}
-  .sin-asignar{background:#e9ecef;border:2px solid #ced4da}
-  .fila-oculta{display:none!important}
-  .kpi-card{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:#fff;border:1px solid var(--gray-border,#dee2e6)}
-  .kpi-card.verde{border-left:4px solid #198754}
-  .kpi-card.naranja{border-left:4px solid #ffc107}
-  .kpi-card.rojo{border-left:4px solid #dc3545}
-  .kpi-value{font-size:20px;font-weight:700;line-height:1}
-  .kpi-label{font-size:10px;color:#6c757d;text-transform:uppercase;font-weight:600}
-  .tooltip-epp{position:fixed;background:#fff;color:#111;padding:14px;border-radius:10px;font-size:12px;z-index:10000;pointer-events:none;opacity:0;transition:opacity .2s;box-shadow:0 6px 20px rgba(0,0,0,.15);max-width:280px;border:1px solid #dee2e6}
-  .tooltip-epp.show{opacity:1}
-  .tooltip-header{font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #dee2e6}
-  .tooltip-row{margin:4px 0;display:flex;justify-content:space-between;gap:10px}
-  .tooltip-label{color:#6c757d;font-size:11px}
-  .tooltip-value{font-weight:600}
-  .modal-imagen{display:none;position:fixed;z-index:10001;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.7)}
-  .modal-imagen-content{position:relative;margin:5% auto;width:90%;max-width:500px;background:#fff;border-radius:10px;padding:20px}
-  .modal-close{position:absolute;top:12px;right:15px;font-size:24px;font-weight:bold;color:#6c757d;cursor:pointer}
-  .modal-close:hover{color:#dc3545}
-  .modal-imagen-img{width:100%;border-radius:8px;margin-bottom:10px}
-  /* Chips categoría */
-  .maestro-chips{ display:flex; flex-wrap:wrap; gap:6px; }
-  .maestro-chip{ padding:.15rem .7rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:.85rem; white-space:nowrap; transition:background .15s,color .15s,border-color .15s; }
-  .maestro-chip:hover{ background:#f1f5f9; }
-  .maestro-chip.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
-  /* Lista de compras */
-  .compra-prioridad{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
-  .compra-prioridad.vencido{background:#f8d7da;color:#842029}
-  .compra-prioridad.porvencer{background:#fff3cd;color:#664d03}
-</style>
-
 <!-- ENCABEZADO -->
 <div class="d-flex align-items-center mt-3 mb-2">
   <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;background:#6f42c1">
@@ -566,17 +515,7 @@ function _imprimirProveedor(){
   const total=items.reduce((s,i)=>s+i.cantidad,0);
   const fecha=new Date().toLocaleDateString('es-PE');
 
-  let html='<html><head><title>Orden de Compra EPP</title><style>';
-  html+='body{font-family:Arial,sans-serif;margin:20px;font-size:12px}';
-  html+='h2{text-align:center;margin-bottom:5px}';
-  html+='.fecha{text-align:center;color:#666;margin-bottom:15px}';
-  html+='table{width:100%;border-collapse:collapse;margin-top:10px}';
-  html+='th,td{border:1px solid #333;padding:6px 10px}';
-  html+='th{background:#2c3e50;color:#fff;text-align:left}';
-  html+='td.num{text-align:center}';
-  html+='.total-row{background:#f0f0f0;font-weight:bold}';
-  html+='@media print{body{margin:10px}}';
-  html+='</style></head><body>';
+  let html='<html><head><title>Orden de Compra EPP</title></head><body>';
   html+='<h2>ORDEN DE COMPRA - EPP / UNIFORMES</h2>';
   html+='<div class="fecha">Fecha: '+fecha+'</div>';
   html+='<table><thead><tr><th style="width:40px">#</th><th>Descripción</th><th style="width:100px">Talla</th><th style="width:80px;text-align:center">Cantidad</th></tr></thead><tbody>';
@@ -600,19 +539,7 @@ function _imprimirRegistro(){
   const total=items.reduce((s,i)=>s+i.cantidad,0);
   const fecha=new Date().toLocaleDateString('es-PE');
 
-  let html='<html><head><title>Registro Interno - Reposición EPP</title><style>';
-  html+='body{font-family:Arial,sans-serif;margin:20px;font-size:11px}';
-  html+='h2{text-align:center;margin-bottom:5px}';
-  html+='.fecha{text-align:center;color:#666;margin-bottom:15px}';
-  html+='table{width:100%;border-collapse:collapse}';
-  html+='th,td{border:1px solid #999;padding:5px 8px}';
-  html+='th{background:#34495e;color:#fff;text-align:left;font-size:11px}';
-  html+='.group{background:#ecf0f1;font-weight:bold}';
-  html+='.vencido{color:#c0392b;font-weight:bold}';
-  html+='.porvencer{color:#d35400}';
-  html+='.total-row{background:#2c3e50;color:#fff;font-weight:bold}';
-  html+='@media print{body{margin:10px}}';
-  html+='</style></head><body>';
+  let html='<html><head><title>Registro Interno - Reposición EPP</title></head><body>';
   html+='<h2>REGISTRO INTERNO - REPOSICIÓN EPP</h2>';
   html+='<div class="fecha">Fecha: '+fecha+'</div>';
   html+='<table><thead><tr><th style="width:30px">#</th><th>Producto / Talla</th><th>Trabajador</th><th>Estado</th><th style="width:60px;text-align:center">Cant</th></tr></thead><tbody>';
