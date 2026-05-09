@@ -84,7 +84,7 @@ eventos/accidentes e IPERC.
 ├── ComunicadosCode.js   # Comunicados internos (usa PERSONAL SS)
 ├── Homecode.js          # Avisos ERP (hoja AVISOS en PERSONAL SS)
 ├── index.html           # SPA: login + router de módulos + tema Neo Brutalism toggle
-├── home.html            # Dashboard post-login: avisos ERP + panel cobertura Vacunas/EMO (llama obtenerDashboardLaboral con delay 2s)
+├── home.html            # Dashboard post-login: avisos ERP + marcador de asistencia (iframe externo)
 ├── css.html             # Estilos globales: Bootstrap 5.3, sidebar, tema Neo Brutalism
 │
 │   ── CHECKLIST ──────────────────────────────────────────────────────────────

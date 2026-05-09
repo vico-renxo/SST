@@ -178,12 +178,15 @@
     </div>
   </div>
   <div id="rl-p-vacunas" class="rl-panel" style="display:none">
-    <div class="rl-card"><div class="rl-card-title"><i class="fas fa-syringe"></i>Estado de Vacunación General</div><div id="rl-vac-grid" class="rl-vac-grid"></div></div>
+    <div class="rl-card"><div class="rl-card-title"><i class="fas fa-syringe"></i>Estado de Vacunación General</div><div id="rl-vac-grid" class="rl-vac-grid"></div><div id="rl-vac-summary" style="margin-top:.9rem"></div></div>
     <div class="rl-card">
       <div class="rl-card-title"><i class="fas fa-table"></i>Trabajadores — Detalle Vacunas</div>
-      <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap">
-        <input type="text" id="rl-vac-search" placeholder="Buscar nombre o DNI..." oninput="rlFiltrarVacunas()" style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none;flex:1;min-width:180px;max-width:340px">
+      <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+        <input type="text" id="rl-vac-search" placeholder="Buscar nombre o DNI..." oninput="rlFiltrarVacunas()" style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none;flex:1;min-width:180px;max-width:300px">
         <select id="rl-vac-filter" onchange="rlFiltrarVacunas()" style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none"><option value="all">Todos</option><option value="incompleto">Con faltantes</option><option value="completo">Completo</option></select>
+        <select id="rl-vac-sort" onchange="rlFiltrarVacunas()" style="border:2px solid #e2e8f0;border-radius:10px;padding:.45rem .9rem;font-size:.85rem;outline:none"><option value="faltantes-desc">Más faltantes primero</option><option value="faltantes-asc">Menos faltantes primero</option><option value="alfa">Alfabético</option></select>
+        <button onclick="rlExportarVacunasCSV()" style="background:#10b981;border:none;color:#fff;border-radius:10px;padding:.45rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;white-space:nowrap"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+        <span id="rl-vac-count" style="font-size:.8rem;color:#6b7280;font-weight:600;margin-left:auto"></span>
       </div>
       <div class="rl-table-wrap"><table class="rl-table"><thead id="rl-vac-thead"></thead><tbody id="rl-vac-tbody"></tbody></table></div>
     </div>
@@ -461,40 +464,60 @@
         </div>`;
     }).join('');
     document.getElementById('rl-vac-grid').innerHTML = cardsHtml;
+    // Summary bar
+    const completos = rlData.vacunasData.filter(v => rlData.vacunasHeaders.every(h => v.vacunas[h]?.tiene)).length;
+    const pctComp = Math.round(completos / total * 100);
+    const colorComp = pctComp>=80?'#10b981':pctComp>=60?'#f59e0b':'#ef4444';
+    document.getElementById('rl-vac-summary').innerHTML = `
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;padding:.75rem 1rem;background:#f8fafc;border-radius:10px;font-size:.82rem;align-items:center">
+        <span><b style="font-size:1.1rem;color:${colorComp}">${pctComp}%</b> con esquema completo</span>
+        <span style="color:#10b981"><b>${completos}</b> trabajadores completos</span>
+        <span style="color:#ef4444"><b>${total - completos}</b> con vacunas pendientes</span>
+        <span style="color:#6b7280">Total registros: <b>${total}</b></span>
+      </div>`;
     const headers = rlData.vacunasHeaders;
     document.getElementById('rl-vac-thead').innerHTML = `
       <tr>
         <th>#</th><th>DNI</th><th>Nombre</th>
         ${headers.map(h => `<th style="font-size:.7rem;white-space:nowrap">${rlEsc(h)}</th>`).join('')}
-        <th>Completo</th>
+        <th style="white-space:nowrap">Faltantes</th><th>Completo</th>
       </tr>`;
     rlFiltrarVacunas();
   }
   window.rlFiltrarVacunas = function() {
     const q    = (document.getElementById('rl-vac-search').value || '').toLowerCase();
     const filt = document.getElementById('rl-vac-filter').value;
+    const ord  = (document.getElementById('rl-vac-sort') || {}).value || 'faltantes-desc';
     const headers = rlData.vacunasHeaders;
-    let rows = rlData.vacunasData.filter(v => {
-      const match = v.nombre.toLowerCase().includes(q) || v.dni.includes(q);
-      if(!match) return false;
-      const completo = headers.every(h => v.vacunas[h]?.tiene);
-      if(filt==='completo')   return completo;
-      if(filt==='incompleto') return !completo;
-      return true;
-    });
+    let rows = rlData.vacunasData
+      .map(v => ({ ...v, _faltantes: headers.filter(h => !v.vacunas[h]?.tiene).length }))
+      .filter(v => {
+        const match = v.nombre.toLowerCase().includes(q) || v.dni.includes(q);
+        if(!match) return false;
+        if(filt==='completo')   return v._faltantes === 0;
+        if(filt==='incompleto') return v._faltantes > 0;
+        return true;
+      });
+    if(ord==='faltantes-desc') rows.sort((a,b) => b._faltantes - a._faltantes);
+    else if(ord==='faltantes-asc') rows.sort((a,b) => a._faltantes - b._faltantes);
+    else rows.sort((a,b) => a.nombre.localeCompare(b.nombre));
+    const cnt = document.getElementById('rl-vac-count');
+    if(cnt) cnt.textContent = rows.length + ' trabajador(es)';
     const html = rows.map((v,i) => {
-      const completo = headers.every(h => v.vacunas[h]?.tiene);
+      const completo = v._faltantes === 0;
       const cells = headers.map(h => {
         const val = v.vacunas[h];
         if(val?.tiene) return `<td style="text-align:center"><span style="color:#10b981;font-size:1.1rem" title="${rlEsc(val.valor)}">&#10003;</span></td>`;
-        return `<td style="text-align:center"><span style="color:#e5e7eb;font-size:1.1rem">&#10005;</span></td>`;
+        return `<td style="text-align:center"><span style="color:#fca5a5;font-size:1rem">&#10005;</span></td>`;
       }).join('');
+      const faltColor = v._faltantes===0?'#10b981':v._faltantes<=3?'#f59e0b':'#ef4444';
       return `
         <tr>
           <td style="color:#9ca3af">${i+1}</td>
           <td style="font-size:.78rem;color:#6b7280">${rlEsc(v.dni)}</td>
           <td style="font-weight:600;color:#1e293b;white-space:nowrap">${rlEsc(v.nombre)}</td>
           ${cells}
+          <td style="text-align:center;font-weight:700;color:${faltColor}">${v._faltantes}</td>
           <td style="text-align:center">${completo ? '<span class="rl-badge ap">Sí</span>' : '<span class="rl-badge rp">No</span>'}</td>
         </tr>`;
     }).join('');
@@ -604,6 +627,25 @@
     const parts = String(name||'').trim().split(' ');
     return (parts[0]?.[0]||'') + (parts[1]?.[0]||'');
   }
+  window.rlExportarVacunasCSV = function() {
+    if(!rlData) return;
+    const headers = rlData.vacunasHeaders;
+    const rows = rlData.vacunasData;
+    const sep = ',';
+    const escape = v => '"' + String(v||'').replace(/"/g,'""') + '"';
+    const csvHeaders = ['DNI','Nombre', ...headers, 'Faltantes','Completo'].map(escape).join(sep);
+    const csvRows = rows.map(v => {
+      const faltantes = headers.filter(h => !v.vacunas[h]?.tiene).length;
+      const vals = headers.map(h => v.vacunas[h]?.tiene ? (v.vacunas[h].valor || 'Sí') : '');
+      return [v.dni, v.nombre, ...vals, faltantes, faltantes===0?'Sí':'No'].map(escape).join(sep);
+    });
+    const csv = [csvHeaders, ...csvRows].join('\n');
+    const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'vacunas_emo_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+  };
   document.addEventListener('click', function(e) {
     const list = document.getElementById('rl-worker-list');
     if(list && !list.contains(e.target) && e.target.id !== 'rl-worker-input') list.style.display='none';
