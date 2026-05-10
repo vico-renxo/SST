@@ -77,7 +77,6 @@
 
 </div>
 
-
   <div id="loadingUsuarios" class="text-center my-4" style="display: none;">
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Cargando...</span>
@@ -162,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).getColor();
 });
 
-
 function cargarDatos3() {
   document.getElementById("loadingUsuarios").style.display = "block";
   const btnVerMasUsuarios = document.getElementById("btnVerMasUsuarios");
@@ -194,7 +192,6 @@ function cargarDatos3() {
     })
     .obtenerUsuariosPaginado(offsetUsuarios, limitUsuarios, filtroActivoUsuarios);
 }
-
 
 function mostrarFilas3(data) {
   const tbody = document.getElementById("cuerpo3");
@@ -393,7 +390,6 @@ function mostrarFilas3(data) {
           modal3.showModal();
         }
 
-
       function cerrarModal3() {
         document.getElementById("modal3").close();
       }
@@ -472,7 +468,6 @@ function mostrarFilas3(data) {
     google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarUsuario(valores);
   }
 }
-
 
 function eliminarRegistro3(usuario, nombre) {
   if (!usuario) return;

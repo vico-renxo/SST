@@ -36,7 +36,6 @@
             </button>
           </div>
 
-
 <!-- Filtro por mes — Registros/Charlas -->
 <div class="d-flex align-items-center gap-2 mb-2 mt-1 flex-wrap" style="font-size:12px">
   <span class="text-muted fw-bold" style="white-space:nowrap"><i class="fa fa-calendar-alt me-1"></i>Mes:</span>
@@ -223,7 +222,6 @@ function cargarDatosDesdeServidorCharla(reset = false) {
     if (badgeCharlas) {
       badgeCharlas.textContent = totalGlobalCharla;
     }
-
 
       // Solo limpiar si es reset
       if (reset) {
@@ -660,7 +658,6 @@ document.getElementById("btnRegistrarCharla").addEventListener("click", () => {
     `<option value="${opcion}">${opcion}</option>`
   ).join("");
 
-
       if (configCampo.tipo === "select") {
         return `
           <div class="mb-2">
@@ -708,7 +705,6 @@ document.getElementById("btnRegistrarCharla").addEventListener("click", () => {
   form.innerHTML = camposHTML;
   new bootstrap.Modal(document.getElementById("modalEditarCharla")).show();
 });
-
 
     // Función ejemplo para eliminar fila, puedes personalizarla
 function eliminarFila(id) {
@@ -789,7 +785,6 @@ function abrirModalEditar(id) {
         }
       }
 
-
     const configCampo = camposConListas[i];
 
    if (configCampo) {
@@ -800,7 +795,6 @@ function abrirModalEditar(id) {
   const opciones = opcionesFuente.map(opcion =>
     `<option value="${opcion}" ${opcion === valor ? "selected" : ""}>${opcion}</option>`
   ).join("");
-
 
       if (configCampo.tipo === "select") {
         return `
@@ -1078,7 +1072,6 @@ function enviarWhatsAppDesdeCard(boton) {
     }
   });
 }
-
 
 </script>
 <script>

@@ -663,7 +663,6 @@ function renderizarTablaCheck_v2(respuesta, searchId = currentSearchIdCheck_v2) 
       catBarsHTML += useGrid ? '</div>' : '</div>';
     }
 
-
     const div = document.createElement("div");
     div.innerHTML = buildEvalCardHTML_v2({
       id: fila[0],
@@ -1528,7 +1527,6 @@ function descargarExcelTest_v2() {
   const fecha = new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb, `Test_${fecha}.xlsx`);
 }
-
 
 function getInitials_v2(nombre) {
   return String(nombre || '')

@@ -13,7 +13,6 @@
   </div>
 </div>
 
-
 <div class="container-fluid my-1 px-0" id="page1">
 <!-- ✅ Botones superiores alineados: 2 a la izquierda, 1 a la derecha -->
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" role="toolbar" aria-label="Botones principales del checklist">
@@ -45,7 +44,6 @@
 
 </div>
 
-
 <!-- Filtro por Equipo (chips) -->
 <div class="d-flex align-items-center gap-2 mb-2" style="font-size:12px">
   <span class="text-muted fw-bold" style="white-space:nowrap"><i class="fa fa-filter me-1"></i>Equipo:</span>
@@ -73,7 +71,6 @@
     <span class="check-chip" data-mes="12">Dic</span>
   </div>
 </div>
-
 
   <!-- Spinner -->
   <div id="spinnerCheck" class="text-center my-2" style="display: none;">
@@ -653,14 +650,12 @@ window.addEventListener('beforeunload', function() {
   clearTimeout(searchTimeoutCheck);
 });
 
-
 function toggleExtraContentCheck(id, el) {
   const content = document.getElementById(`extra-content-check-${id}`);
   const visible = content.style.display === "block";
   content.style.display = visible ? "none" : "block";
   el.textContent = visible ? "Ver más" : "Ver menos";
 }
-
 
 //Función password
 async function checkPasswordAndEdit(rowData) {
@@ -710,7 +705,6 @@ async function checkPasswordAndEdit(rowData) {
   }
 }
 
-
 function fillModalWithData(data) {
   // ✅ Guardar data completa para subsanación
   window.currentCheckData = data;
@@ -753,7 +747,6 @@ function fillModalWithData(data) {
     populateSubsanacion(data, data[2]);
   }
 }
-
 
 //DELETE DATA
 async function deleteData(id, el) {

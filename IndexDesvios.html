@@ -122,7 +122,6 @@
     </div>
   </div>
 
-
 <!-- MODAL DESVIOS -->
 
 <div class="modal fade" id="myModalDesvios" tabindex="-1" aria-labelledby="myModalDesviosLabel" aria-hidden="true">
@@ -339,7 +338,6 @@
   </div>
 </div>
 
-
 <!-- MODAL INSPECCIONES -->
 <div class="modal fade" id="exampleModalInspeccioes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="max-width: 95% !important;" role="document">
@@ -478,7 +476,6 @@
  </div>
 </div>
 
-
       </div>
     </div>
   </div>
@@ -589,7 +586,6 @@ function mostrarEstadoCarga(tipo, mostrar = true) {
     previewFile("myFile1", "imgForm1", "data1");
     previewFile("myFile2", "imgForm2", "data2");
 
-
 //buscador por DNI
 const inputElement = document.getElementById("nameDesvios");
 const outputElement = document.getElementById("nombreDesvios");
@@ -645,14 +641,12 @@ function updateMessage(value) {
   }
 }
 
-
   </script>
 
   </html>
 
   <!-- PARA DESCARGAR EN FORMATO PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 
 <script>
 // BLOQUE CARD ✅ FASE 1 – Cache inteligente implementado
@@ -1241,7 +1235,6 @@ window.addEventListener('beforeunload', function() {
   clearTimeout(searchTimeout);
 });
 
-
 function toggleTextDesvios(type, index, event, link) {
   if (event) event.preventDefault();
 
@@ -1267,8 +1260,6 @@ function toggleTextDesvios(type, index, event, link) {
   // Cambiar texto del enlace
   if (link) link.textContent = isHidden ? 'Menos' : 'Más';
 }
-
-
 
 function preventFormSubmit() {
   var forms = document.querySelectorAll('form');
@@ -1341,7 +1332,6 @@ function handleFormSubmitDesvios(formObject) {
   }).processFormDesvios(formObject);
 }
 
-
 function clearFormDesvios() {
   const userObj = JSON.parse(localStorage.getItem('userName') || '{}');
   const usuario = userObj.usuario || '';
@@ -1412,7 +1402,6 @@ function setIDAndOpenLink(recordId) {
   });
 }
 
-
 function deleteDataDesvios(el) {
   pedirPassword('Para borrar debe ingresar su Password', passwordsDesvios.eliminar, () => {
     Swal.fire({
@@ -1475,7 +1464,6 @@ function pedirPassword(label, listaPermitida, onSuccess) {
     }
   });
 }
-
 
   function populateFormDesvios(records) {
     document.getElementById('RecId').value = records[0][0];
@@ -1540,7 +1528,6 @@ function showImageDesvios(imgUrl) {
 
   document.body.appendChild(modal);
 }
-
 
 // Función para enviar mensaje por WhatsApp
 function sendWhatsAppDesvios(messageDesvios) {
@@ -1728,7 +1715,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   // FIN LISTENER DE IMÁGENES
-
 
   if (reportButton3 && inputDescripcion) {
     reportButton3.addEventListener("click", function () {

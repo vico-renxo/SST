@@ -245,7 +245,6 @@
     // ad1 y ad2 ahora son independientes.
     document.getElementById("ad3_v2").addEventListener("change", updateEquipos_v2);
 
-
     // ==========================================
     // 4. FUNCIONES RESTANTES (TODO IGUAL QUE ANTES)
     // ==========================================
@@ -948,7 +947,6 @@
       var avatarFallback = generarAvatarSVG_v2(d.nombre);
       var fotoSrc = d.fotoUrl || avatarFallback;
       var fotoOnError = 'this.onerror=null;this.src=\'' + avatarFallback + '\'';
-
 
       // Cards de categorías (KPI cards)
       var catsHTML = catKeys.map(function(cat, idx) {

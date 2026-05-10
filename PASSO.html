@@ -176,7 +176,6 @@ if (_passoTabLink) {
   });
 }
 
-
 function cargarPASSO() {
   document.getElementById('loadingPASSO').style.display = 'block';
   document.getElementById('contenidoPASSO').style.display = 'none';
@@ -349,7 +348,6 @@ function renderInspecciones(actividades) {
   cont.innerHTML = html;
 }
 
-
 // =============================================
 // 🔥 FUNCIÓN AUXILIAR PARA OBTENER CLASE DE COLOR DE PORCENTAJE
 // =============================================
@@ -359,7 +357,6 @@ function getColorPorcentaje(valor) {
   if (valor >= 81 && valor <= 99) return 'celda-porcentaje-verde';
   return '';
 }
-
 
 // =============================================
 // RENDER CAPACITACIONES / ENTRENAMIENTOS
@@ -466,9 +463,6 @@ function renderCursos(actividades, containerId) {
   html += '</tbody></table>';
   cont.innerHTML = html;
 }
-
-
-
 
 // =============================================
 // RENDER REUNIONES (FORMATO P/E SIMPLE)
@@ -619,9 +613,6 @@ function renderReuniones(reuniones) {
   html += '</tbody></table>';
   cont.innerHTML = html;
 }
-
-
-
 
 // =============================================
 // REUNIONES CRUD UI

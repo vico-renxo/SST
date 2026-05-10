@@ -363,7 +363,6 @@ function startRolModule(usuario) {
         .getRolInitialData();
 }
 
-
 // Nueva función auxiliar para cambiar entre modos sin recargar todo
 function aplicarModoVista(usuario) {
     const modoSolicitado = usuario.modoVistaSolicitado; // 'LITE' o 'FULL'
@@ -393,8 +392,6 @@ function aplicarModoVista(usuario) {
         renderTable();
     }
 }
-
-
 
 // ==========================================
 // 🔧 LÓGICA DE INICIALIZACIÓN
@@ -1636,7 +1633,6 @@ function analyzeWorkLoad() {
     return weeksMap; 
 }
 
-
 // ==========================================
 // 👥 RENDERIZADO DE SIDEBAR (PERSONAL)
 // ==========================================
@@ -1864,7 +1860,6 @@ function getComplianceStatus(empId) {
     let isComplete = (checksCount === weeksToCheck.length && weeksToCheck.length > 0);
     return { html: checksHtml, isComplete: isComplete };
 }
-
 
 function getYearlyStats(empId, year) {
     let stats = [];
@@ -2358,7 +2353,6 @@ function handleDrop(e) {
     }
 }
 
-
 function isNightShift(subId) {
     let result = false;
     structure.forEach(area => {
@@ -2482,7 +2476,6 @@ function openContextMenu(e, cellKey, isLockedCurrent) {
     menu.style.top = `${e.pageY}px`;
 }
 
-
 function toggleCellLock() {
     if (!currentCtxCellKey) return;
     
@@ -2576,7 +2569,6 @@ function toggleWorkerHighlight(empId) {
         showToast(`ℹ️ ${empName} no tiene turnos visibles (${startDate} - ${endDateStr})`);
     }
 }
-
 
 // ==========================================
 // 📅 MODAL DE AUSENCIAS
@@ -3200,8 +3192,6 @@ if (isLiteMode && !userManualViewSelection) {
         changeView(isLandscape ? 28 : 7, true);
     }, 500);
 }
-
-
 
 </script>
 </div>

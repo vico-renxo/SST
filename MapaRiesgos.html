@@ -248,7 +248,6 @@ window.RiskMaps = (function() {
     return i === -1 ? 999 : i;  // los que no tengan tipo van al final
   };
 
-
   // Utils
   function getUrl(idOrUrl) {
     if (!idOrUrl) return '';
@@ -354,7 +353,6 @@ function initCanvas() {
         shadow: '1px 1px 2px rgba(0,0,0,0.7)' // 👈 sombra más fina, no difusa
       });
 
-
       // === Ajuste al zoom de textos actual ===
       const TEXT_BASE = (typeof DEFAULT_TEXT_SCALE_BASE !== 'undefined') ? DEFAULT_TEXT_SCALE_BASE : 1;
       const textZoomFactor = TEXT_BASE > 0 ? (defaultTextScale / TEXT_BASE) : 1;
@@ -388,7 +386,6 @@ function initCanvas() {
   // Drag & drop de iconos
   setupCanvasDragDrop();
 }
-
 
   function initViewerCanvas() {
     if (viewerCanvas) viewerCanvas.dispose();
@@ -464,7 +461,6 @@ function setupCanvasDragDrop() {
     }, { crossOrigin: 'anonymous' });
   });
 }
-
 
   // Background handling
   function setBackgroundWithZoom(bg, targetCanvas = canvas) {
@@ -904,7 +900,6 @@ function updateLegend() {
   }, 100);
 }
 
-
 function verMapa(id) {
   const map = mapas.find(m => m.id === id);
   if (!map) return;
@@ -1001,7 +996,6 @@ function verMapa(id) {
     }
   }, 100);
 }
-
 
   function mostrarFondoTemporal(file) {
     const reader = new FileReader();
@@ -1413,7 +1407,6 @@ function zoomIconos(factor) {
   canvas.requestRenderAll();
 }
 
-
 // ===================== zoomTextos (REEMPLAZAR COMPLETA) =====================
 function zoomTextos(factor) {
   // Mantiene estado de zoom acumulado (se usa para nuevos textos)
@@ -1427,7 +1420,6 @@ function zoomTextos(factor) {
   });
   canvas.requestRenderAll();
 }
-
 
   // Icon modal functions
   let iconosModalInstance = null;
@@ -1735,7 +1727,6 @@ function setupExportMenu(){
   });
 }
 
-
 // ===== Normalización de coordenadas/escala entre fondos =====
 function rm_getNormalizeFactor(map, targetCanvas){
   // currentBaseW lo pone setBackgroundWithZoom()
@@ -1748,8 +1739,6 @@ function rm_getNormalizeFactor(map, targetCanvas){
 }
 
 </script>
-
-
 
 </body>
 </html>

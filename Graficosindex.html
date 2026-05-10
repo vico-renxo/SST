@@ -58,7 +58,6 @@
         </div>
     </div>
 
-
     <div class="controls" hidden>
         <label>Fecha Inicio:</label>
         <input type="date" id="fechaInicioGraficos">
@@ -879,7 +878,6 @@ function crearOActualizarGrafico(canvasId, config, updateData = null) {
         return;
     }
 
-
     try {
         // Mostrar todos los indicadores de carga
         const chartIds = ['piramide', 'trabajadores', 'ic', 'desvios', 'accidentes', 
@@ -1385,7 +1383,6 @@ function crearOActualizarGrafico(canvasId, config, updateData = null) {
     // Alias para mantener compatibilidad
     window.graficarPiramide = actualizarDashboard;
     window.limpiarCache = limpiarTodosLosGraficos;
-
 
 function generarTextoAnalisis(resultado, resumenDesvios) {
     const datos = resultado.datos;

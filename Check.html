@@ -6,7 +6,6 @@
   
 </head>
 
-
 <body>
   <div class="container-fluid px-0" style="padding:0px; margin:0px;" id="checkid">
     <div class="row py-0">
@@ -158,7 +157,6 @@
               </div>
 
             </div>
-
 
           <div class="col-lg-12 mx-auto shadow p-1 border bg-light text-center" id="dataTable2" style="display:none">
             <label>Historial</label>
@@ -565,7 +563,6 @@ function submitForm(obj) {
   google.script.run.withSuccessHandler(showTable).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).searchData(obj);
 }
 
-
 // =============================================
 // VARIABLE GLOBAL: fotos por sección
 // =============================================
@@ -750,7 +747,6 @@ async function firmarYGuardar(firmaOverride) {
     .saveDataCheck(objData);
 }
 
-
 // =============================================
 // CONSTRUIR FILA DE SWITCH POR SECCIÓN
 // =============================================
@@ -769,7 +765,6 @@ function buildSwitchRow(sectionIdx) {
     "</td>" +
   "</tr>";
 }
-
 
 // =============================================
 // MOSTRAR TABLA (MODIFICADO CON SWITCHES)
@@ -879,7 +874,6 @@ function showTable(dataArray) {
     }
 }
 
-
 // =============================================
 // DETECTAR "NO" EN SECCIÓN → HABILITAR SWITCH
 // =============================================
@@ -898,7 +892,6 @@ function checkSectionNos(sectionIdx) {
     }
 }
 
-
 // =============================================
 // TOGGLE PANEL DE OBSERVACIÓN
 // =============================================
@@ -914,7 +907,6 @@ function toggleObsPanel(sectionIdx) {
         panel.style.display = 'none';
     }
 }
-
 
 // =============================================
 // CONSTRUIR CÁMARAS POR ÍTEM "NO"
@@ -958,7 +950,6 @@ function buildPerItemCameras(sectionIdx) {
         renderThumbs(sectionIdx, itemNum);
     });
 }
-
 
 // =============================================
 // AGREGAR FOTO CON ITEM + FECHA/HORA ESTAMPADA
@@ -1017,7 +1008,6 @@ function addSectionPhoto(sectionIdx, itemNum, event) {
     event.target.value = '';
 }
 
-
 // =============================================
 // ELIMINAR FOTO DE SECCIÓN
 // =============================================
@@ -1031,7 +1021,6 @@ function removeSectionPhoto(sectionIdx, itemNum, photoIdx) {
     if (mainIdx !== -1) sectionPhotos[sectionIdx].splice(mainIdx, 1);
     renderThumbs(sectionIdx, itemNum);
 }
-
 
 // =============================================
 // RENDERIZAR THUMBNAILS POR ÍTEM
@@ -1054,7 +1043,6 @@ function renderThumbs(sectionIdx, itemNum) {
 
     container.style.display = photos.length > 0 ? 'flex' : 'none';
 }
-
 
 // =============================================
 // GENERAR COLLAGE POR ÍTEM (array de {b64} objetos)
@@ -1109,7 +1097,6 @@ function buildItemCollage(photosArr) {
     });
 }
 
-
 // =============================================
 // RECOPILAR OBSERVACIONES DE TODAS LAS SECCIONES
 // Nuevo formato: [{section, items: [{num, comment, image}]}]
@@ -1156,7 +1143,6 @@ async function collectSectionObservations() {
 }
 
 </script>
-
 
   <script>
     let ad4 = document.getElementById('ad4');
@@ -1217,7 +1203,6 @@ async function whenButtonClicked() {
     abrirFirmaModal();
   }
 }
-
 
 function previewImage(event) {
     var reader = new FileReader();
@@ -1412,9 +1397,6 @@ function clearForm() {
     if (panel) { panel.style.display = 'none'; var obsEl = panel.querySelector('[id^="obs-items-"]'); if (obsEl) obsEl.innerHTML = ''; }
   }
 }
-
-
-
 
 function btnw(){
     // Auto-búsqueda ahora manejada por afterLugarChange()

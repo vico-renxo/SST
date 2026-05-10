@@ -30,7 +30,6 @@
   <i class="fa-solid fa-rotate-right"></i>
 </button>
 
-
  <div id="contenedorGeneral" style="position: relative; min-height: 200px;">
   <!-- Spinner que cubrirá solo esta sección -->
 <div id="loadingglobal" 
@@ -63,7 +62,6 @@
   <div id="mensajeCursos" class="mb-2 text-danger"></div>
   <br>
 </div>
-
 
  <!-- MODAL REGISTRO FIRMA -->
 <div class="modal fade" id="modalFirma" tabindex="-1" aria-labelledby="modalFirmaLabel" aria-hidden="true">
@@ -121,7 +119,6 @@
 
   <div id="estadoBusqueda" class="small text-muted mt-1" style="min-height:18px;"></div>
 </div>
-
 
           <div class="col-md-6">
             <label class="form-label">Tema *</label>
@@ -628,8 +625,6 @@ function crearCardCurso(curso, index) {
   return cardDiv;
 }
 
-
-
 // ✅ ANIMACIONES DE ENTRADA MEJORADAS
 function animarEntradaCursos() {
   const cards = document.querySelectorAll('.curso-card');
@@ -743,7 +738,6 @@ function mostrarResultados(respuesta) {
 
   elementsCache.contenedorCursos.appendChild(tipoChipsContainer);
 
-
   // === Renderizar tarjetas de cursos ===
   renderizarCursosOptimizado(cursos);
 
@@ -759,7 +753,6 @@ function mostrarResultados(respuesta) {
 
   loadingEndG();
 }
-
 
 // ✅ FILTRO DE CURSOS SUPER OPTIMIZADO
 const filtrarCursosOptimizado = debounceFilterCursos(function() {
@@ -807,7 +800,6 @@ const filtrarCursosOptimizado = debounceFilterCursos(function() {
     const totalVisible = cards.length - hiddenCards.size;
   });
 });
-
 
 // === FILTRAR POR TIPO DE PROGRAMA ===
 function filtrarPorTipo(tipo, chipsContainer) {
@@ -861,7 +853,6 @@ function actualizarProgreso(cursos) {
     label.innerHTML = `Cumplimiento: (${aprobados}/${total})`;
   }
 }
-
 
 // ✅ FUNCIÓN PÚBLICA PARA COMPATIBILIDAD
 function filtrarCursos() {
@@ -1289,8 +1280,6 @@ function iniciarCronometro(id, fechaFin) {
   const intervalo = setInterval(actualizar, 1000);
 }
 
-
-
                                                                                                              
                                                                                                                                               
     /*************** Configure la página del examen después de enviar las respuestas. ***************/                                        
@@ -1451,7 +1440,6 @@ async function buscarTemaPorCodigo(forzar = false) {
     
   }
 }
-
 
 function limpiarCamposTema() {
   document.getElementById("temaFirma").value = "";
@@ -1632,7 +1620,6 @@ function finalizarTest(){
      document.getElementById("bloqueTest").style.display = "none";
 }
 
-
 //Actualizador
 function actualizarDatosCursos() {
   const btn = document.getElementById("btnActualizarCursos");
@@ -1791,8 +1778,6 @@ function abrirKahootModal() {
         }
     };
 }
-
-
 
 function cerrarKahootModal() {
   const modal = document.getElementById('kahootModalOverlay');

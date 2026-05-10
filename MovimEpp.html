@@ -5,8 +5,6 @@
   <title>EPP – Gestión moderna</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-
-
 </head>
 <body>
 <div class="app-wrap epp-scope">
@@ -210,7 +208,6 @@
   </div>
 </div>
 
-
 <!-- Overlay -->
 <div id="globalOverlayEPP" class="overlay">
   <div class="text-center">
@@ -356,7 +353,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   _pendientePollTimer = setInterval(_pollPendientes, 30000);
 });
 
-
 /* =================== BACKEND SYNC =================== */
 async function refreshInit(almacenId){
   const data = await gasCall('getInit', almacenId||'');
@@ -457,8 +453,6 @@ async function onChangeAlmacen(e){
     overlay(false);
   }
 }
-
-
 
 /* =================== Persona =================== */
 async function buscarPersona(){
@@ -767,9 +761,6 @@ function renderHistorial(list){
   });
 }
 
-
-
-
 /* ======= Exportar a Excel ======= */
 function xlsxDownload(filename, aoa, sheetName='Hoja1'){
   const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -777,7 +768,6 @@ function xlsxDownload(filename, aoa, sheetName='Hoja1'){
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   XLSX.writeFile(wb, filename);
 }
-
 
 function exportarRegistroPDF() {
   if (!stateEPP.persona) { Swal.fire('Primero busca un trabajador', '', 'info'); return; }
@@ -808,7 +798,6 @@ function exportarRegistroPDF() {
     })
     .generarRegistroEPP(dni);
 }
-
 
 async function exportStockXlsx(){
   const filt = currentFilter();
@@ -863,7 +852,6 @@ function confirmarEntregaNoPrevista(productoBase){
   });
 }
 
-
 /* =================== Cards CON ESTADO EN BOTÓN =================== */
   /* =================== Cards CON SEPARADOR Y CONFIRMACIÓN =================== */
 function renderCards(){
@@ -873,7 +861,6 @@ function renderCards(){
 
   const hasPersona = !!stateEPP.persona;
   const cargo = stateEPP.persona?.CARGO || '';
-
 
   const activeChip=document.querySelector('#chipCats .chip.active'); 
   const cat=activeChip?activeChip.dataset.cat:'Todos';
@@ -1116,10 +1103,6 @@ function attachCardListeners(){
   });
 }
 
-
-
-
-
 /* =================== Operación -> carrito =================== */
 let opModal=null, movModal=null, newProdModal=null, currentOp=null;
 
@@ -1218,7 +1201,6 @@ async function openOp(productoBase, tipo){
   document.getElementById('btnAddToCart').onclick = addToCart;
   opModal.show();
 }
-
 
 /* MERGE ítems + edición cantidad (#2) */
 function addToCart(){
@@ -1409,9 +1391,6 @@ function generarPDFCliente(persona, almacen, items, firmaDataUrl, opts={}){
   return url;
 }
 
-
-
-
 function stockMetaOf(producto, variante){
   const rows = (stateEPP.stock||[]).filter(s => s.PRODUCTO === producto);
 
@@ -1548,7 +1527,6 @@ async function cartExec(){
     Swal.fire('Error', String(err), 'error');
   }
 }
-
 
 /* =================== Movimiento =================== */
 function openMov(productoBaseOpt){
@@ -1777,7 +1755,6 @@ async function saveNewProduct(){
   }catch(e){ Swal.fire('Error', String(e), 'error'); }
   finally{ setLoading(btn,false); }
 }
-
 
 //skeleton
 /* =================== PAGINACIÓN SSR (30 en 30) =================== */

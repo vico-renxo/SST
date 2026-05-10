@@ -62,7 +62,6 @@
             <select id="chipSelect" class="form-select mt-2"></select>
           </div>
 
-
           <label class="mt-2">Frec. inspección (días)</label>
           <input class="form-control" id="matInsp" type="number" min="0" placeholder="Ej: 30"/>
 
@@ -350,7 +349,6 @@ editarColumna: function(indiceCol) {
   setTimeout(() => { this.state.isEditing = false; }, 1000);
 },
 
-
 getModalValues: function() {
   const capSel = this.getChipValues().join(", ");
   return [
@@ -361,7 +359,6 @@ getModalValues: function() {
     this.elements.producto().value.trim()
   ];
 },
-
 
     saveToGoogleSheets: function(valores) {
       const colAbs = MAT_FIRST_DATA_COL + this.state.columnaEditando;
