@@ -228,12 +228,18 @@ a:hover {
 #miVista2 #page-content-wrapper {
   margin-left: 13.5rem;
   transition: margin .28s cubic-bezier(.4,0,.2,1);
-  padding: 56px .3rem .3rem;
+  padding: 60px .5rem .5rem;
   width: 100%;
 }
 #miVista2 #wrapper.toggled #sidebar-wrapper { left: -13.5rem; }
 #miVista2 #wrapper.toggled #page-content-wrapper { margin-left: 0; }
 #miVista2 #menu-toggle { cursor: pointer; }
+
+/* ── Normalizar espacio superior en todos los módulos ── */
+/* El navbar ya tiene 60px de clearance; los módulos no deben agregar más */
+#miVista2 .tab-pane > div:first-child        { margin-top: 0 !important; }
+#miVista2 .tab-pane > .container:first-child { padding-top: 0.5rem !important; }
+#miVista2 .tab-pane > .container-fluid:first-child { padding-top: 0.25rem !important; }
 
 /* Responsive móvil — sidebar oculto por defecto */
 @media (max-width: 767px) {
