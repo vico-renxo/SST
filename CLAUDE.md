@@ -878,4 +878,72 @@ git remote set-url origin "https://x-access-token:${PAT}@github.com/vico-renxo/S
 
 ---
 
+### L5 · `aspect-ratio` falla en flex containers cuando el CSS está en el `<head>`
+
+**Problema:** Los módulos HTML originalmente tenían `<style>` blocks inline (en el body del SPA). Al centralizarlos en `css-modulos.html` (cargado en `<head>`), las cards tiktok-style (`.tiktok-card`) dejaron de tener la altura correcta a pesar de tener `aspect-ratio: 9/16`.
+
+**Causa raíz:** `aspect-ratio` en un elemento con `display: flex` puede fallar silenciosamente cuando el CSS está en el `<head>` y el elemento existe en un contexto de layout complejo (tab-panes, containment). Los inline `<style>` del body tenían mayor prioridad en cascada (posición tardía en el documento), enmascarando el problema.
+
+**Solución definitiva — truco `padding-bottom`:**
+```css
+/* ✅ Funciona en TODOS los contextos: flex, grid, contain, head o body */
+.tiktok-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 177.78%; /* = (16/9) × 100% para ratio 9:16 */
+}
+/* El contenido que iría al fondo con justify-content:flex-end
+   debe ser position:absolute bottom:0 en su lugar */
+.tiktok-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+```
+
+**Regla:** Para cualquier card con proporción fija (tiktok-style, portrait, landscape), siempre usar `padding-bottom` en lugar de `aspect-ratio`. Es universalmente compatible y no depende del contexto de layout.
+
+**Fórmulas comunes:**
+- 9:16 portrait → `padding-bottom: 177.78%`
+- 16:9 landscape → `padding-bottom: 56.25%`
+- 1:1 cuadrado → `padding-bottom: 100%`
+- 4:3 → `padding-bottom: 75%`
+
+---
+
+### L6 · css-modulos.html — estructura y errores a evitar
+
+**Estado actual:** `css-modulos.html` tiene UNA sola `<style>` tag que envuelve todo el archivo (línea 1: `<style>`, línea final: `</style>`). Se carga en el `<head>` de index.html via `<?!= HtmlService.createHtmlOutputFromFile('css-modulos').getContent() ?>`.
+
+**Errores detectados y corregidos:**
+- `//comment` (comentario estilo JS) dentro de CSS → inválido, usar `/* comment */`
+- `*/` suelto sin `/*` previo → dangling closer, produce error de parseo silencioso
+- `contain: layout style paint` en un contenedor de cards → puede interferir con el cálculo de tamaños de hijos; evitar salvo necesidad probada
+
+**Verificar balance de comentarios antes de editar css-modulos.html:**
+```bash
+python3 -c "
+content = open('/home/user/SST/css-modulos.html').read()
+import re
+pos = 0; in_c = False; issues = []
+while pos < len(content):
+    if not in_c:
+        idx = content.find('/*', pos)
+        if idx == -1: break
+        in_c = True; cs = idx; pos = idx + 2
+    else:
+        idx = content.find('*/', pos)
+        if idx == -1:
+            issues.append(f'UNCLOSED comment at line {content[:cs].count(chr(10))+1}')
+            break
+        in_c = False; pos = idx + 2
+[print(i) for i in issues] or print('OK')
+"
+```
+
+---
+
 *Fin de CLAUDE.md — Actualizar después de cada cambio estructural.*
