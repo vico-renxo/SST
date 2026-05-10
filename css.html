@@ -236,7 +236,9 @@ a:hover {
 #miVista2 #menu-toggle { cursor: pointer; }
 
 /* ── Normalizar espacio superior en todos los módulos ── */
-/* El navbar ya tiene 60px de clearance; los módulos no deben agregar más */
+/* Bootstrap .row.g-3 aplica margin-top:1rem a .tab-content como hijo directo del row.
+   Neutralizarlo aquí evita el exceso de espacio en TODOS los módulos. */
+#miVista2 .tab-content                       { margin-top: 0 !important; }
 #miVista2 .tab-pane > div:first-child        { margin-top: 0 !important; }
 #miVista2 .tab-pane > .container:first-child { padding-top: 0.5rem !important; }
 #miVista2 .tab-pane > .container-fluid:first-child { padding-top: 0.25rem !important; }
