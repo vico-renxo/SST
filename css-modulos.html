@@ -2172,14 +2172,13 @@ th.sticky-header {
       background: #000;
       color: white;
       aspect-ratio: 9/16;
+      min-height: clamp(280px, calc(25vw * 16 / 9 - 3rem), 560px);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      /* ✅ Optimizaciones de rendimiento */
-      transform: translateZ(0); /* GPU acceleration */
+      transform: translateZ(0);
       backface-visibility: hidden;
       will-change: transform;
-      contain: layout style paint;
     }
 
     .tiktok-card img {
