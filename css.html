@@ -23,6 +23,20 @@
   --gray-border: #e5e7eb;
   --hover-bg: #f1f3f5;
   --white: #ffffff;
+
+  /* ── ESCALA TIPOGRÁFICA UNIFORME ─────────────────────────────
+     Todos los módulos deben respetar esta jerarquía.
+     xs   = badges, ayuda visual
+     sm   = chips de filtro, etiquetas auxiliares
+     base = inputs, celdas de tabla, texto de formulario
+     md   = labels de filtro, subtítulos de sección
+     lg   = títulos de módulo, h5
+  ──────────────────────────────────────────────────────────── */
+  --font-xs:   0.72rem;   /* 11.5px */
+  --font-sm:   0.76rem;   /* 12.2px */
+  --font-base: 0.84rem;   /* 13.4px */
+  --font-md:   0.875rem;  /* 14px   */
+  --font-lg:   0.95rem;   /* 15.2px */
 }
 
 /* Pantalla de carga */
@@ -418,8 +432,8 @@ textarea.form-control {
   border: 1px solid #d0d7de;
   background-color: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
-  font-size: 14px;
-  padding: 10px 12px;
+  font-size: var(--font-base);   /* 13.4px — uniforme en todos los módulos */
+  padding: 8px 12px;
 }
 input.form-control:focus,
 select.form-control:focus,
@@ -434,12 +448,52 @@ textarea.form-control:focus {
 button.btn {
   border-radius: 10px !important;
   font-weight: 500;
+  font-size: var(--font-base);
   transition: all 0.2s ease-in-out;
 }
 
 button.btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* ════════════════════════════════════════════════════════════
+   TIPOGRAFÍA UNIFORME — Aplicada a todos los módulos.
+   Todos los elementos de filtro, tabla y chip respetan la
+   escala var(--font-*) definida en :root.
+   ════════════════════════════════════════════════════════════ */
+
+/* Tablas — uniforme en todo el sistema */
+table th {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+table td {
+  font-size: var(--font-base);
+}
+
+/* Chips de filtro — TODOS los módulos usan el mismo tamaño */
+.check-chip,
+.chip-mes,
+.chip-mes-charla,
+.epp-chip,
+.maestro-chip,
+.chipepp,
+.filter-tab {
+  font-size: var(--font-sm) !important;
+}
+
+/* Badges de frecuencia PASSO */
+.badge-frec,
+.badge-diario, .badge-semanal, .badge-mensual,
+.badge-trimestral, .badge-semestral, .badge-anual, .badge-2semanas {
+  font-size: var(--font-sm) !important;
+}
+
+/* Estado badges y potencial — módulos desvíos/check */
+.estado-badge, .badge-potencial {
+  font-size: var(--font-xs) !important;
 }
 
 /* conexion a INTERNET */
@@ -473,8 +527,9 @@ button.btn:hover {
 }
 
 .form-label {
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+  font-size: var(--font-md);   /* 14px — uniforme en todos los módulos */
+  font-weight: 600;
   color: #374151;
 }
 

@@ -769,7 +769,26 @@ ls -la /home/user/SST/*.js /home/user/SST/*.html
 - **Función toggle**: `toggleNeoTheme()` en index.html
 - **CSS override**: todos los overrides en `css.html` bajo el selector `body.neo-brutalism`
 
-### 9.5 Dónde agregar CSS nuevo
+### 9.5 Escala tipográfica del sistema (definida en css.html :root)
+
+```css
+--font-xs:   0.72rem;   /* 11.5px — badges, estado-badge, helper text */
+--font-sm:   0.76rem;   /* 12.2px — chips de filtro (check-chip, chip-mes, epp-chip, maestro-chip, chipepp, filter-tab, badge-frec) */
+--font-base: 0.84rem;   /* 13.4px — form-control, form-select, table td */
+--font-md:   0.875rem;  /* 14px   — form-label, subtítulos de módulo */
+--font-lg:   0.95rem;   /* 15.2px — títulos principales */
+```
+
+**Reglas obligatorias:**
+- **Chips de filtro** → siempre `var(--font-sm)` — NO usar px ni rem hardcodeados
+- **Labels de formulario** → `var(--font-md)` vía `.form-label`
+- **Inputs/selects** → `var(--font-base)` vía `.form-control` / `.form-select`
+- **Encabezados de tabla** (`th`) → `var(--font-sm)` con `font-weight: 700`
+- **Celdas de tabla** (`td`) → `var(--font-base)`
+- **Badges** → `var(--font-xs)` con `!important`
+- **NO usar** `style="font-size:12px"` en contenedores de chips — CSS ya lo maneja
+
+### 9.6 Dónde agregar CSS nuevo
 - **Estilos globales** (sidebar, navbar, componentes compartidos, tema): → `css.html`
 - **Estilos de un módulo específico** (Check, Rol, EPP, Eventos, etc.): → `css-modulos.html` en la sección del módulo correspondiente
 - **NUNCA** agregar `<style>` dentro de un archivo `.html` de módulo — todos los módulos HTML deben estar libres de bloques `<style>`
