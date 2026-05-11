@@ -2197,8 +2197,6 @@ th.sticky-header {
       transform: scale(1.02);
     }
 
-
-
     .overlay-buttons button:hover {
       background-color: #f0f0f0;
       transform: scale(1.05);
@@ -2227,7 +2225,6 @@ th.sticky-header {
       text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
       line-height: 1.4;
     }
-
 
     .tiktok-text::-webkit-scrollbar {
       display: none;
@@ -2986,7 +2983,6 @@ circle {
   display: block;
 }
 
-
 .add {
   text-align: center;
 }
@@ -3226,7 +3222,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
   grid-column: 1 / -1;
   min-height: 450px;
 }
-
 
 .piramide-content {
     display: flex;
@@ -3610,7 +3605,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
   padding-right: 4px; /* menos relleno interno para no chocar con el botón */
 }
 
-
 #miVista .delete-btn {
   position: absolute;
   top: 50%;
@@ -3624,7 +3618,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
   visibility: hidden;
   z-index: 3;
 }
-
 
   #miVista input:focus {
     outline: none;
@@ -3658,7 +3651,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
    ├─ PARTE 8: LITE Mode (celular trabajador)
    └─ PARTE 9: ADMIN Mobile + Media Queries
    ================================================================ */
-
 
 /* ═══════════════════════════════════════════════════════════════
    PARTE 1: VARIABLES + BASE + SCROLLBARS
@@ -3718,7 +3710,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
 #rol-module-wrapper ::-webkit-scrollbar-track { background: transparent; }
 #rol-module-wrapper ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 #rol-module-wrapper ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
 
 /* ═══════════════════════════════════════════════════════════════
    PARTE 2: SIDEBAR (Panel de Personal)
@@ -3875,7 +3866,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
     -webkit-tap-highlight-color: rgba(37, 99, 235, 0.2);
 }
 #rol-module-wrapper .btn-absence:hover { background: var(--primary); color: white; border-color: var(--primary); }
-
 
 /* ═══════════════════════════════════════════════════════════════
    PARTE 3: TOP BAR + BOTONES (con fix touch targets 44px)
@@ -4176,7 +4166,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
     padding: 0 4px 0 8px;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    PARTE 5: SHIFT CARDS + ZONAS ESPECIALES
    ═══════════════════════════════════════════════════════════════ */
@@ -4256,7 +4245,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
 #rol-module-wrapper .zone-avail .col-area { background-color: #475569 !important; border-bottom: 1px solid #64748b; }
 #rol-module-wrapper .zone-avail .col-sub { background-color: #f1f5f9 !important; color: #475569; border-bottom: 1px solid white; }
 #rol-module-wrapper .zone-avail td { background-color: #f8fafc; }
-
 
 /* ═══════════════════════════════════════════════════════════════
    FOOTER - ✅ FIX STICKY: bottom + background sólido
@@ -4505,7 +4493,6 @@ body { font-family: Arial, sans-serif; font-size: 13px; padding: 30px; }
     z-index: 20;
     position: relative;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    PARTE 7: MODALES + CONTEXT MENU + DRAG&DROP + ANIMACIONES
@@ -4919,7 +4906,6 @@ body.lite-mode #rol-module-wrapper .shift-card.my-shift {
     transform: scale(1.03);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    PARTE 9: MEDIA QUERIES RESPONSIVAS
    ═══════════════════════════════════════════════════════════════ */
@@ -5232,7 +5218,6 @@ body.lite-mode #rol-module-wrapper .shift-card.my-shift {
 
 @media(max-width:700px){.rl-two-col{grid-template-columns:1fr !important;}}
 
-
 /* ════════════════════════════════════════════════════════════
    CURSOS — Catálogo de cursos/temas de capacitación
    ════════════════════════════════════════════════════════════ */
@@ -5242,16 +5227,13 @@ body.lite-mode #rol-module-wrapper .shift-card.my-shift {
         padding: 5px;
       }
 
-
 /* ════════════════════════════════════════════════════════════
    NEO BRUTALISM — Overrides de módulos específicos
    Se activa con body.neo-brutalism (botón toggle en navbar)
    ════════════════════════════════════════════════════════════ */
 
 /* ── DESVIOS / CHECK — Estado badges + potencial badges ─────── */
-body.neo-brutalism .estado-badge {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .estado-badge { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background-color: #FFDD00 !important;
   color: #000 !important;
@@ -5259,22 +5241,18 @@ body.neo-brutalism .estado-badge {
   backdrop-filter: none !important;
 }
 body.neo-brutalism .badge-potencial {
-  border-radius: 0 !important;
   text-shadow: none !important;
   border: 2px solid #000 !important;
 }
-body.neo-brutalism .badge-potencial.alto {
-  background-color: #FF5F1F !important;
+body.neo-brutalism .badge-potencial.alto { background-color: #FF5F1F !important;
   color: #fff !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .badge-potencial.medio {
-  background-color: #FFDD00 !important;
+body.neo-brutalism .badge-potencial.medio { background-color: #FFDD00 !important;
   color: #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .badge-potencial.bajo {
-  background-color: #000 !important;
+body.neo-brutalism .badge-potencial.bajo { background-color: #000 !important;
   color: #FFDD00 !important;
   box-shadow: 2px 2px 0 #555 !important;
 }
@@ -5282,20 +5260,14 @@ body.neo-brutalism .badge-potencial:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .skeleton-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .skeleton-card { border: 2.5px solid #000 !important;
 }
-body.neo-brutalism .avatar-circle-only {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .avatar-circle-only { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background-color: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism .overlay-buttons button {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .overlay-buttons button { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background: #FFDD00 !important;
 }
@@ -5306,108 +5278,70 @@ body.neo-brutalism .overlay-buttons button:hover {
 }
 
 /* ── EPP (MovimEpp) — Cards de producto ─────────────────────── */
-body.neo-brutalism .epp-scope .card-prod {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .epp-scope .card-prod { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism .epp-scope .card-prod.lowstock {
-  border-color: #FF5F1F !important;
+body.neo-brutalism .epp-scope .card-prod.lowstock { border-color: #FF5F1F !important;
   box-shadow: 4px 4px 0 #FF5F1F !important;
 }
-body.neo-brutalism .epp-scope .card-prod img {
-  border-bottom: 2px solid #000 !important;
+body.neo-brutalism .epp-scope .card-prod img { border-bottom: 2px solid #000 !important;
 }
-body.neo-brutalism .epp-scope .tag-previsto {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .epp-scope .tag-previsto { border: 1.5px solid #000 !important;
   background: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism .epp-scope .tag-previsto .circle {
-  border-radius: 0 !important;
-  border: 1px solid #000 !important;
+body.neo-brutalism .epp-scope .tag-previsto .circle { border: 1px solid #000 !important;
 }
-body.neo-brutalism .epp-scope .badge-stocklow {
-  border-radius: 0 !important;
-  box-shadow: 2px 2px 0 #000 !important;
+body.neo-brutalism .epp-scope .badge-stocklow { box-shadow: 2px 2px 0 #000 !important;
   border: 1.5px solid #000 !important;
   background: #FF5F1F !important;
 }
-body.neo-brutalism .epp-scope .variant-pill {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .epp-scope .variant-pill { border: 1.5px solid #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .epp-scope .persona-box {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .epp-scope .persona-box { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   background: #F5F0E8 !important;
 }
 body.neo-brutalism .epp-scope .badge-reqcap,
 body.neo-brutalism .epp-scope .badge-inspe,
-body.neo-brutalism .epp-scope .badge-devolv {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .epp-scope .badge-devolv { border: 1.5px solid #000 !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
 
 /* ── EVENTOS — Cards flip 3D ────────────────────────────────── */
-body.neo-brutalism .ev-card-face {
-  border-radius: 0 !important;
-}
-body.neo-brutalism .ev-front-content {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+
+body.neo-brutalism .ev-front-content { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism .ev-card-back {
-  border-radius: 0 !important;
-  background: #000 !important;
+body.neo-brutalism .ev-card-back { background: #000 !important;
   border: 2.5px solid #FFDD00 !important;
 }
-body.neo-brutalism .ev-more-panel {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .ev-more-panel { border: 2px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism .ev-more-panel-header {
-  background: #FFDD00 !important;
+body.neo-brutalism .ev-more-panel-header { background: #FFDD00 !important;
   border-bottom: 2px solid #000 !important;
 }
-body.neo-brutalism .ev-more-summary-item {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .ev-more-summary-item { border: 1.5px solid #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .ev-pregunta-row {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .ev-pregunta-row { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .ev-score-badge {
-  border-radius: 0 !important;
-  box-shadow: 2px 2px 0 #000 !important;
+body.neo-brutalism .ev-score-badge { box-shadow: 2px 2px 0 #000 !important;
 }
 
 /* ── MAPA DE RIESGOS — Cards + badges + FAB ─────────────────── */
-body.neo-brutalism #riskmaps-module .tiktok-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism #riskmaps-module .tiktok-card { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism #riskmaps-module .map-title-overlay {
-  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent) !important;
+body.neo-brutalism #riskmaps-module .map-title-overlay { background: linear-gradient(to top, rgba(0,0,0,0.85), transparent) !important;
   border-top: 2px solid #FFDD00 !important;
 }
-body.neo-brutalism #riskmaps-module .type-badge {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #riskmaps-module .type-badge { border: 1.5px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism #riskmaps-module .overlay-buttons button {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #riskmaps-module .overlay-buttons button { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background: #FFDD00 !important;
 }
@@ -5416,40 +5350,28 @@ body.neo-brutalism #riskmaps-module .overlay-buttons button:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism #riskmaps-module .fab {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism #riskmaps-module .fab { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 
 /* ── ROL DE TURNOS — Modal + shift cards + tabla ────────────── */
-body.neo-brutalism #rol-module-wrapper .modal-box {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .modal-box { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
   background: #F5F0E8 !important;
 }
 body.neo-brutalism #rol-module-wrapper .form-group input,
-body.neo-brutalism #rol-module-wrapper .form-group select {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .form-group select { border: 2px solid #000 !important;
 }
 body.neo-brutalism #rol-module-wrapper .form-group input:focus,
-body.neo-brutalism #rol-module-wrapper .form-group select:focus {
-  box-shadow: 2px 2px 0 #000 !important;
+body.neo-brutalism #rol-module-wrapper .form-group select:focus { box-shadow: 2px 2px 0 #000 !important;
   border-color: #FFDD00 !important;
   outline: none !important;
 }
-body.neo-brutalism #rol-module-wrapper .shift-card {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .shift-card { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper tfoot {
-  border-top: 3px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper tfoot { border-top: 3px solid #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .btn-remove-card {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .btn-remove-card { border: 2px solid #000 !important;
 }
 
 /* ── GRAFICOS — Contenedores de charts ──────────────────────── */
@@ -5457,30 +5379,19 @@ body.neo-brutalism .kpi-card,
 body.neo-brutalism .kpi-box,
 body.neo-brutalism .metric-card,
 body.neo-brutalism .graficos-kpi,
-body.neo-brutalism [class*="kpi-"] {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism [class*="kpi-"] { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
 
 /* ── CAPACITACIONES — Barras y KPIs ────────────────────────── */
-body.neo-brutalism .rl-kpi-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .rl-kpi-card { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .rl-topic-bar {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
-}
-body.neo-brutalism .rl-pct-fill {
-  border-radius: 0 !important;
+body.neo-brutalism .rl-topic-bar { border: 1.5px solid #000 !important;
 }
 
 /* ── ASIGNACIONES — EPP firma trabajador ────────────────────── */
-body.neo-brutalism .epp-unified-card {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .epp-unified-card { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
   background: #F5F0E8 !important;
 }
@@ -5488,191 +5399,135 @@ body.neo-brutalism .epp-unified-card:hover {
   transform: translate(-2px, -2px) !important;
   box-shadow: 6px 6px 0 #000 !important;
 }
-body.neo-brutalism .epp-head-card {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-head-card { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .epp-chip {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-chip { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .epp-chip:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .epp-chip.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .epp-chip.active { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .epp-badge {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .epp-badge { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .epp-badge-previsto {
-  background: #FFDD00 !important;
+body.neo-brutalism .epp-badge-previsto { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .epp-badge-entregado {
-  background: #000 !important;
+body.neo-brutalism .epp-badge-entregado { background: #000 !important;
   color: #FFDD00 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .epp-badge-devolvible {
-  background: #FF5F1F !important;
+body.neo-brutalism .epp-badge-devolvible { background: #FF5F1F !important;
   color: #fff !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .epp-badge-proximo {
-  background: #F5F0E8 !important;
+body.neo-brutalism .epp-badge-proximo { background: #F5F0E8 !important;
   color: #000 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .epp-big-input input {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-big-input input { border: 2px solid #000 !important;
 }
-body.neo-brutalism .epp-big-input button {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-big-input button { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .epp-skeleton {
-  border-radius: 0 !important;
-}
-body.neo-brutalism .epp-toast {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+
+body.neo-brutalism .epp-toast { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .alerta-modal-grande {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism .alerta-modal-grande { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .alerta-header {
-  background: #FFDD00 !important;
+body.neo-brutalism .alerta-header { background: #FFDD00 !important;
   border-bottom: 2px solid #000 !important;
   color: #000 !important;
 }
 body.neo-brutalism .tabla-alertas { border: 2px solid #000 !important; }
-body.neo-brutalism .tabla-alertas th {
-  background: #000 !important;
+body.neo-brutalism .tabla-alertas th { background: #000 !important;
   color: #FFDD00 !important;
   border: 1px solid #000 !important;
 }
-body.neo-brutalism .panel-pendientes {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism .panel-pendientes { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .panel-pendientes .item-pendiente {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .panel-pendientes .item-pendiente { border: 1.5px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .panel-pendientes .btn-aceptar,
-body.neo-brutalism .panel-pendientes .btn-rechazar {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .panel-pendientes .btn-rechazar { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .firma-overlay .firma-modal {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism .firma-overlay .firma-modal { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .firma-modal canvas {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .firma-modal canvas { border: 2px solid #000 !important;
 }
-body.neo-brutalism .rechazo-overlay .rechazo-modal {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism .rechazo-overlay .rechazo-modal { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .btn-firmas-pendientes {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .btn-firmas-pendientes { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
-}
-body.neo-brutalism .btn-firmas-pendientes .badge-pendientes {
-  border-radius: 0 !important;
 }
 
 /* ── EPPMAESTRO — Gestión maestra de productos ───────────────── */
-body.neo-brutalism .kpi-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .kpi-card { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 body.neo-brutalism .kpi-card.verde { border-left: 5px solid #000 !important; }
 body.neo-brutalism .kpi-card.naranja { border-left: 5px solid #FF5F1F !important; }
 body.neo-brutalism .kpi-card.rojo { border-left: 5px solid #dc3545 !important; }
-body.neo-brutalism .maestro-chip {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .maestro-chip { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .maestro-chip:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .maestro-chip.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .maestro-chip.active { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .semaforo { border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .semaforo { border: 1.5px solid #000 !important; }
 body.neo-brutalism .compra-prioridad.vencido,
-body.neo-brutalism .compra-prioridad.porvencer {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .compra-prioridad.porvencer { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .tooltip-epp.show {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .tooltip-epp.show { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
 
 /* ── MATRIZAPP — Configuración reglas EPP ───────────────────── */
-body.neo-brutalism .chipepp {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .chipepp { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .chipepp.active,
-body.neo-brutalism .chipepp:hover {
-  background: #FFDD00 !important;
+body.neo-brutalism .chipepp:hover { background: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism .chip-input { border-radius: 0 !important; border: 2px solid #000 !important; }
+body.neo-brutalism .chip-input { border: 2px solid #000 !important; }
 
 /* ── EDITCHECK — Edición de registro checklist ──────────────── */
-body.neo-brutalism .obs-card-sub {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .obs-card-sub { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .obs-card-sub.pendiente {
-  box-shadow: 3px 3px 0 #FF5F1F !important;
+body.neo-brutalism .obs-card-sub.pendiente { box-shadow: 3px 3px 0 #FF5F1F !important;
   border-color: #FF5F1F !important;
 }
-body.neo-brutalism .obs-card-sub.en-gestion {
-  box-shadow: 3px 3px 0 #FFDD00 !important;
+body.neo-brutalism .obs-card-sub.en-gestion { box-shadow: 3px 3px 0 #FFDD00 !important;
   border-color: #000 !important;
   background: #fffbe6 !important;
 }
-body.neo-brutalism .obs-photo-box { border-radius: 0 !important; border: 2px dashed #000 !important; }
+body.neo-brutalism .obs-photo-box { border: 2px dashed #000 !important; }
 body.neo-brutalism .obs-section-title { border-bottom: 2.5px solid #000 !important; }
 
 /* ── PASSO — Programa inspecciones + reuniones ──────────────── */
@@ -5683,46 +5538,36 @@ body.neo-brutalism .badge-mensual,
 body.neo-brutalism .badge-trimestral,
 body.neo-brutalism .badge-semestral,
 body.neo-brutalism .badge-anual,
-body.neo-brutalism .badge-2semanas {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .badge-2semanas { border: 1.5px solid #000 !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
-body.neo-brutalism .celda-cumple {
-  background: #FFDD00 !important; color: #000 !important; border: 1px solid #000 !important;
+body.neo-brutalism .celda-cumple { background: #FFDD00 !important; color: #000 !important; border: 1px solid #000 !important;
 }
-body.neo-brutalism .celda-falta {
-  background: #FF5F1F !important; color: #fff !important; border: 1px solid #000 !important;
+body.neo-brutalism .celda-falta { background: #FF5F1F !important; color: #fff !important; border: 1px solid #000 !important;
 }
-body.neo-brutalism .celda-parcial {
-  background: #F5F0E8 !important; color: #000 !important; border: 1px solid #000 !important;
+body.neo-brutalism .celda-parcial { background: #F5F0E8 !important; color: #000 !important; border: 1px solid #000 !important;
 }
-body.neo-brutalism .celda-porcentaje-verde { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; }
-body.neo-brutalism .celda-porcentaje-naranja { background: #FF5F1F !important; color: #fff !important; border-radius: 0 !important; }
-body.neo-brutalism .celda-porcentaje-rojo { background: #000 !important; color: #FFDD00 !important; border-radius: 0 !important; }
+body.neo-brutalism .celda-porcentaje-verde { background: #FFDD00 !important; color: #000 !important; }
+body.neo-brutalism .celda-porcentaje-naranja { background: #FF5F1F !important; color: #fff !important; }
+body.neo-brutalism .celda-porcentaje-rojo { background: #000 !important; color: #FFDD00 !important; }
 body.neo-brutalism .passo-table { border: 2px solid #000 !important; }
 body.neo-brutalism .btn-guardar-passo,
-body.neo-brutalism .btn-cancelar-passo {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .btn-cancelar-passo { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 
 /* ── BUSCADORCAP — Cumplimiento por trabajador ──────────────── */
-body.neo-brutalism .badge-ap { border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .badge-pct-ok { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .badge-pct-med { background: #FF5F1F !important; color: #fff !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .badge-pct-low { background: #000 !important; color: #FFDD00 !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism #modalDetalleBox {
-  border-radius: 0 !important; border: 3px solid #000 !important;
+body.neo-brutalism .badge-ap { border: 1.5px solid #000 !important; }
+body.neo-brutalism .badge-pct-ok { background: #FFDD00 !important; color: #000 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .badge-pct-med { background: #FF5F1F !important; color: #fff !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .badge-pct-low { background: #000 !important; color: #FFDD00 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism #modalDetalleBox { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important; background: #F5F0E8 !important;
 }
 body.neo-brutalism .det-tema-hdr { background: #FFDD00 !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
 
 /* ── COMUNICADOS — Comunicados internos ─────────────────────── */
-body.neo-brutalism .com-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .com-card { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 body.neo-brutalism .com-card:hover {
@@ -5732,20 +5577,16 @@ body.neo-brutalism .com-card:hover {
 body.neo-brutalism .com-badge-tipo,
 body.neo-brutalism .badge-imagen,
 body.neo-brutalism .badge-texto,
-body.neo-brutalism .badge-video {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .badge-video { border: 1.5px solid #000 !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
-body.neo-brutalism .status-pill { border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .status-pill { border: 1.5px solid #000 !important; }
 body.neo-brutalism .status-pill.activo { background: #FFDD00 !important; color: #000 !important; }
 body.neo-brutalism .status-pill.inactivo { background: #000 !important; color: #FFDD00 !important; }
-body.neo-brutalism .com-preview-box { border-radius: 0 !important; border: 2px solid #000 !important; }
+body.neo-brutalism .com-preview-box { border: 2px solid #000 !important; }
 
 /* ── GRAFICOSINDEX — Charts + IA pronóstico ─────────────────── */
-body.neo-brutalism .chart-container {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .chart-container { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 body.neo-brutalism .chart-container:hover {
@@ -5753,271 +5594,182 @@ body.neo-brutalism .chart-container:hover {
   box-shadow: 6px 6px 0 #000 !important;
 }
 body.neo-brutalism .chart-title { border-bottom: 2px solid #000 !important; }
-body.neo-brutalism .pronostico-ia-container .card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .pronostico-ia-container .card { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .pronostico-ia-container .header {
-  background: #FFDD00 !important;
+body.neo-brutalism .pronostico-ia-container .header { background: #FFDD00 !important;
   color: #000 !important;
   border-bottom: 2px solid #000 !important;
 }
-body.neo-brutalism .pronostico-ia-container .status-indicator {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .pronostico-ia-container .status-indicator { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .pronostico-ia-container .btn-primary {
-  border-radius: 0 !important;
-  background: #000 !important;
+body.neo-brutalism .pronostico-ia-container .btn-primary { background: #000 !important;
   color: #FFDD00 !important;
   border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #555 !important;
 }
-body.neo-brutalism .pronostico-ia-container .btn-secondary {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .pronostico-ia-container .btn-secondary { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 
 /* ── IPERC — Matriz IPERC ───────────────────────────────────── */
 body.neo-brutalism #iperc-module-wrapper .card,
-body.neo-brutalism #iperc-module-wrapper .panel {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism #iperc-module-wrapper .panel { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism #iperc-module-wrapper .badge { border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism #iperc-module-wrapper .badge { border: 1.5px solid #000 !important; }
 body.neo-brutalism #iperc-module-wrapper th { background: #000 !important; color: #FFDD00 !important; }
 
 /* ── GLOBAL — Componentes Bootstrap no cubiertos en css.html ── */
-body.neo-brutalism .accordion-button {
-  border-radius: 0 !important;
-  border-bottom: 2px solid #000 !important;
+body.neo-brutalism .accordion-button { border-bottom: 2px solid #000 !important;
 }
-body.neo-brutalism .accordion-item {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .accordion-item { border: 2px solid #000 !important;
 }
-body.neo-brutalism .accordion-button:not(.collapsed) {
-  background: #FFDD00 !important;
+body.neo-brutalism .accordion-button:not(.collapsed) { background: #FFDD00 !important;
   color: #000 !important;
   box-shadow: none !important;
 }
-body.neo-brutalism .progress {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .progress { border: 1.5px solid #000 !important;
   overflow: visible !important;
 }
-body.neo-brutalism .progress-bar {
-  border-radius: 0 !important;
+
+body.neo-brutalism .list-group-item { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .list-group-item {
-  border: 1.5px solid #000 !important;
-  border-radius: 0 !important;
-}
-body.neo-brutalism .dropdown-menu {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .dropdown-menu { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 body.neo-brutalism .dropdown-item:hover,
-body.neo-brutalism .dropdown-item:focus {
-  background-color: #FFDD00 !important;
+body.neo-brutalism .dropdown-item:focus { background-color: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism .form-select {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .form-select { border: 2px solid #000 !important;
 }
-body.neo-brutalism .input-group-text {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .input-group-text { border: 2px solid #000 !important;
   background: #FFDD00 !important;
   color: #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism .input-group > * {
-  border-radius: 0 !important;
+
+body.neo-brutalism .pagination .page-link { border: 2px solid #000 !important;
 }
-body.neo-brutalism .pagination .page-link {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
-}
-body.neo-brutalism .pagination .page-item.active .page-link {
-  background: #FFDD00 !important;
+body.neo-brutalism .pagination .page-item.active .page-link { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .offcanvas,
 body.neo-brutalism .offcanvas-start,
-body.neo-brutalism .offcanvas-end {
-  border: 3px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .offcanvas-end { border: 3px solid #000 !important;
 }
-body.neo-brutalism .toast {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .toast { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .form-check-input {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .form-check-input { border: 2px solid #000 !important;
 }
-body.neo-brutalism .form-check-input:checked {
-  background-color: #FFDD00 !important;
+body.neo-brutalism .form-check-input:checked { background-color: #FFDD00 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism .nav-tabs .nav-link {
-  border-radius: 0 !important;
-  border: 1.5px solid transparent !important;
+body.neo-brutalism .nav-tabs .nav-link { border: 1.5px solid transparent !important;
 }
-body.neo-brutalism .nav-tabs .nav-link.active {
-  border: 2px solid #000 !important;
+body.neo-brutalism .nav-tabs .nav-link.active { border: 2px solid #000 !important;
   border-bottom-color: #F5F0E8 !important;
   background: #F5F0E8 !important;
   color: #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism .nav-tabs {
-  border-bottom: 2.5px solid #000 !important;
+body.neo-brutalism .nav-tabs { border-bottom: 2.5px solid #000 !important;
 }
-body.neo-brutalism .tab-content {
-  border: 2px solid #000 !important;
+body.neo-brutalism .tab-content { border: 2px solid #000 !important;
   border-top: none !important;
 }
 
 /* ── REPORTESLABORAL — Tablero laboral (rl-* namespace) ─────── */
-body.neo-brutalism .rl-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .rl-card { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .rl-panel {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .rl-panel { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .rl-table th {
-  background: #000 !important;
+body.neo-brutalism .rl-table th { background: #000 !important;
   color: #FFDD00 !important;
 }
-body.neo-brutalism .rl-table tbody tr:hover {
-  background: #fffbe6 !important;
+body.neo-brutalism .rl-table tbody tr:hover { background: #fffbe6 !important;
 }
-body.neo-brutalism .rl-tabs {
-  border-bottom: 2.5px solid #000 !important;
+body.neo-brutalism .rl-tabs { border-bottom: 2.5px solid #000 !important;
 }
-body.neo-brutalism .rl-tab-btn {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-tab-btn { border: 2px solid #000 !important;
 }
-body.neo-brutalism .rl-tab-btn.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .rl-tab-btn.active { background: #FFDD00 !important;
   color: #000 !important;
   font-weight: 700 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .rl-badge {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .rl-badge { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .rl-search-box {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-search-box { border: 2px solid #000 !important;
 }
-body.neo-brutalism .rl-search-item:hover {
-  background: #FFDD00 !important;
+body.neo-brutalism .rl-search-item:hover { background: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism .rl-vac-card {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .rl-vac-card { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .rl-vac-donut {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-vac-donut { border: 2px solid #000 !important;
 }
-body.neo-brutalism .rl-worker-card {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-worker-card { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .rl-worker-avatar,
-body.neo-brutalism .rl-rank-avatar {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-rank-avatar { border: 2px solid #000 !important;
 }
-body.neo-brutalism .rl-rank-item {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .rl-rank-item { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .rl-progress-wrap {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .rl-progress-wrap { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .rl-progress-bar { border-radius: 0 !important; }
-body.neo-brutalism .rl-detail-item {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+
+body.neo-brutalism .rl-detail-item { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .rl-kpi-icon { border-radius: 0 !important; }
-body.neo-brutalism .rl-legend-dot { border-radius: 0 !important; }
-body.neo-brutalism .rl-btn-refresh {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+
+body.neo-brutalism .rl-btn-refresh { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .rl-seg-ap { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; }
-body.neo-brutalism .rl-seg-cd { background: #000 !important; color: #FFDD00 !important; border-radius: 0 !important; }
-body.neo-brutalism .rl-seg-pd { background: #FF5F1F !important; color: #fff !important; border-radius: 0 !important; }
-body.neo-brutalism .rl-seg-rp { border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .rl-seg-ap { background: #FFDD00 !important; color: #000 !important; }
+body.neo-brutalism .rl-seg-cd { background: #000 !important; color: #FFDD00 !important; }
+body.neo-brutalism .rl-seg-pd { background: #FF5F1F !important; color: #fff !important; }
+body.neo-brutalism .rl-seg-rp { border: 1.5px solid #000 !important; }
 
 /* ── BUSCADORCHARLAS — Búsqueda de charlas ──────────────────── */
-body.neo-brutalism .card-charla {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .card-charla { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
 body.neo-brutalism .card-charla:hover {
   transform: translate(-2px, -2px) !important;
   box-shadow: 6px 6px 0 #000 !important;
 }
-body.neo-brutalism .charla-header {
-  background: #FFDD00 !important;
+body.neo-brutalism .charla-header { background: #FFDD00 !important;
   color: #000 !important;
   border-bottom: 2px solid #000 !important;
-  border-radius: 0 !important;
 }
 body.neo-brutalism .charla-body { border-top: none !important; }
-body.neo-brutalism .chip-mes-charla {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .chip-mes-charla { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .chip-mes-charla.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .chip-mes-charla.active { background: #FFDD00 !important;
   color: #000 !important;
 }
 
 /* ── CHIP-MES — Filtro de meses (Desvíos, IndexCheck, global) ── */
-body.neo-brutalism .chip-mes {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .chip-mes { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background: #fff !important;
   transition: none !important;
 }
-body.neo-brutalism .chip-mes:hover {
-  background: #fffbe6 !important;
+body.neo-brutalism .chip-mes:hover { background: #fffbe6 !important;
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .chip-mes.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .chip-mes.active { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   font-weight: 700 !important;
@@ -6028,52 +5780,37 @@ body.neo-brutalism .chips-mes {
 }
 
 /* ── INSPECCIONES — Modal + filtros de búsqueda ─────────────── */
-body.neo-brutalism #exampleModalInspeccioes .modal-content {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism #exampleModalInspeccioes .modal-content { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
 }
-body.neo-brutalism #exampleModalInspeccioes .modal-header {
-  background: #FFDD00 !important;
+body.neo-brutalism #exampleModalInspeccioes .modal-header { background: #FFDD00 !important;
   color: #000 !important;
   border-bottom: 2.5px solid #000 !important;
-  border-radius: 0 !important;
 }
 body.neo-brutalism #exampleModalInspeccioes .modal-header .btn-close {
   filter: none !important;
 }
-body.neo-brutalism #exampleModalInspeccioes .accordion-button {
-  border-radius: 0 !important;
-  background: #F5F0E8 !important;
+body.neo-brutalism #exampleModalInspeccioes .accordion-button { background: #F5F0E8 !important;
   border: 1.5px solid #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism #exampleModalInspeccioes .accordion-button:not(.collapsed) {
-  background: #FFDD00 !important;
+body.neo-brutalism #exampleModalInspeccioes .accordion-button:not(.collapsed) { background: #FFDD00 !important;
   color: #000 !important;
 }
-body.neo-brutalism #exampleModalInspeccioes .accordion-item {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism #exampleModalInspeccioes .accordion-item { border: 2px solid #000 !important;
 }
-body.neo-brutalism .bg-warning-subtle {
-  background-color: #fffbe6 !important;
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
-}
-body.neo-brutalism #tablaDatosInpsecciones table {
+body.neo-brutalism .bg-warning-subtle { background-color: #fffbe6 !important;
   border: 2px solid #000 !important;
 }
-body.neo-brutalism #tablaDatosInpsecciones th {
-  background: #000 !important;
+body.neo-brutalism #tablaDatosInpsecciones table { border: 2px solid #000 !important;
+}
+body.neo-brutalism #tablaDatosInpsecciones th { background: #000 !important;
   color: #FFDD00 !important;
   border: 1px solid #000 !important;
 }
 
 /* ── STAR RATING — Evaluaciones ─────────────────────────────── */
-body.neo-brutalism .star-rating {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .star-rating { border: 2px solid #000 !important;
   padding: 4px 8px !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
@@ -6082,22 +5819,16 @@ body.neo-brutalism .star.selected,
 body.neo-brutalism .star:hover { color: #FFDD00 !important; }
 
 /* ── CHECK / TEST — Componentes foto/obs/IA ─────────────────── */
-body.neo-brutalism .obs-thumb-wrapper {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .obs-thumb-wrapper { border: 1.5px solid #000 !important;
 }
 body.neo-brutalism .obs-thumb-label,
 body.neo-brutalism .sub-thumb-label,
 body.neo-brutalism .obs-cam-label,
-body.neo-brutalism .sub-cam-label {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .sub-cam-label { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .ia-section {
-  border-radius: 0 !important;
-  border: 1.5px solid rgba(255,255,255,0.3) !important;
+body.neo-brutalism .ia-section { border: 1.5px solid rgba(255,255,255,0.3) !important;
 }
-body.neo-brutalism .ia-section-title { border-radius: 0 !important; }
+
 body.neo-brutalism .ia-fortaleza { border: 2px solid #FFDD00 !important; }
 body.neo-brutalism .ia-oportunidad { border: 2px solid #FF5F1F !important; }
 body.neo-brutalism .ia-objetivo { border: 2px solid #fff !important; }
@@ -6106,7 +5837,7 @@ body.neo-brutalism .ev-score-2,
 body.neo-brutalism .ev-score-3,
 body.neo-brutalism .ev-score-4,
 body.neo-brutalism .ev-score-5,
-body.neo-brutalism .ev-score-neutral { border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .ev-score-neutral { border: 1.5px solid #000 !important; }
 
 /* ── ROL — Shift chips + filtros + compliance ───────────────── */
 body.neo-brutalism #rol-module-wrapper .chip-work,
@@ -6115,119 +5846,85 @@ body.neo-brutalism #rol-module-wrapper .chip-vac,
 body.neo-brutalism #rol-module-wrapper .chip-fal,
 body.neo-brutalism #rol-module-wrapper .chip-med,
 body.neo-brutalism #rol-module-wrapper .chip-otr,
-body.neo-brutalism #rol-module-wrapper .chip-per {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .chip-per { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .filter-bar-container {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .filter-bar-container { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .filter-tab {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .filter-tab { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .filter-tab.active {
-  background: #FFDD00 !important;
+body.neo-brutalism #rol-module-wrapper .filter-tab.active { background: #FFDD00 !important;
   color: #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism #rol-module-wrapper .compliance-panel {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .compliance-panel { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .heatmap-wrapper {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .heatmap-wrapper { border: 2px solid #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .prog-bar { border-radius: 0 !important; }
-body.neo-brutalism #rol-module-wrapper .prog-fill { border-radius: 0 !important; }
-body.neo-brutalism #rol-module-wrapper .tile {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+
+body.neo-brutalism #rol-module-wrapper .tile { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism #rol-module-wrapper .t-ok { background: #FFDD00 !important; color: #000 !important; font-weight: 700 !important; }
 body.neo-brutalism #rol-module-wrapper .t-warn { background: #FF5F1F !important; color: #fff !important; }
 body.neo-brutalism #rol-module-wrapper .t-danger { background: #000 !important; color: #FFDD00 !important; }
 body.neo-brutalism #rol-module-wrapper .t-empty { background: #F5F0E8 !important; color: #000 !important; border: 1px dashed #000 !important; }
-body.neo-brutalism #rol-module-wrapper .tab-count {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .tab-count { border: 1.5px solid #000 !important;
 }
 
 /* ── EVENTOS — Pirámide Bird/accidente ──────────────────────── */
-body.neo-brutalism .piramide-container {
-  border-radius: 0 !important;
-  border: 2.5px solid #000 !important;
+body.neo-brutalism .piramide-container { border: 2.5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
 }
-body.neo-brutalism .nivel { border-radius: 0 !important; border: 2px solid #000 !important; }
+body.neo-brutalism .nivel { border: 2px solid #000 !important; }
 body.neo-brutalism .bueno { background: #FFDD00 !important; color: #000 !important; }
 body.neo-brutalism .malo { background: #FF5F1F !important; color: #fff !important; }
 
 /* ── ASIGNACIONES — Componentes adicionales ─────────────────── */
-body.neo-brutalism .epp-section-card {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-section-card { border: 2px solid #000 !important;
 }
-body.neo-brutalism .epp-card-content { border-radius: 0 !important; }
+
 body.neo-brutalism .epp-info-row { border-bottom: 1px dashed #000 !important; }
-body.neo-brutalism .ver-mas-btn {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .ver-mas-btn { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .epp-btn-sm {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .epp-btn-sm { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .estado-confirmado {
-  border-radius: 0 !important;
-  background: #FFDD00 !important;
+body.neo-brutalism .estado-confirmado { background: #FFDD00 !important;
   color: #000 !important;
   border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .estado-pendiente {
-  border-radius: 0 !important;
-  background: #FF5F1F !important;
+body.neo-brutalism .estado-pendiente { background: #FF5F1F !important;
   color: #fff !important;
   border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .estado-rechazado {
-  border-radius: 0 !important;
-  background: #000 !important;
+body.neo-brutalism .estado-rechazado { background: #000 !important;
   color: #FFDD00 !important;
   border: 1.5px solid #000 !important;
 }
 
 /* ── CAPACITACIONES — Radio + código validación ─────────────── */
 body.neo-brutalism .radio-label,
-body.neo-brutalism .choice {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .choice { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
 body.neo-brutalism .radio-label:hover,
-body.neo-brutalism .choice:hover {
-  background: #fffbe6 !important;
+body.neo-brutalism .choice:hover { background: #fffbe6 !important;
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .radio-group-label {
-  border-bottom: 2.5px solid #000 !important;
+body.neo-brutalism .radio-group-label { border-bottom: 2.5px solid #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism .codigo-wrapper { border-radius: 0 !important; border: 2px solid #000 !important; }
-body.neo-brutalism .codigo-input { border-radius: 0 !important; border: 2px solid #000 !important; }
+body.neo-brutalism .codigo-wrapper { border: 2px solid #000 !important; }
+body.neo-brutalism .codigo-input { border: 2px solid #000 !important; }
 body.neo-brutalism .codigo-valid { border-color: #000 !important; background: #fffbe6 !important; }
 body.neo-brutalism .codigo-error { border-color: #FF5F1F !important; }
 
 /* ── PASSO — Celdas de tabla restantes ──────────────────────── */
-body.neo-brutalism .celda-mes { border: 1px solid #000 !important; border-radius: 0 !important; }
-body.neo-brutalism .celda-prog { border: 1px solid #000 !important; border-radius: 0 !important; }
+body.neo-brutalism .celda-mes { border: 1px solid #000 !important; }
+body.neo-brutalism .celda-prog { border: 1px solid #000 !important; }
 body.neo-brutalism .celda-vacia { border: 1px solid #000 !important; background: #F5F0E8 !important; }
 body.neo-brutalism .fila-actividad { border-bottom: 2px solid #000 !important; }
 body.neo-brutalism .fila-gerencia { border-bottom: 2px solid #FFDD00 !important; background: #fffbe6 !important; }
@@ -6235,86 +5932,64 @@ body.neo-brutalism .col-actividad,
 body.neo-brutalism .col-frecuencia,
 body.neo-brutalism .col-supervisor { border-right: 2px solid #000 !important; }
 body.neo-brutalism .meses-grid { border: 2px solid #000 !important; }
-body.neo-brutalism #passoTabs .nav-link {
-  border-radius: 0 !important;
-  border: 1.5px solid transparent !important;
+body.neo-brutalism #passoTabs .nav-link { border: 1.5px solid transparent !important;
 }
-body.neo-brutalism #passoTabs .nav-link.active {
-  border: 2px solid #000 !important;
+body.neo-brutalism #passoTabs .nav-link.active { border: 2px solid #000 !important;
   background: #FFDD00 !important;
   color: #000 !important;
   font-weight: 700 !important;
 }
 
 /* ── MAPARIESGOS — Editor canvas + leyenda ──────────────────── */
-body.neo-brutalism .legend-chip {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .legend-chip { border: 1.5px solid #000 !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
 body.neo-brutalism .legend-item { border-bottom: 1px solid #000 !important; }
-body.neo-brutalism .legend-sidebar {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .legend-sidebar { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism #riskmaps-module .editor-sidebar {
-  border-radius: 0 !important;
-  border-right: 2.5px solid #000 !important;
+body.neo-brutalism #riskmaps-module .editor-sidebar { border-right: 2.5px solid #000 !important;
 }
-body.neo-brutalism #riskmaps-module .zoom-controls {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism #riskmaps-module .zoom-controls { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism #riskmaps-module .rm-item {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #riskmaps-module .rm-item { border: 1.5px solid #000 !important;
 }
-body.neo-brutalism .tb-preventivo { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .tb-informativo { background: #F5F0E8 !important; color: #000 !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .tb-restrictivo { background: #FF5F1F !important; color: #fff !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
-body.neo-brutalism .tb-obligatorio { background: #000 !important; color: #FFDD00 !important; border-radius: 0 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .tb-preventivo { background: #FFDD00 !important; color: #000 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .tb-informativo { background: #F5F0E8 !important; color: #000 !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .tb-restrictivo { background: #FF5F1F !important; color: #fff !important; border: 1.5px solid #000 !important; }
+body.neo-brutalism .tb-obligatorio { background: #000 !important; color: #FFDD00 !important; border: 1.5px solid #000 !important; }
 
 /* ── EPPMAESTRO — Tablas + tooltips restantes ───────────────── */
-body.neo-brutalism .celda-epp {
-  border: 1px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .celda-epp { border: 1px solid #000 !important;
 }
-body.neo-brutalism .celda-trabajador {
-  border: 1px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .celda-trabajador { border: 1px solid #000 !important;
   background: #F5F0E8 !important;
 }
 body.neo-brutalism .header-epp,
-body.neo-brutalism .header-trabajador {
-  background: #000 !important;
+body.neo-brutalism .header-trabajador { background: #000 !important;
   color: #FFDD00 !important;
   border: 1px solid #000 !important;
 }
-body.neo-brutalism .st-OK { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; }
-body.neo-brutalism .st-NOTIF { background: #FF5F1F !important; color: #fff !important; border-radius: 0 !important; }
-body.neo-brutalism .st-ENTR { background: #000 !important; color: #FFDD00 !important; border-radius: 0 !important; }
-body.neo-brutalism .tooltip-header { background: #FFDD00 !important; color: #000 !important; border-radius: 0 !important; }
+body.neo-brutalism .st-OK { background: #FFDD00 !important; color: #000 !important; }
+body.neo-brutalism .st-NOTIF { background: #FF5F1F !important; color: #fff !important; }
+body.neo-brutalism .st-ENTR { background: #000 !important; color: #FFDD00 !important; }
+body.neo-brutalism .tooltip-header { background: #FFDD00 !important; color: #000 !important; }
 body.neo-brutalism .tooltip-row { border-bottom: 1px solid #000 !important; }
 body.neo-brutalism .total-row { background: #fffbe6 !important; border-top: 2.5px solid #000 !important; }
-body.neo-brutalism .modal-imagen-content {
-  border-radius: 0 !important;
-  border: 3px solid #000 !important;
+body.neo-brutalism .modal-imagen-content { border: 3px solid #000 !important;
   box-shadow: 6px 6px 0 #000 !important;
 }
-body.neo-brutalism .modal-close { border-radius: 0 !important; border: 2px solid #000 !important; }
+body.neo-brutalism .modal-close { border: 2px solid #000 !important; }
 
 /* ── HHT / USUARIOS / LISTAS — Tablas editables ─────────────── */
 body.neo-brutalism #miVista table { border: 2.5px solid #000 !important; }
 body.neo-brutalism #miVista th { background: #000 !important; color: #FFDD00 !important; border: 1px solid #000 !important; }
 body.neo-brutalism #miVista td { border: 1px solid #000 !important; }
-body.neo-brutalism #miVista input { border-radius: 0 !important; border: 1px solid #000 !important; }
+body.neo-brutalism #miVista input { border: 1px solid #000 !important; }
 
 /* ── AVATAR / STAFF — Componentes de usuario ────────────────── */
-body.neo-brutalism .avatar-circle {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .avatar-circle { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background: #FFDD00 !important;
   color: #000 !important;
@@ -6322,18 +5997,13 @@ body.neo-brutalism .avatar-circle {
 body.neo-brutalism .staff-item { border-bottom: 1px solid #000 !important; }
 body.neo-brutalism .staff-item:hover { background: #fffbe6 !important; }
 
-
-
 /* ── MOVIMEPP — Chips de categoría + buscador ───────────────── */
-body.neo-brutalism .epp-scope .chip {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-scope .chip { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   font-size: var(--font-sm) !important;
   transition: none !important;
 }
-body.neo-brutalism .epp-scope .chip.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .epp-scope .chip.active { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   font-weight: 700 !important;
@@ -6342,95 +6012,70 @@ body.neo-brutalism .epp-scope .chip:hover {
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .epp-scope .search-hero {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .epp-scope .search-hero { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   background: #F5F0E8 !important;
 }
-body.neo-brutalism .epp-scope .search-hero .big-input input {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-scope .search-hero .big-input input { border: 2px solid #000 !important;
   font-size: var(--font-base) !important;
 }
-body.neo-brutalism .epp-scope .product-search input {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .epp-scope .product-search input { border: 2px solid #000 !important;
 }
 
 /* ── ROL — Chip-toggle turnos (D/T/N) ──────────────────────── */
-body.neo-brutalism #rol-module-wrapper .chip-toggle {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism #rol-module-wrapper .chip-toggle { border: 1.5px solid #000 !important;
   font-size: var(--font-sm) !important;
   transition: none !important;
 }
-body.neo-brutalism #rol-module-wrapper .chip-toggle:hover {
-  background: #fffbe6 !important;
+body.neo-brutalism #rol-module-wrapper .chip-toggle:hover { background: #fffbe6 !important;
   border-color: #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .chip-toggle.active-day {
-  background: #FFDD00 !important;
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-day { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .chip-toggle.active-afternoon {
-  background: #FF5F1F !important;
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-afternoon { background: #FF5F1F !important;
   color: #fff !important;
   border-color: #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism #rol-module-wrapper .chip-toggle.active-night {
-  background: #000 !important;
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-night { background: #000 !important;
   color: #FFDD00 !important;
   border-color: #000 !important;
   box-shadow: 2px 2px 0 #555 !important;
 }
 
 /* ── INVENTARIO CHECK — Cargo chips ─────────────────────────── */
-body.neo-brutalism .cargo-chip {
-  border-radius: 0 !important;
-  border: 1.5px solid #000 !important;
+body.neo-brutalism .cargo-chip { border: 1.5px solid #000 !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
-body.neo-brutalism .cargo-chip.bg-primary {
-  background: #FFDD00 !important;
+body.neo-brutalism .cargo-chip.bg-primary { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
 }
 
 /* ── REPORTESLABORAL / BUSCADORCAP — Buscador con lista ─────── */
-body.neo-brutalism .rl-search-box input {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-search-box input { border: 2px solid #000 !important;
   font-size: var(--font-base) !important;
   box-shadow: 2px 2px 0 #000 !important;
 }
-body.neo-brutalism .rl-search-box input:focus {
-  border-color: #FF5F1F !important;
+body.neo-brutalism .rl-search-box input:focus { border-color: #FF5F1F !important;
   box-shadow: 3px 3px 0 #FF5F1F !important;
 }
-body.neo-brutalism .rl-search-list {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .rl-search-list { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .rl-search-item {
-  font-size: var(--font-base) !important;
+body.neo-brutalism .rl-search-item { font-size: var(--font-base) !important;
   border-bottom: 1px solid #000 !important;
 }
-body.neo-brutalism .rl-search-item:hover {
-  background: #FFDD00 !important;
+body.neo-brutalism .rl-search-item:hover { background: #FFDD00 !important;
   color: #000 !important;
 }
 
 /* ── MATRIZAPP — Chips container ────────────────────────────── */
-body.neo-brutalism .chips-container {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .chips-container { border: 2px solid #000 !important;
 }
-body.neo-brutalism .chips-list .chipepp {
-  font-size: var(--font-sm) !important;
+body.neo-brutalism .chips-list .chipepp { font-size: var(--font-sm) !important;
 }
 </style>

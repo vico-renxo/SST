@@ -336,7 +336,6 @@ a:hover {
   }
 }
 
-
 /* RELOJ */
 .wrapper{
   height: 60px;
@@ -391,7 +390,6 @@ a:hover {
 .wrapper span:last-child{
   filter: blur(20px);
 }
-
 
     /* Radios más grandes y suaves */
     .form-check-input {
@@ -640,10 +638,6 @@ table td {
   transform: rotate(90deg);
 }
 
-
-
-
-
 /* La campana flotante en la esquina */
 .campana-flotante {
   position: fixed;
@@ -717,7 +711,6 @@ table td {
   100% { transform: scale(1); }
 }
 
-
 .alerta-modal-grande {
   background: white;
   width: 100%;
@@ -771,8 +764,6 @@ table td {
 .bg-rojo { background: #d32f2f; color: white; }
 .bg-naranja { background: #ef6c00; color: white; }
 
-
-
 @keyframes fadeInDown {
   from { opacity: 0; transform: translate(-50%, -20px); }
   to { opacity: 1; transform: translate(-50%, 0); }
@@ -792,21 +783,22 @@ table td {
 ════════════════════════════════════════════════════════════════ -->
 <style>
 /* ── Fuente y fondo general ────────────────────────────────── */
-body.neo-brutalism {
-  font-family: 'Space Grotesk', 'IBM Plex Mono', monospace !important;
+
+
+/* ── Reset universal de bordes cuadrados ─────────────────────── */
+body.neo-brutalism * { border-radius: 0 !important; }
+
+body.neo-brutalism { font-family: 'Space Grotesk', 'IBM Plex Mono', monospace !important;
   background: #F5F0E8 !important;
 }
 
 /* ── Navbar ─────────────────────────────────────────────────── */
-body.neo-brutalism .navbar {
-  background: #000 !important;
+body.neo-brutalism .navbar { background: #000 !important;
   border-bottom: 3px solid #000 !important;
   box-shadow: 0 4px 0 #FFDD00 !important;
 }
 body.neo-brutalism .morphing-menu svg { color: #FFDD00 !important; }
-body.neo-brutalism .dropdown-menu {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .dropdown-menu { border: 2.5px solid #000 !important;
   box-shadow: 5px 5px 0 #000 !important;
 }
 
@@ -815,85 +807,64 @@ body.neo-brutalism #miVista2 #wrapper { background: #F5F0E8 !important; }
 body.neo-brutalism #miVista2 #page-content-wrapper { background: #F5F0E8 !important; }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
-body.neo-brutalism #miVista2 #sidebar-wrapper.sidebar-shell {
-  background: #FFDD00 !important;
+body.neo-brutalism #miVista2 #sidebar-wrapper.sidebar-shell { background: #FFDD00 !important;
   border-right: 3px solid #000 !important;
   box-shadow: 4px 0 0 #000 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-section-title {
-  color: #000 !important;
+body.neo-brutalism #miVista2 .sidebar-section-title { color: #000 !important;
   font-weight: 900 !important;
   letter-spacing: .12em !important;
 }
-body.neo-brutalism #miVista2 .sidebar-link {
-  color: #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism #miVista2 .sidebar-link { color: #000 !important;
   border-left-color: transparent !important;
   font-weight: 600 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-link:hover {
-  background: #000 !important;
+body.neo-brutalism #miVista2 .sidebar-link:hover { background: #000 !important;
   color: #FFDD00 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-link.active {
-  background: #000 !important;
+body.neo-brutalism #miVista2 .sidebar-link.active { background: #000 !important;
   color: #FFDD00 !important;
   border-left-color: #FF5F1F !important;
   font-weight: 800 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-group-toggle {
-  color: #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism #miVista2 .sidebar-group-toggle { color: #000 !important;
   font-weight: 600 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-group-toggle:hover {
-  background: #000 !important;
+body.neo-brutalism #miVista2 .sidebar-group-toggle:hover { background: #000 !important;
   color: #FFDD00 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-group-toggle.open {
-  background: rgba(0,0,0,.08) !important;
+body.neo-brutalism #miVista2 .sidebar-group-toggle.open { background: rgba(0,0,0,.08) !important;
   border-left-color: #000 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-sublink {
-  color: #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism #miVista2 .sidebar-sublink { color: #000 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-sublink:hover {
-  background: #000 !important;
+body.neo-brutalism #miVista2 .sidebar-sublink:hover { background: #000 !important;
   color: #FFDD00 !important;
 }
-body.neo-brutalism #miVista2 .sidebar-sublink.active {
-  background: #FF5F1F !important;
+body.neo-brutalism #miVista2 .sidebar-sublink.active { background: #FF5F1F !important;
   color: #fff !important;
   border-left-color: #000 !important;
   font-weight: 700 !important;
 }
 
 /* ── Botones ─────────────────────────────────────────────────── */
-body.neo-brutalism .btn {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .btn { border: 2.5px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   font-weight: 700 !important;
   transition: transform .07s ease, box-shadow .07s ease !important;
 }
-body.neo-brutalism .btn:hover {
-  transform: translate(-2px, -2px) !important;
+body.neo-brutalism .btn:hover { transform: translate(-2px, -2px) !important;
   box-shadow: 5px 5px 0 #000 !important;
 }
-body.neo-brutalism .btn:active {
-  transform: translate(2px, 2px) !important;
+body.neo-brutalism .btn:active { transform: translate(2px, 2px) !important;
   box-shadow: 1px 1px 0 #000 !important;
 }
-body.neo-brutalism .rounded-pill { border-radius: 0 !important; }
 
 /* ── Inputs / selects ────────────────────────────────────────── */
 body.neo-brutalism input.form-control,
 body.neo-brutalism select.form-control,
 body.neo-brutalism select.form-select,
-body.neo-brutalism textarea.form-control {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism textarea.form-control { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   background: #fff !important;
   transition: none !important;
@@ -901,50 +872,37 @@ body.neo-brutalism textarea.form-control {
 body.neo-brutalism input.form-control:focus,
 body.neo-brutalism select.form-control:focus,
 body.neo-brutalism select.form-select:focus,
-body.neo-brutalism textarea.form-control:focus {
-  border-color: #FF5F1F !important;
+body.neo-brutalism textarea.form-control:focus { border-color: #FF5F1F !important;
   box-shadow: 3px 3px 0 #FF5F1F !important;
   outline: none !important;
 }
 
 /* ── Cards ────────────────────────────────────────────────────── */
-body.neo-brutalism .card {
-  border: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .card { border: 2.5px solid #000 !important;
   box-shadow: 5px 5px 0 #000 !important;
   background: #fff !important;
 }
-body.neo-brutalism .card-header {
-  border-bottom: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .card-header { border-bottom: 2px solid #000 !important;
   background: #000 !important;
   color: #FFDD00 !important;
   font-weight: 800 !important;
 }
 
 /* ── Modales ─────────────────────────────────────────────────── */
-body.neo-brutalism .modal-content {
-  border: 3px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .modal-content { border: 3px solid #000 !important;
   box-shadow: 8px 8px 0 #000 !important;
 }
-body.neo-brutalism .modal-header {
-  border-bottom: 2.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .modal-header { border-bottom: 2.5px solid #000 !important;
   background: #000 !important;
   color: #FFDD00 !important;
 }
-body.neo-brutalism .modal-footer {
-  border-top: 2px solid #000 !important;
+body.neo-brutalism .modal-footer { border-top: 2px solid #000 !important;
 }
 
 /* ── Tablas ──────────────────────────────────────────────────── */
-body.neo-brutalism table {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism table { border: 2px solid #000 !important;
 }
-body.neo-brutalism th {
-  background: #000 !important;
+body.neo-brutalism th { background: #000 !important;
   color: #FFDD00 !important;
   border: 1.5px solid #000 !important;
   font-weight: 800 !important;
@@ -954,46 +912,35 @@ body.neo-brutalism td { border: 1px solid #000 !important; }
 body.neo-brutalism tbody tr:hover { background: rgba(255,221,0,.15) !important; }
 
 /* ── Alerts ──────────────────────────────────────────────────── */
-body.neo-brutalism .alert {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .alert { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
 
 /* ── Badges ──────────────────────────────────────────────────── */
-body.neo-brutalism .badge {
-  border: 1.5px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .badge { border: 1.5px solid #000 !important;
   font-weight: 700 !important;
 }
 
 /* ── Nav pills ───────────────────────────────────────────────── */
-body.neo-brutalism .nav-pills .nav-link {
-  border-radius: 0 !important;
-  border: 2px solid transparent !important;
+body.neo-brutalism .nav-pills .nav-link { border: 2px solid transparent !important;
   font-weight: 600 !important;
 }
-body.neo-brutalism .nav-pills .nav-link.active {
-  background: #000 !important;
+body.neo-brutalism .nav-pills .nav-link.active { background: #000 !important;
   color: #FFDD00 !important;
   border: 2px solid #000 !important;
 }
 
 /* ── Chips (IndexCheck) ──────────────────────────────────────── */
-body.neo-brutalism .check-chip {
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .check-chip { border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
   background: #fff !important;
   transition: none !important;
 }
-body.neo-brutalism .check-chip:hover {
-  background: #fffbe6 !important;
+body.neo-brutalism .check-chip:hover { background: #fffbe6 !important;
   transform: translate(-1px, -1px) !important;
   box-shadow: 3px 3px 0 #000 !important;
 }
-body.neo-brutalism .check-chip.active {
-  background: #FFDD00 !important;
+body.neo-brutalism .check-chip.active { background: #FFDD00 !important;
   color: #000 !important;
   border-color: #000 !important;
   font-weight: 700 !important;
@@ -1001,28 +948,19 @@ body.neo-brutalism .check-chip.active {
 }
 
 /* ── Tarjetas checklist (tiktok-style) ───────────────────────── */
-body.neo-brutalism .tiktok-card,
-body.neo-brutalism [class*="col-"] > div {
-  border-radius: 0 !important;
-}
 
 /* ── SweetAlert2 ─────────────────────────────────────────────── */
-body.neo-brutalism .swal2-popup {
-  border: 3px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .swal2-popup { border: 3px solid #000 !important;
   box-shadow: 8px 8px 0 #000 !important;
   font-family: 'Space Grotesk', monospace !important;
 }
 body.neo-brutalism .swal2-confirm,
 body.neo-brutalism .swal2-cancel,
-body.neo-brutalism .swal2-deny {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+body.neo-brutalism .swal2-deny { border: 2px solid #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   font-weight: 700 !important;
 }
-body.neo-brutalism .swal2-confirm:hover {
-  transform: translate(-1px,-1px);
+body.neo-brutalism .swal2-confirm:hover { transform: translate(-1px,-1px);
   box-shadow: 4px 4px 0 #000 !important;
 }
 
@@ -1031,20 +969,15 @@ body.neo-brutalism .spinner-border { color: #000 !important; }
 
 /* ── Alerta modal campana ────────────────────────────────────── */
 body.neo-brutalism .alerta-modal,
-body.neo-brutalism .alerta-modal-grande {
-  border: 3px solid #000 !important;
-  border-radius: 0 !important;
+body.neo-brutalism .alerta-modal-grande { border: 3px solid #000 !important;
   box-shadow: 7px 7px 0 #000 !important;
 }
-body.neo-brutalism .item-alerta {
-  border-left: 5px solid #000 !important;
+body.neo-brutalism .item-alerta { border-left: 5px solid #000 !important;
   background: #FFDD0030 !important;
-  border-radius: 0 !important;
 }
 
 /* ── Botón toggle tema (en navbar) ──────────────────────────── */
-#btn-theme-toggle {
-  background: transparent;
+#btn-theme-toggle { background: transparent;
   border: none;
   cursor: pointer;
   width: 36px;
@@ -1057,18 +990,14 @@ body.neo-brutalism .item-alerta {
   transition: background .2s;
   color: inherit;
 }
-body.neo-brutalism #btn-theme-toggle {
-  background: #FFDD00;
+body.neo-brutalism #btn-theme-toggle { background: #FFDD00;
   color: #000;
   border: 2px solid #FFDD00;
-  border-radius: 0 !important;
   box-shadow: 2px 2px 0 #fff;
 }
 
-
 /* ══ SHELL: Panel Asistente IA (#asistentePanel, #aiBtn) ══ */
-#asistentePanel {
-  position: fixed; bottom: 24px; right: 24px; z-index: 99999;
+#asistentePanel { position: fixed; bottom: 24px; right: 24px; z-index: 99999;
   width: 340px; border-radius: 20px;
   background: linear-gradient(145deg, #1e1b4b, #312e81);
   box-shadow: 0 8px 32px rgba(99,102,241,.5);
@@ -1077,34 +1006,28 @@ body.neo-brutalism #btn-theme-toggle {
   animation: slideUp .3s ease;
 }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-#asistentePanel .asist-header {
-  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+#asistentePanel .asist-header { background: linear-gradient(135deg,#6366f1,#8b5cf6);
   padding: 12px 16px; display: flex; align-items: center; gap: 10px;
 }
 #asistentePanel .asist-header span { color: #fff; font-weight: 600; font-size: 14px; flex: 1; }
-#asistentePanel .asist-close {
-  background: rgba(255,255,255,.2); border: none; color: #fff;
+#asistentePanel .asist-close { background: rgba(255,255,255,.2); border: none; color: #fff;
   width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 13px;
 }
-#asistenteChat {
-  height: 220px; overflow-y: auto; padding: 12px;
+#asistenteChat { height: 220px; overflow-y: auto; padding: 12px;
   display: flex; flex-direction: column; gap: 8px;
 }
 .asist-msg { padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 90%; line-height: 1.4; }
 .asist-msg.user { background: #6366f1; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .asist-msg.bot  { background: rgba(255,255,255,.12); color: #e0e7ff; align-self: flex-start; border-bottom-left-radius: 4px; }
 .asist-msg.typing { color: #a5b4fc; font-style: italic; }
-#asistentePanel .asist-footer {
-  padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.1);
+#asistentePanel .asist-footer { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.1);
   display: flex; gap: 8px; align-items: center;
 }
-#asistTexto {
-  flex: 1; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+#asistTexto { flex: 1; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
   border-radius: 10px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none;
 }
 #asistTexto::placeholder { color: rgba(255,255,255,.4); }
-#btnMic, #btnEnviar {
-  width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+#btnMic, #btnEnviar { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
 }
 #btnMic    { background: rgba(255,255,255,.15); color: #a5b4fc; transition: all .2s; }
