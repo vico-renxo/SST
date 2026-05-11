@@ -1240,7 +1240,7 @@
     display:flex; align-items:center; justify-content:center; box-shadow:var(--cardShadow);
   }
   .epp-scope .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .epp-scope .chip{ padding:.15rem .7rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:.9rem; }
+  .epp-scope .chip{ padding:.15rem .7rem; border:1px solid #e5e7eb; border-radius:999px; background:#fff; cursor:pointer; font-size:var(--font-sm); }
   .epp-scope .chip.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
   .epp-scope .product-search{ margin-top:10px; display:flex; gap:8px; }
   .epp-scope .persona-box{ border-radius:16px; background:#fff; box-shadow:var(--cardShadow); padding:14px; }
@@ -5202,11 +5202,11 @@ body.lite-mode #rol-module-wrapper .shift-card.my-shift {
 .rl-vac-donut svg{transform:rotate(-90deg);}
 .rl-vac-donut .rl-vac-pct-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#1e293b;}
 /* Buscador */ .rl-search-box{position:relative;max-width:420px;}
-.rl-search-box input{width:100%;border:2px solid #e2e8f0;border-radius:12px;padding:.65rem 1rem .65rem 2.6rem;font-size:.9rem;transition:border .2s;outline:none;}
+.rl-search-box input{width:100%;border:2px solid #e2e8f0;border-radius:12px;padding:.65rem 1rem .65rem 2.6rem;font-size:var(--font-base);transition:border .2s;outline:none;}
 .rl-search-box input:focus{border-color:#2563eb;}
 .rl-search-box i{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#9ca3af;}
 .rl-search-list{max-height:220px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:10px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.1);display:none;margin-top:.3rem;}
-.rl-search-item{padding:.6rem 1rem;cursor:pointer;font-size:.85rem;border-bottom:1px solid #f1f5f9;}
+.rl-search-item{padding:.6rem 1rem;cursor:pointer;font-size:var(--font-base);border-bottom:1px solid #f1f5f9;}
 .rl-search-item:hover{background:#eff6ff;}
 .rl-search-item .rl-si-dni{font-size:.72rem;color:#9ca3af;}
 /* Loading */ .rl-spinner{display:flex;align-items:center;justify-content:center;padding:3rem;gap:1rem;color:#6b7280;flex-direction:column;}
@@ -6323,4 +6323,114 @@ body.neo-brutalism .staff-item { border-bottom: 1px solid #000 !important; }
 body.neo-brutalism .staff-item:hover { background: #fffbe6 !important; }
 
 
+
+/* ── MOVIMEPP — Chips de categoría + buscador ───────────────── */
+body.neo-brutalism .epp-scope .chip {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  font-size: var(--font-sm) !important;
+  transition: none !important;
+}
+body.neo-brutalism .epp-scope .chip.active {
+  background: #FFDD00 !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  font-weight: 700 !important;
+}
+body.neo-brutalism .epp-scope .chip:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+body.neo-brutalism .epp-scope .search-hero {
+  border: 2.5px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  background: #F5F0E8 !important;
+}
+body.neo-brutalism .epp-scope .search-hero .big-input input {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  font-size: var(--font-base) !important;
+}
+body.neo-brutalism .epp-scope .product-search input {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+}
+
+/* ── ROL — Chip-toggle turnos (D/T/N) ──────────────────────── */
+body.neo-brutalism #rol-module-wrapper .chip-toggle {
+  border-radius: 0 !important;
+  border: 1.5px solid #000 !important;
+  font-size: var(--font-sm) !important;
+  transition: none !important;
+}
+body.neo-brutalism #rol-module-wrapper .chip-toggle:hover {
+  background: #fffbe6 !important;
+  border-color: #000 !important;
+}
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-day {
+  background: #FFDD00 !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-afternoon {
+  background: #FF5F1F !important;
+  color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+body.neo-brutalism #rol-module-wrapper .chip-toggle.active-night {
+  background: #000 !important;
+  color: #FFDD00 !important;
+  border-color: #000 !important;
+  box-shadow: 2px 2px 0 #555 !important;
+}
+
+/* ── INVENTARIO CHECK — Cargo chips ─────────────────────────── */
+body.neo-brutalism .cargo-chip {
+  border-radius: 0 !important;
+  border: 1.5px solid #000 !important;
+  box-shadow: 1px 1px 0 #000 !important;
+}
+body.neo-brutalism .cargo-chip.bg-primary {
+  background: #FFDD00 !important;
+  color: #000 !important;
+  border-color: #000 !important;
+}
+
+/* ── REPORTESLABORAL / BUSCADORCAP — Buscador con lista ─────── */
+body.neo-brutalism .rl-search-box input {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  font-size: var(--font-base) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+body.neo-brutalism .rl-search-box input:focus {
+  border-color: #FF5F1F !important;
+  box-shadow: 3px 3px 0 #FF5F1F !important;
+}
+body.neo-brutalism .rl-search-list {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+body.neo-brutalism .rl-search-item {
+  font-size: var(--font-base) !important;
+  border-bottom: 1px solid #000 !important;
+}
+body.neo-brutalism .rl-search-item:hover {
+  background: #FFDD00 !important;
+  color: #000 !important;
+}
+
+/* ── MATRIZAPP — Chips container ────────────────────────────── */
+body.neo-brutalism .chips-container {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+}
+body.neo-brutalism .chips-list .chipepp {
+  font-size: var(--font-sm) !important;
+}
 </style>
