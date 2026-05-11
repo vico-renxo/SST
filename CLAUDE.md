@@ -946,4 +946,69 @@ while pos < len(content):
 
 ---
 
+### L7 · Neo Brutalism — cobertura completa de módulos en css-modulos.html
+
+**Estado:** El bloque `body.neo-brutalism` en `css-modulos.html` (sección "NEO BRUTALISM — Overrides de módulos específicos", ~línea 5246 en adelante) cubre todos los módulos del proyecto.
+
+**Arquitectura del bloque de overrides:**
+- **css.html** — 56 reglas globales: navbar, sidebar, .btn, .card, .modal-content, table, .badge, .check-chip, .tiktok-card, SweetAlert2
+- **css-modulos.html** — ~650 reglas modulares organizadas por módulo
+
+**Namespaces CSS por módulo (para agregar overrides nuevos):**
+
+| Módulo | Namespace / selector raíz | Clases clave con override |
+|---|---|---|
+| IndexDesvios/Check | `.estado-badge`, `.badge-potencial` | Sí |
+| Asignaciones EPP | `.epp-unified-card`, `.epp-chip`, `.epp-badge-*`, `.firma-modal`, `.panel-pendientes`, `.alerta-modal-grande` | Sí |
+| MovimEpp | `.epp-scope .card-prod`, `.tag-previsto`, `.badge-stocklow`, `.variant-pill` | Sí |
+| EPPMaestro | `.kpi-card`, `.maestro-chip`, `.celda-epp`, `.st-OK/.NOTIF/.ENTR`, `.tooltip-epp` | Sí |
+| MatrizApp | `.chipepp`, `.chip-input` | Sí |
+| EditCheck | `.obs-card-sub` variants, `.obs-photo-box` | Sí |
+| Check/Test | `.obs-thumb-wrapper`, `.ia-section`, `.ia-fortaleza/.oportunidad/.objetivo`, `.ev-score-*` | Sí |
+| PASSO | `.badge-frec`, `.celda-cumple/.falta/.parcial`, `.celda-porcentaje-*`, `.celda-mes/.prog/.vacia`, `.fila-actividad/.gerencia`, `.col-*` | Sí |
+| Eventos | `.ev-card-face`, `.ev-front-content`, `.ev-card-back`, `.ev-more-panel`, `.piramide-container`, `.nivel`, `.bueno/.malo` | Sí |
+| MapaRiesgos | `#riskmaps-module .tiktok-card`, `.map-title-overlay`, `.type-badge`, `.tb-preventivo/.informativo/.restrictivo/.obligatorio`, `.legend-chip/.sidebar`, `.zoom-controls`, `.rm-item` | Sí |
+| Rol | `#rol-module-wrapper .modal-box`, `.shift-card`, `.chip-work/.rest/.vac/.fal/.med/.otr/.per`, `.filter-bar-container`, `.filter-tab`, `.compliance-panel`, `.heatmap-wrapper`, `.tile`, `.t-ok/.warn/.danger/.empty`, `.tab-count` | Sí |
+| Graficosindex | `.chart-container`, `.pronostico-ia-container .card/.header/.btn-*/.status-indicator` | Sí |
+| Capacitaciones | `.rl-kpi-card`, `.rl-topic-bar`, `.radio-label`, `.choice`, `.radio-group-label`, `.codigo-*` | Sí |
+| ReportesLaboral | `.rl-card`, `.rl-panel`, `.rl-table th`, `.rl-tab-btn`, `.rl-badge`, `.rl-search-box`, `.rl-vac-card`, `.rl-worker-card`, `.rl-rank-*`, `.rl-seg-*`, `.rl-progress-*` | Sí |
+| BuscadorCharlas | `.card-charla`, `.charla-header`, `.chip-mes-charla` | Sí |
+| BuscadorCap | `.badge-pct-ok/.med/.low`, `#modalDetalleBox`, `.det-tema-hdr` | Sí |
+| Comunicados | `.com-card`, `.com-badge-tipo`, `.status-pill.activo/.inactivo`, `.com-preview-box` | Sí |
+| IPERC | `#iperc-module-wrapper .card/.badge`, `th` | Sí |
+| Evaluacion | `.star-rating`, `.star`, `.star.selected` | Sí |
+| Asignaciones/Global | `.estado-confirmado/.pendiente/.rechazado`, `.avatar-circle`, `.staff-item` | Sí |
+| Listas/HHT | `#miVista table/th/td/input` | Sí |
+
+**Paleta Neo Brutalism (referencia rápida):**
+- Amarillo activo: `#FFDD00` (texto #000)
+- Naranja alerta: `#FF5F1F` (texto #fff)
+- Negro primary: `#000` (texto #FFDD00)
+- Crema fondo: `#F5F0E8`
+- Borde: `2.5px solid #000`, shadow: `3px 3px 0 #000` (sin blur)
+
+**Regla al agregar nuevo componente:**
+```css
+/* En css-modulos.html, al final del bloque NEO BRUTALISM */
+body.neo-brutalism .mi-nuevo-componente {
+  border-radius: 0 !important;
+  border: 2.5px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+body.neo-brutalism .mi-nuevo-componente.active {
+  background: #FFDD00 !important;
+  color: #000 !important;
+}
+```
+
+**Verificar cobertura:**
+```bash
+# Contar clases con override vs total
+grep -c 'body\.neo-brutalism' /home/user/SST/css-modulos.html
+# Buscar clase específica
+grep 'body\.neo-brutalism.*\.mi-clase' /home/user/SST/css-modulos.html
+```
+
+---
+
 *Fin de CLAUDE.md — Actualizar después de cada cambio estructural.*
