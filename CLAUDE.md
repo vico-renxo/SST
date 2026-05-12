@@ -375,10 +375,12 @@ eventos/accidentes e IPERC.
 
 ### AlertasCode.js — Alertas EPP
 **Responsabilidad:** Detectar EPP vencidos o próximos a vencer.
-**Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP (EppCode.js)
+**Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP, _readMatrizGrid_() (EppCode.js)
 **PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (fallback: Session.getActiveUser().getEmail())
+**Lógica de dedup:** clave = `dni|producto` (sin variante) — una entrega nueva de cualquier variante cancela la anterior del mismo producto.
+**Filtro MATRIZ:** usa `_readMatrizGrid_().byProduct[pb].previstoCargos` para mostrar solo EPPs asignados al cargo del trabajador (col CARGO de REGISTRO). Admin (ADMIN_EMAIL) omite el filtro.
 **Funciones públicas:**
-- `obtenerAlertasVencimientos(dniLogin)` — alertas para un trabajador
+- `obtenerAlertasVencimientos(dniLogin)` — alertas vencidas/próximas filtradas por MATRIZ del cargo
 - `verificarAlertasCompletas(dniLogin)` — resumen tieneVencimientos + tienePendientes
 
 ---
