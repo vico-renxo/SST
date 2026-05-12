@@ -377,11 +377,13 @@ eventos/accidentes e IPERC.
 **Responsabilidad:** Detectar EPP vencidos o próximos a vencer.
 **Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP, _readMatrizGrid_() (EppCode.js)
 **PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (fallback: Session.getActiveUser().getEmail())
-**Algoritmo (cualquier entrega vigente = cubierto):**
-1. Recopila TODAS las entregas por `dni|producto` (sin variante — una variante nueva del mismo producto no es un registro separado).
-2. Por cada producto: si AL MENOS UNA entrega tiene `fechaVenc > hoy` → trabajador cubierto, no hay alerta.
-3. Solo genera alerta si TODAS las entregas del producto están vencidas → usa la más reciente (`sort desc fechaVenc`) como referencia.
-4. `diffDias <= 0` → estado VENCIDO (bg-rojo); `diffDias <= 15` → estado VENCE EN N DÍAS (bg-naranja).
+**Algoritmo (entrega más reciente = estado actual):**
+1. Agrupa por clave `dni|producto` (sin variante — una entrega nueva de cualquier variante cancela la alerta de variantes anteriores).
+2. Por cada producto: toma la entrega MÁS RECIENTE por `fechaEntrega` (col FECHA).
+3. Si esa entrega no tiene `fechaVenc` → cubierto indefinidamente, sin alerta.
+4. Si `fechaVenc > hoy` → cubierto, sin alerta.
+5. `diffDias <= 0` → VENCIDO (bg-rojo); `0 < diffDias <= 15` → VENCE EN N DÍAS (bg-naranja).
+**IMPORTANTE — ADMIN_EMAIL:** usar solo `PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL')`, sin fallback a `Session.getActiveUser().getEmail()`. El fallback haría `esAdmin=true` para todos, bypasseando el filtro por DNI y mostrando EPPs de otros trabajadores.
 **Filtro MATRIZ:** usa `_readMatrizGrid_().byProduct[pb].previstoCargos` para mostrar solo EPPs asignados al cargo del trabajador (col CARGO de REGISTRO). Admin (ADMIN_EMAIL) omite el filtro.
 **Funciones públicas:**
 - `obtenerAlertasVencimientos(dniLogin)` — alertas vencidas/próximas filtradas por MATRIZ del cargo

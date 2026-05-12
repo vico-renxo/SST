@@ -2,21 +2,29 @@
  * Obtiene alertas de vencimiento de EPP para el trabajador logueado.
  *
  * ALGORITMO:
- *   Por cada producto (sin distinguir variante), recopila TODAS las entregas.
- *   - Si ALGUNA tiene vencimiento futuro → el trabajador está cubierto, sin alerta.
- *   - Si TODAS están vencidas → alerta con la fecha más reciente (última expirada).
+ *   Por cada producto (clave = dni|producto, sin variante), toma la entrega
+ *   MÁS RECIENTE (por fecha de entrega).
+ *   - Si esa entrega no tiene fecha de vencimiento → cubierto, sin alerta.
+ *   - Si tiene fecha futura → cubierto, sin alerta.
+ *   - Si está vencida (≤0 días) → VENCIDO.
+ *   - Si vence en ≤15 días → VENCE EN N DÍAS.
+ *
+ * Agrupa por producto SIN variante: una entrega nueva de cualquier variante
+ * del mismo producto cancela la alerta de variantes anteriores.
  *
  * Filtra por MATRIZ: solo productos asignados al cargo actual del trabajador.
- * Admin (ADMIN_EMAIL) omite el filtro de MATRIZ.
+ * Admin (ADMIN_EMAIL en ScriptProperties) omite los filtros de DNI y MATRIZ.
  */
 function obtenerAlertasVencimientos(dniLogin) {
   try {
-    const ss  = getSpreadsheetEPP();
-    const shReg = ss.getSheetByName(SHEPP.REGISTRO);
+    const ss     = getSpreadsheetEPP();
+    const shReg  = ss.getSheetByName(SHEPP.REGISTRO);
     const correoActual = Session.getActiveUser().getEmail();
-    const ADMIN_EMAIL  = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL')
-                         || Session.getActiveUser().getEmail();
-    const esAdmin = (correoActual === ADMIN_EMAIL || !dniLogin);
+
+    // ADMIN_EMAIL solo desde ScriptProperties — sin fallback al correo activo
+    // (el fallback haría esAdmin=true para todos los usuarios)
+    const adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || '';
+    const esAdmin = (adminEmail !== '' && correoActual === adminEmail) || !dniLogin;
 
     const data = shReg.getDataRange().getValues();
     const hoy  = new Date();
@@ -27,10 +35,14 @@ function obtenerAlertasVencimientos(dniLogin) {
     const COL_OP       = IDX.REG.OPERACION - 1;
     const COL_NOMBRES  = IDX.REG.NOMBRES - 1;
     const COL_CARGO    = IDX.REG.CARGO - 1;
+    const COL_FECHA    = IDX.REG.FECHA - 1;
 
-    // PASO 1: Recopilar TODAS las entregas por dni|producto (sin variante)
+    // PASO 1: Por cada dni|producto, quedarse solo con la entrega MÁS RECIENTE
+    // (por fecha de entrega, no por fecha de vencimiento).
+    // Clave sin variante: una entrega nueva de cualquier variante del mismo
+    // producto cancela la alerta de variantes anteriores.
     let cargoDelDni = '';
-    const entregasPorProducto = {}; // clave → [{ fila, fechaVenc }]
+    const ultimasPorProducto = {}; // clave → { fila, fechaEntrega }
 
     for (let i = 1; i < data.length; i++) {
       const fila = data[i];
@@ -41,19 +53,17 @@ function obtenerAlertasVencimientos(dniLogin) {
       const producto = _str(fila[COL_PRODUCTO]);
       if (!producto) continue;
 
-      const clave = dni + '|' + producto;
-
       if (!cargoDelDni && _str(fila[COL_DNI]) === _str(dniLogin)) {
         cargoDelDni = _str(fila[COL_CARGO]).toUpperCase().trim();
       }
 
-      const fechaVencRaw = fila[COL_VENC];
-      if (!fechaVencRaw) continue;
-      const fechaVenc = new Date(fechaVencRaw);
-      if (isNaN(fechaVenc.getTime())) continue;
+      const clave = dni + '|' + producto;
+      const fechaEntrega = new Date(fila[COL_FECHA]);
+      if (isNaN(fechaEntrega.getTime())) continue;
 
-      if (!entregasPorProducto[clave]) entregasPorProducto[clave] = [];
-      entregasPorProducto[clave].push({ fila, fechaVenc });
+      if (!ultimasPorProducto[clave] || fechaEntrega > ultimasPorProducto[clave].fechaEntrega) {
+        ultimasPorProducto[clave] = { fila, fechaEntrega };
+      }
     }
 
     // PASO 2: Construir set de productos en la MATRIZ del cargo
@@ -71,25 +81,21 @@ function obtenerAlertasVencimientos(dniLogin) {
       Logger.log('AlertasVenc — cargo: ' + cargoDelDni + ' | productos en matriz: ' + productosEnMatriz.size);
     }
 
-    // PASO 3: Por cada producto, verificar si hay ALGUNA entrega vigente
+    // PASO 3: Generar alertas solo de la entrega más reciente de cada producto
     const alertas = [];
 
-    for (const clave in entregasPorProducto) {
-      const entregas = entregasPorProducto[clave];
-      if (!entregas.length) continue;
-
-      const producto = _str(entregas[0].fila[COL_PRODUCTO]);
+    for (const clave in ultimasPorProducto) {
+      const { fila } = ultimasPorProducto[clave];
+      const producto = _str(fila[COL_PRODUCTO]);
 
       // Filtro MATRIZ: solo EPPs del cargo actual
       if (productosEnMatriz && !productosEnMatriz.has(producto.trim().toUpperCase())) continue;
 
-      // Si ALGUNA entrega tiene vencimiento futuro → cubierto, sin alerta
-      const tienePlazoVigente = entregas.some(e => e.fechaVenc > hoy);
-      if (tienePlazoVigente) continue;
+      const fechaVencRaw = fila[COL_VENC];
+      if (!fechaVencRaw) continue; // Sin fecha de vencimiento → cubierto indefinidamente
 
-      // Todas vencidas → alerta con la de vencimiento más reciente
-      entregas.sort((a, b) => b.fechaVenc - a.fechaVenc);
-      const { fila, fechaVenc } = entregas[0];
+      const fechaVenc = new Date(fechaVencRaw);
+      if (isNaN(fechaVenc.getTime())) continue;
 
       const diffDias = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
       const fechaFormateada = Utilities.formatDate(fechaVenc, 'GMT-5', 'dd/MM/yyyy');
