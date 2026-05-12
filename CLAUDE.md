@@ -376,7 +376,7 @@ eventos/accidentes e IPERC.
 ### AlertasCode.js — Alertas EPP
 **Responsabilidad:** Detectar EPP vencidos o próximos a vencer.
 **Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP, _readMatrizGrid_() (EppCode.js)
-**PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (fallback: Session.getActiveUser().getEmail())
+**PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (SIN fallback — si no está configurado, ningún usuario es admin por email)
 **Algoritmo (entrega más reciente = estado actual):**
 1. Agrupa por clave `dni|producto` (sin variante — una entrega nueva de cualquier variante cancela la alerta de variantes anteriores).
 2. Por cada producto: toma la entrega MÁS RECIENTE por `fechaEntrega` (col FECHA).
@@ -1045,6 +1045,30 @@ grep -c 'body\.neo-brutalism' /home/user/SST/css-modulos.html
 # Buscar clase específica
 grep 'body\.neo-brutalism.*\.mi-clase' /home/user/SST/css-modulos.html
 ```
+
+---
+
+---
+
+### L8 · AlertasCode — ADMIN_EMAIL nunca debe caer en Session.getActiveUser()
+
+**Bug introducido:** Al "mejorar" `ADMIN_EMAIL = "tu_correo_admin@gmail.com"` (placeholder) por
+`PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || Session.getActiveUser().getEmail()`
+se hizo que `esAdmin = true` para **todos** los usuarios (su correo siempre iguala al fallback de su propia sesión).
+
+**Consecuencias:**
+1. Filtro `if (!esAdmin && fila[COL_DNI] !== dniLogin) continue` se saltaba → se cargaban EPPs de TODOS los trabajadores.
+2. Bloque `if (!esAdmin && cargoDelDni)` no ejecutaba → `productosEnMatriz = null` → sin filtro MATRIZ → EPPs ajenos al cargo aparecían.
+3. El panel de alertas del trabajador mostraba EPPs vencidos de OTROS compañeros como si fueran suyos.
+
+**Patrón correcto (invariable):**
+```javascript
+const adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || '';
+const esAdmin = (adminEmail !== '' && correoActual === adminEmail) || !dniLogin;
+```
+
+**Regla:** En cualquier función que use `esAdmin` para decidir si filtrar por DNI,
+NUNCA hacer fallback del email admin al correo de la sesión activa.
 
 ---
 
