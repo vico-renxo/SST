@@ -1400,7 +1400,7 @@ function getCumplimientoPorTrabajador(search, fechaDesde, fechaHasta) {
     const rawP   = hP.getLastRow() > 1 ? hP.getRange(2, 1, hP.getLastRow()-1, 12).getValues() : [];
     const personal = rawP.filter(r => {
       const est = String(r[11]||'').trim().toUpperCase();
-      return r[1] && (est === 'ACTIVO' || est === 'SI');
+      return r[1] && (est === 'ACTIVO' || est === 'LICENCIA' || est === 'SI');
     }).map(r => ({
       dni:     String(r[1]).trim().replace(/^'/,''),
       nombre:  String(r[2]||'').trim(),
@@ -2454,7 +2454,7 @@ function generarRegistroCap(codigo) {
       var nAct = 0;
       if (hP2.getLastRow() > 1) {
         var ests = hP2.getRange(2, 12, hP2.getLastRow()-1, 1).getDisplayValues();
-        ests.forEach(function(r) { var s = String(r[0]||'').toUpperCase(); if(s==='ACTIVO'||s==='SI') nAct++; });
+        ests.forEach(function(r) { var s = String(r[0]||'').toUpperCase(); if(s==='ACTIVO'||s==='LICENCIA'||s==='SI') nAct++; });
       }
       numTrab = nAct;
     } catch(e4) {}

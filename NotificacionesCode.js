@@ -120,7 +120,7 @@ function notificarATodos(titulo, mensaje) {
     for (let i = 0; i < data.length; i++) {
       const estado = (data[i][11] || '').toString().toUpperCase(); // Col L = estado activo
       const dni = (data[i][1] || '').toString().trim(); // Col B = DNI
-      if (dni && (estado === 'SI' || estado === 'ACTIVO')) {
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI')) {
         dnis.push(dni);
       }
     }
@@ -214,7 +214,7 @@ function obtenerTrabajadoresParaNotificar() {
       const nombre = (data[i][2] || '').toString().trim(); // Col C = Nombre
       const cargo = (data[i][3] || '').toString().trim(); // Col D = Cargo
       const empresa = (data[i][4] || '').toString().trim(); // Col E = Empresa
-      if (dni && (estado === 'SI' || estado === 'ACTIVO')) {
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI')) {
         trabajadores.push({ dni: dni, nombre: nombre, cargo: cargo, empresa: empresa });
       }
     }

@@ -236,6 +236,44 @@ function mostrarFilas3(data) {
         td.classList.add("email-cell");
         td.title = email; // Tooltip
 
+      // --- CONDICIÓN ---
+      } else if (headers3[j] === "CONDICIÓN") {
+        const condMap = {
+          'ACTIVO':                 { bg: '#d4edda', color: '#155724' },
+          'LICENCIA':               { bg: '#cce5ff', color: '#004085' },
+          'SUSPENSIÓN DE LABORES':  { bg: '#fff3cd', color: '#856404' },
+          'POSTULANTE':             { bg: '#e2e3e5', color: '#383d41' },
+          'LIQUIDADO':              { bg: '#f8d7da', color: '#721c24' },
+          'TRASPASO':               { bg: '#e2d9f3', color: '#432874' },
+          'VISITANTE':              { bg: '#d1ecf1', color: '#0c5460'  }
+        };
+        const opciones = Object.keys(condMap);
+        const sel = document.createElement('select');
+        sel.className = 'form-select form-select-sm';
+        sel.style.minWidth = '170px';
+        sel.dataset.id = fila[0]; // ID del usuario (col A)
+        opciones.forEach(op => {
+          const opt = document.createElement('option');
+          opt.value = op;
+          opt.textContent = op;
+          if (op === celda) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        const applyColor = v => {
+          const c = condMap[v] || { bg: '#e2e3e5', color: '#383d41' };
+          sel.style.backgroundColor = c.bg;
+          sel.style.color = c.color;
+          sel.style.fontWeight = '600';
+          sel.style.borderColor = c.color;
+        };
+        applyColor(celda);
+        sel.addEventListener('change', function() {
+          const nuevaCond = this.value;
+          applyColor(nuevaCond);
+          actualizarCondicion(this.dataset.id, nuevaCond, this);
+        });
+        td.appendChild(sel);
+
       // --- AUTORIZADO? ---
       } else if (headers3[j] === "AUTORIZADO?") {
         td.textContent = celda;
@@ -467,6 +505,20 @@ function mostrarFilas3(data) {
   } else {
     google.script.run.withSuccessHandler(callback).withFailureHandler(function(err){ console.error('[GAS Error]', err.message || err); }).actualizarUsuario(valores);
   }
+}
+
+function actualizarCondicion(id, condicion, selectEl) {
+  selectEl.disabled = true;
+  google.script.run
+    .withSuccessHandler(function() {
+      selectEl.disabled = false;
+    })
+    .withFailureHandler(function(err) {
+      selectEl.disabled = false;
+      console.error('[GAS Error]', err.message || err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar la condición.', timer: 3000, showConfirmButton: false });
+    })
+    .actualizarCondicionUsuario(id, condicion);
 }
 
 function eliminarRegistro3(usuario, nombre) {

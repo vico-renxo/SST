@@ -1526,7 +1526,7 @@ function getSupervisoresOperaciones() {
       .filter(r => {
         const estado = String(r[9] || '').trim().toUpperCase();
         const cargo  = String(r[4] || '').trim().toLowerCase();
-        return (estado === 'SI' || estado === 'ACTIVO') && cargo.includes('supervisor');
+        return (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI') && cargo.includes('supervisor');
       })
       .map(r => String(r[0] || '').trim())
       .filter(v => v)

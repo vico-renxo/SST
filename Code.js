@@ -104,26 +104,32 @@ function loginData(obj) {
     const row = data[i];
     const username = (row[1] || "").toString().toLowerCase(); // Col B
     const password = row[13] || ""; // Col N
-    const estado = (row[15] || "").toString().toUpperCase(); // Col P
-    
+    const autorizado = (row[15] || "").toString().toUpperCase(); // Col P
+    const condicion  = (row[11] || "").toString().toUpperCase().trim(); // Col L
+
     // ✅ Para verificación, solo comparar username
-    const isMatch = obj.checkOnly ? 
-      username === obj.username.toString().toLowerCase() : 
+    const isMatch = obj.checkOnly ?
+      username === obj.username.toString().toLowerCase() :
       username + password === id;
-    
+
     if (isMatch) {
+      const bloqueadoPorCondicion = !CONDICIONES_ACCESO.includes(condicion);
+      const bloqueadoPorAutorizado = autorizado === "NO";
+      const bloqueado = bloqueadoPorCondicion || bloqueadoPorAutorizado;
+
       // Si es solo verificación de estado
       if (obj.checkOnly) {
         return {
-          blocked: estado === "NO",  // true solo si está explícitamente bloqueado
+          blocked: bloqueado,
           accesos: row[16] || "",    // Col Q
-          status: estado
+          status: autorizado,
+          condicion: condicion
         };
       }
-      
-      // Si el usuario está bloqueado, no permitir login
-      if (estado === "NO") {
-        return { blocked: true };
+
+      // Bloquear si la condición no permite acceso
+      if (bloqueado) {
+        return { blocked: true, motivo: condicion || 'SIN_CONDICION' };
       }
       
       // Login exitoso - registrar en LOG
@@ -241,6 +247,10 @@ function saveColor(color) {
 //USUARIOS.
 const HOJA = "PERSONAL";
 
+// Condiciones que permiten login y recibir notificaciones
+const CONDICIONES_ACCESO = ['ACTIVO', 'LICENCIA'];
+const CONDICIONES_VALIDAS = ['ACTIVO', 'LICENCIA', 'SUSPENSIÓN DE LABORES', 'POSTULANTE', 'LIQUIDADO', 'TRASPASO', 'VISITANTE'];
+
 function obtenerUsuariosPaginado(offset, limit, filtro = "") {
   const hoja = getSpreadsheetPersonal().getSheetByName(HOJA);
   const ultimaFila = hoja.getLastRow();
@@ -248,7 +258,7 @@ function obtenerUsuariosPaginado(offset, limit, filtro = "") {
   if (ultimaFila < 2) return { headers3: [], filas: [], total: 0 };
 
   const rango = hoja.getRange(1, 1, ultimaFila, 19).getValues();
-  const columnas = [0, 1, 2, 6, 4, 5, 12, 13, 14, 15, 16, 18];
+  const columnas = [0, 1, 2, 6, 4, 5, 11, 12, 13, 14, 15, 16, 18]; // 11=CONDICIÓN (col L)
 
   const headers3 = columnas.map(i => rango[0][i]);
 
@@ -388,6 +398,20 @@ function actualizarUsuario(data) {
 }
 
 
+function actualizarCondicionUsuario(id, condicion) {
+  if (!CONDICIONES_VALIDAS.includes(condicion)) throw new Error('Condición inválida: ' + condicion);
+  const hoja = getSpreadsheetPersonal().getSheetByName(HOJA);
+  const ids = hoja.getRange(2, 1, hoja.getLastRow() - 1, 1).getValues();
+  for (let i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]).trim() === String(id).trim()) {
+      hoja.getRange(i + 2, 12).setValue(condicion); // Col L (1-based)
+      Logger.log('Condición actualizada: id=' + id + ' → ' + condicion);
+      return { ok: true };
+    }
+  }
+  throw new Error('Usuario no encontrado: ' + id);
+}
+
 function eliminarUsuarioPorUsuario(usuario) {
   const hoja = getSpreadsheetPersonal().getSheetByName(HOJA);
   const lastRow = hoja.getLastRow();
@@ -456,7 +480,7 @@ function buscarDatosPorNumero(numero) {
       const estado  = String(row[11] || '').trim().toUpperCase(); // Col L: SI / ACTIVO / CESADO…
       const foto    = String(row[14] || '').trim(); // Col O
       if (nombre) trabajadoresFotos[nombre] = foto;
-      if (nombre && (estado === 'SI' || estado === 'ACTIVO')) trabajadores.push(nombre);
+      if (nombre && CONDICIONES_ACCESO.includes(estado)) trabajadores.push(nombre);
     });
     // Eliminar duplicados manteniendo el orden de aparición
     const seen = new Set();

@@ -155,6 +155,7 @@ eventos/accidentes e IPERC.
 - `obtenerUsuariosPaginado(offset, limit, filtro)` — lista paginada usuarios
 - `agregarUsuario(data)` — crea usuario + email bienvenida + Telegram
 - `actualizarUsuario(data)` — actualiza usuario + Telegram
+- `actualizarCondicionUsuario(id, condicion)` — actualiza col L (condición laboral); valida contra CONDICIONES_VALIDAS
 - `eliminarUsuarioPorUsuario(usuario)` — elimina + Telegram
 - `buscarDatosPorNumero(numero)` — busca por DNI
 - `getTodasLasListas()` — listas maestras con caché 5 min (CacheService, key: listas_globales_v5)
@@ -424,7 +425,7 @@ eventos/accidentes e IPERC.
 | F | 5 | (no mapeado) | — |
 | G | 6 | Cargo | Texto |
 | H-K | 7-10 | (no mapeados) | — |
-| L | 11 | Estado (SI/ACTIVO/CESADO/BAJA) | Texto |
+| L | 11 | Condición laboral | ACTIVO / LICENCIA / SUSPENSIÓN DE LABORES / POSTULANTE / LIQUIDADO / TRASPASO / VISITANTE |
 | M | 12 | Email | Texto |
 | N | 13 | Contraseña | Texto |
 | O | 14 | URL Foto | Texto |
@@ -657,7 +658,13 @@ if (!accesos.includes('CHECK')) { /* sin acceso */ }
 | HHT | index.html router | Horas Hombre Trabajadas |
 
 **Supervisores** — `cargo.includes('SUPERVISOR')` → ven todos los equipos sin filtro de cargo en Check.
-**Estado 'ACTIVO' / 'SI'** — ambos valores válidos en col L de PERSONAL para usuario activo.
+**Condición col L — acceso y notificaciones:**
+- `CONDICIONES_ACCESO = ['ACTIVO', 'LICENCIA']` — definida en Code.js; única fuente de verdad
+- Login bloqueado si col L no está en CONDICIONES_ACCESO O si col P = 'NO'
+- Notificaciones (bulk/broadcast) solo se envían a ACTIVO y LICENCIA
+- Col P (AUTORIZADO SI/NO) se mantiene como segunda barrera de seguridad
+- `actualizarCondicionUsuario(id, condicion)` — escribe col L (col 12, 1-based) desde Usuarios.html
+- `obtenerUsuariosPaginado` retorna col L en index 6 del array de columnas (header "CONDICIÓN")
 **Autorizado 'SI'** — col P de PERSONAL debe ser 'SI' para permitir login.
 
 ---
