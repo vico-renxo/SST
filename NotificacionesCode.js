@@ -114,13 +114,15 @@ function notificarATodos(titulo, mensaje) {
     const lastRow = hoja.getLastRow();
     if (lastRow < 2) return { ok: false, error: 'No hay trabajadores' };
 
-    const data = hoja.getRange(2, 1, lastRow - 1, 12).getValues();
+    const data = hoja.getRange(2, 1, lastRow - 1, 17).getValues(); // hasta col Q (accesos)
     const dnis = [];
 
     for (let i = 0; i < data.length; i++) {
-      const estado = (data[i][11] || '').toString().toUpperCase(); // Col L = estado activo
-      const dni = (data[i][1] || '').toString().trim(); // Col B = DNI
-      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI')) {
+      const estado   = (data[i][11] || '').toString().toUpperCase(); // Col L
+      const accesos  = (data[i][16] || '').toString().toLowerCase(); // Col Q
+      const dni      = (data[i][1]  || '').toString().trim();        // Col B
+      const esTodo   = accesos.includes('todo');
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI' || esTodo)) {
         dnis.push(dni);
       }
     }
@@ -205,16 +207,18 @@ function obtenerTrabajadoresParaNotificar() {
     const lastRow = hoja.getLastRow();
     if (lastRow < 2) return [];
 
-    const data = hoja.getRange(2, 1, lastRow - 1, 12).getValues();
+    const data = hoja.getRange(2, 1, lastRow - 1, 17).getValues(); // hasta col Q (accesos)
     const trabajadores = [];
 
     for (let i = 0; i < data.length; i++) {
-      const estado = (data[i][11] || '').toString().toUpperCase(); // Col L = estado activo
-      const dni = (data[i][1] || '').toString().trim(); // Col B = DNI
-      const nombre = (data[i][2] || '').toString().trim(); // Col C = Nombre
-      const cargo = (data[i][3] || '').toString().trim(); // Col D = Cargo
-      const empresa = (data[i][4] || '').toString().trim(); // Col E = Empresa
-      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI')) {
+      const estado  = (data[i][11] || '').toString().toUpperCase(); // Col L
+      const accesos = (data[i][16] || '').toString().toLowerCase(); // Col Q
+      const dni     = (data[i][1]  || '').toString().trim();        // Col B
+      const nombre  = (data[i][2]  || '').toString().trim();        // Col C
+      const cargo   = (data[i][3]  || '').toString().trim();        // Col D
+      const empresa = (data[i][4]  || '').toString().trim();        // Col E
+      const esTodo  = accesos.includes('todo');
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI' || esTodo)) {
         trabajadores.push({ dni: dni, nombre: nombre, cargo: cargo, empresa: empresa });
       }
     }

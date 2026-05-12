@@ -113,7 +113,11 @@ function loginData(obj) {
       username + password === id;
 
     if (isMatch) {
-      const bloqueadoPorCondicion = !CONDICIONES_ACCESO.includes(condicion);
+      const accesos = (row[16] || '').toString().trim(); // Col Q
+      const esTodo  = accesos.toLowerCase() === 'todo' || accesos.toLowerCase().includes('todo');
+
+      // Excepción: usuarios con acceso "Todo" siempre pueden entrar
+      const bloqueadoPorCondicion = !CONDICIONES_ACCESO.includes(condicion) && !esTodo;
       const bloqueadoPorAutorizado = autorizado === "NO";
       const bloqueado = bloqueadoPorCondicion || bloqueadoPorAutorizado;
 
