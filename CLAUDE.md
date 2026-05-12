@@ -662,11 +662,12 @@ if (!accesos.includes('CHECK')) { /* sin acceso */ }
 - `CONDICIONES_ACCESO = ['ACTIVO', 'LICENCIA']` — definida en Code.js; única fuente de verdad
 - Login bloqueado si col L no está en CONDICIONES_ACCESO O si col P = 'NO'
 - **Excepción "Todo"**: usuarios con col Q (accesos) = `'todo'` (case-insensitive) siempre pueden hacer login y recibir notificaciones, independientemente de col L
-- Notificaciones (bulk/broadcast) solo se envían a ACTIVO, LICENCIA, y accesos='todo'
+- Login bloqueado si col L no está en CONDICIONES_ACCESO O si col P = 'NO'
+- Notificaciones (bulk/broadcast) solo se envían a ACTIVO y LICENCIA — sin excepciones
+- `verificarYEnviarAlertasInspeccion()`: filtra `dnisEnTurno` contra `_getDnisActivos()` antes de enviar push — LIQUIDADO/SUSPENDIDO no reciben aunque estén en el ROL
 - Col P (AUTORIZADO SI/NO) se mantiene como segunda barrera de seguridad
 - `actualizarCondicionUsuario(id, condicion)` — escribe col L (col 12, 1-based) desde Usuarios.html
 - `obtenerUsuariosPaginado` retorna col L en index 6 del array de columnas (header "CONDICIÓN")
-- En `notificarATodos`/`obtenerTrabajadoresParaNotificar`: rango extendido a 17 cols para leer col Q
 **Autorizado 'SI'** — col P de PERSONAL debe ser 'SI' para permitir login.
 
 ---

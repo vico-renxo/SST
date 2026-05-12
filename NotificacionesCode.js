@@ -114,15 +114,13 @@ function notificarATodos(titulo, mensaje) {
     const lastRow = hoja.getLastRow();
     if (lastRow < 2) return { ok: false, error: 'No hay trabajadores' };
 
-    const data = hoja.getRange(2, 1, lastRow - 1, 17).getValues(); // hasta col Q (accesos)
+    const data = hoja.getRange(2, 1, lastRow - 1, 12).getValues();
     const dnis = [];
 
     for (let i = 0; i < data.length; i++) {
-      const estado   = (data[i][11] || '').toString().toUpperCase(); // Col L
-      const accesos  = (data[i][16] || '').toString().toLowerCase(); // Col Q
-      const dni      = (data[i][1]  || '').toString().trim();        // Col B
-      const esTodo   = accesos.includes('todo');
-      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI' || esTodo)) {
+      const estado = (data[i][11] || '').toString().toUpperCase(); // Col L
+      const dni    = (data[i][1]  || '').toString().trim();        // Col B
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA')) {
         dnis.push(dni);
       }
     }
@@ -207,18 +205,16 @@ function obtenerTrabajadoresParaNotificar() {
     const lastRow = hoja.getLastRow();
     if (lastRow < 2) return [];
 
-    const data = hoja.getRange(2, 1, lastRow - 1, 17).getValues(); // hasta col Q (accesos)
+    const data = hoja.getRange(2, 1, lastRow - 1, 12).getValues();
     const trabajadores = [];
 
     for (let i = 0; i < data.length; i++) {
       const estado  = (data[i][11] || '').toString().toUpperCase(); // Col L
-      const accesos = (data[i][16] || '').toString().toLowerCase(); // Col Q
       const dni     = (data[i][1]  || '').toString().trim();        // Col B
       const nombre  = (data[i][2]  || '').toString().trim();        // Col C
       const cargo   = (data[i][3]  || '').toString().trim();        // Col D
       const empresa = (data[i][4]  || '').toString().trim();        // Col E
-      const esTodo  = accesos.includes('todo');
-      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA' || estado === 'SI' || esTodo)) {
+      if (dni && (estado === 'ACTIVO' || estado === 'LICENCIA')) {
         trabajadores.push({ dni: dni, nombre: nombre, cargo: cargo, empresa: empresa });
       }
     }
@@ -533,13 +529,17 @@ function verificarYEnviarAlertasInspeccion() {
       });
     });
 
-    // Enviar push a cada trabajador
+    // Enviar push solo a trabajadores con condición activa en PERSONAL
+    var dnisActivos = _getDnisActivos();
+    var enviados = 0;
     Object.keys(dnisNotificados).forEach(function(dni) {
+      if (!dnisActivos[dni]) return; // LIQUIDADO, SUSPENDIDO, etc. → sin notificación
       var equiposList = dnisNotificados[dni];
       var pushBody = equiposList.length + ' pendiente(s):\n' + equiposList.join('\n');
       enviarPushNotification(dni, 'Pendientes — ADECCO', pushBody, 'inspeccion-alerta');
+      enviados++;
     });
-    Logger.log('Push enviado a ' + Object.keys(dnisNotificados).length + ' trabajadores (por zona)');
+    Logger.log('Push enviado a ' + enviados + ' trabajadores activos (por zona)');
 
     // ── 7. Enviar resumen Telegram al administrador ──────────────────────
     var resultado = enviarTelegram(lineas.join('\n'));
@@ -608,6 +608,21 @@ function _parseDiasFreqInsp(val) {
   if (s.includes('semestral'))                        return 180;
   if (s.includes('anual') || s.includes('yearly'))   return 365;
   return 0;
+}
+
+// ── Set de DNIs con condición activa (ACTIVO / LICENCIA) ────────────────────
+function _getDnisActivos() {
+  var hoja = getSpreadsheetPersonal().getSheetByName('PERSONAL');
+  var lastRow = hoja.getLastRow();
+  if (lastRow < 2) return {};
+  var data = hoja.getRange(2, 1, lastRow - 1, 12).getValues();
+  var set = {};
+  for (var i = 0; i < data.length; i++) {
+    var dni  = String(data[i][1]  || '').trim();
+    var cond = String(data[i][11] || '').trim().toUpperCase();
+    if (dni && (cond === 'ACTIVO' || cond === 'LICENCIA')) set[dni] = true;
+  }
+  return set;
 }
 
 // ── Mapa DNI → cargo (minúscula) desde hoja PERSONAL ───────────────────────
