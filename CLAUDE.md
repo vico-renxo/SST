@@ -377,7 +377,11 @@ eventos/accidentes e IPERC.
 **Responsabilidad:** Detectar EPP vencidos o próximos a vencer.
 **Dependencias:** getSpreadsheetEPP() (EppCode.js), IDX.REG, SHEPP, _readMatrizGrid_() (EppCode.js)
 **PropertiesService:** `ADMIN_EMAIL` — email del administrador para acceso total (fallback: Session.getActiveUser().getEmail())
-**Lógica de dedup:** clave = `dni|producto` (sin variante) — una entrega nueva de cualquier variante cancela la anterior del mismo producto.
+**Algoritmo (cualquier entrega vigente = cubierto):**
+1. Recopila TODAS las entregas por `dni|producto` (sin variante — una variante nueva del mismo producto no es un registro separado).
+2. Por cada producto: si AL MENOS UNA entrega tiene `fechaVenc > hoy` → trabajador cubierto, no hay alerta.
+3. Solo genera alerta si TODAS las entregas del producto están vencidas → usa la más reciente (`sort desc fechaVenc`) como referencia.
+4. `diffDias <= 0` → estado VENCIDO (bg-rojo); `diffDias <= 15` → estado VENCE EN N DÍAS (bg-naranja).
 **Filtro MATRIZ:** usa `_readMatrizGrid_().byProduct[pb].previstoCargos` para mostrar solo EPPs asignados al cargo del trabajador (col CARGO de REGISTRO). Admin (ADMIN_EMAIL) omite el filtro.
 **Funciones públicas:**
 - `obtenerAlertasVencimientos(dniLogin)` — alertas vencidas/próximas filtradas por MATRIZ del cargo
