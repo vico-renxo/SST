@@ -1,10 +1,10 @@
 
-// --- CONSTANTES ---
-const EMPLOYEES_SS_ID = "1SrkbAD8aoLGCCr8oMh0yRp3iiRl0Du4WEpUU88zOCOc";
-const SPREADSHEET_ID = "12h2yVs0NlD3h3zMYl_93o7ohOKzurxcPZXifoTyVigE"; 
+// --- CONSTANTES (IDs centralizados en Code.js SPREADSHEET_IDS) ---
+const EMPLOYEES_SS_ID = "1SrkbAD8aoLGCCr8oMh0yRp3iiRl0Du4WEpUU88zOCOc"; // ROL_EMPLEADOS
+const SPREADSHEET_ID  = "12h2yVs0NlD3h3zMYl_93o7ohOKzurxcPZXifoTyVigE"; // ROL_ALERTAS
 
-// ✅ NUEVAS CONSTANTES PARA GUARDADO JSON
-const FOLDER_DB_ID = "17tKcRGZtUjE0HwosxlGrycFWIJ20aaS8"; // CARPETA ROL DE TURNOS
+// Carpeta Drive para archivos JSON de turnos
+const FOLDER_DB_ID = "17tKcRGZtUjE0HwosxlGrycFWIJ20aaS8";
 const DB_FILENAME = "rol_turnos.json";
 const DEPT_CONFIG_FILENAME = "department_config.json";
 

@@ -49,9 +49,9 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-const API_KEY = 'AIzaSyD5VkYKWnQ4TdBdDFWnK_4D5Q_nXxXU1BM';
-//const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
-const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+const API_KEY = PropertiesService.getScriptProperties().getProperty('GEMINI_KEY') || 'AIzaSyD5VkYKWnQ4TdBdDFWnK_4D5Q_nXxXU1BM';
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+const geminiUrl = `${GEMINI_BASE_URL}gemini-2.5-flash:generateContent?key=${API_KEY}`;
 //let personal = SpreadsheetApp.openById("1X2zQSVpj3HkGptI2n5LdLZi4ikT0vGU2mQCnfah2QhQ")
 const folderIdFirma = '1TzV9UlPupxeRyo7l2Vn2nO9mh64WG_Kv'; //GESTION - FIRMA
 
@@ -60,9 +60,14 @@ function _normText(s) {
   return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
-// Utilitario compartido para llamadas a Gemini — usado por DesvioscCode.js y Graficos.js
-function _callGemini(prompt, generationConfig) {
-  const payload = { contents: [{ parts: [{ text: prompt }] }] };
+// Utilitario centralizado para llamadas a Gemini — ÚNICO punto de llamada, reutilizar siempre.
+// partsOverride: array de parts (para enviar imágenes/archivos junto con texto)
+// modelOverride: nombre del modelo a usar (por defecto gemini-2.5-flash)
+function _callGemini(prompt, generationConfig, partsOverride, modelOverride) {
+  const model = modelOverride || 'gemini-2.5-flash';
+  const url = `${GEMINI_BASE_URL}${model}:generateContent?key=${API_KEY}`;
+  const parts = partsOverride || [{ text: prompt }];
+  const payload = { contents: [{ parts }] };
   if (generationConfig) payload.generationConfig = generationConfig;
   const options = {
     method: 'post',
@@ -70,16 +75,25 @@ function _callGemini(prompt, generationConfig) {
     payload: JSON.stringify(payload),
     muteHttpExceptions: true
   };
-  const response = UrlFetchApp.fetch(geminiUrl, options);
+  const response = UrlFetchApp.fetch(url, options);
   const data = JSON.parse(response.getContentText());
   return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
-// IDs centralizados — usados por múltiples módulos (CheckCode.js, DesvioscCode.js, Graficos.js)
+// IDs centralizados — ÚNICA fuente de verdad para todos los módulos
 const SPREADSHEET_IDS = {
-  graficos: "1J_v47ohrGj8S1XfWUdneH0l7mMTB8auSOEscHZwsM0g",
-  check:    "12KkPwl_gfQCkqS9ZHsp4hS2fFkebgNbszvTDtZELObU",
-  desvios:  "1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE"
+  personal:        "1NDDHlTfWxmObgm8JZu5WAnCECB3gU6e_k7o_sFcMrkw",
+  check:           "12KkPwl_gfQCkqS9ZHsp4hS2fFkebgNbszvTDtZELObU",
+  checkV2:         "1NR4VtBUqO6DkM_rSjNqC8m19-QPjrd_IW1aEmmsUD6U",
+  desvios:         "1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE",
+  graficos:        "1J_v47ohrGj8S1XfWUdneH0l7mMTB8auSOEscHZwsM0g",
+  epp:             "1Mxy5SkDdLy1Ihct844uLq5ZALe-RFarDfWo9j65kBcE",
+  capacitaciones:  "1Ev5_B3jMtjy_xXt13NYBXYwFA-maFAeLSKfiCFIsMQo",
+  rolEmpleados:    "1SrkbAD8aoLGCCr8oMh0yRp3iiRl0Du4WEpUU88zOCOc",
+  rolAlertas:      "12h2yVs0NlD3h3zMYl_93o7ohOKzurxcPZXifoTyVigE",
+  eventos:         "1Xo5HgaHfskg_mkguGTuuR_AcKeQUoRoG--ch-V8KTpw",
+  mapaRiesgos:     "1EfQvY59m1l1SB_GD__CzL-qJQFdbtYzM9Y2q1u2L3cI",
+  iperc:           "1ANw0WcZiDYfZhDTmEazUeBtx7_MyhG9UOnVTJNx-Xjo"
 };
 
 
@@ -307,9 +321,9 @@ function agregarUsuario(data) {
   const columnas = [1, 2, 3, 7, 5, 6, 13, 14, 15, 16, 17, 19];
   const nuevaFila = hoja.getLastRow() + 1;
 
-  columnas.forEach((col, i) => {
-    hoja.getRange(nuevaFila, col).setValue(data[i] || '');
-  });
+  const rowArr = new Array(19).fill('');
+  columnas.forEach((col, i) => { rowArr[col - 1] = data[i] || ''; });
+  hoja.getRange(nuevaFila, 1, 1, 19).setValues([rowArr]);
 
   const usuario = data[1];
   const nombre = data[2];
@@ -382,9 +396,9 @@ function actualizarUsuario(data) {
     const idFila = String(ids[i][0]).trim();
     if (idFila === id) {
       const row = i + 2;
-      columnas.forEach((col, j) => {
-        hoja.getRange(row, col).setValue(data[j]);
-      });
+      const existingRow = hoja.getRange(row, 1, 1, 19).getValues()[0];
+      columnas.forEach((col, j) => { existingRow[col - 1] = data[j]; });
+      hoja.getRange(row, 1, 1, 19).setValues([existingRow]);
       
       // ✅ NOTIFICACIÓN TELEGRAM
       try {
@@ -558,30 +572,7 @@ function buscarDatosPorNumero(numero) {
 }
 
 
-function enviarTelegram(mensaje) {
-  const TOKEN = '8316348321:AAHyx9OczZdtoNuYi8OzPXx868c1tzhhwmc';
-  const CHAT_ID = '6725665354'; // Reemplaza con tu ID numérico
-  const URL = "https://api.telegram.org/bot" + TOKEN + "/sendMessage";
-  
-  const payload = {
-    "chat_id": CHAT_ID,
-    "text": mensaje,
-    "parse_mode": "HTML"
-  };
-  
-  const opciones = {
-    "method": "post",
-    "contentType": "application/json",
-    "payload": JSON.stringify(payload),
-    "muteHttpExceptions": true
-  };
-  
-  try {
-    UrlFetchApp.fetch(URL, opciones);
-  } catch (e) {
-    Logger.log("Error enviando a Telegram: " + e);
-  }
-}
+// enviarTelegram() centralizado en Telegram.js — no duplicar aquí
 
 // ============================================
 // FUNCIÓN: getIncompatibilidadData

@@ -1815,18 +1815,7 @@ Solo responde con el JSON, sin explicaciones ni comentarios adicionales.
     parts.push({ inlineData: { mimeType, data: base64 } });
   }
 
-  const payload = { contents: [{ parts }] };
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-  const options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  };
-
-  const response = UrlFetchApp.fetch(url, options);
-  const data = JSON.parse(response.getContentText());
-  const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const texto = _callGemini(null, null, parts);
 
   const inicio = texto.indexOf("[");
   const fin = texto.lastIndexOf("]");

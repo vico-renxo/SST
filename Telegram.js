@@ -7,9 +7,12 @@
  */
 
 // ========== CONFIGURACIÓN ==========
+// Los valores se leen desde Script Properties (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).
+// Los hardcodeados son fallback temporal — configura las Script Properties y elimínalos.
+const _tgProps = PropertiesService.getScriptProperties();
 const TELEGRAM_CONFIG = {
-  botToken: '8316348321:AAHyx9OczZdtoNuYi8OzPXx868c1tzhhwmc', // Obtén uno con @BotFather
-  chatId: '6725665354',     // Tu ID de chat o grupo
+  botToken: _tgProps.getProperty('TELEGRAM_BOT_TOKEN') || '8316348321:AAHyx9OczZdtoNuYi8OzPXx868c1tzhhwmc',
+  chatId:   _tgProps.getProperty('TELEGRAM_CHAT_ID')   || '6725665354',
   apiUrl: 'https://api.telegram.org/bot'
 };
 

@@ -664,30 +664,9 @@ function geminiAPI3() {
   // Preparar la solicitud solo si hay contenido en concatenatedText
   const cellB4 = sheetANALISIS.getRange('B4'); // Celda donde se mostrará el resultado
   if (concatenatedText) {
-    const payload = {
-      "contents": [
-        {"parts": [
-          { 
-            "text": `${textoAnalisis}, de la siguiente base de datos ${concatenatedText}`
-          }
-        ]}
-      ]
-    };
-
-    const params = {
-      'contentType': 'application/json',
-      'method': 'post',
-      'payload': JSON.stringify(payload)
-    };
-
     try {
-      const response = UrlFetchApp.fetch(geminiUrl, params);
-      const data = JSON.parse(response);
-      const responseText = data.candidates[0].content.parts[0].text;
-
-      // Escribir la respuesta en la hoja "ANALISIS", celda B4
-      cellB4.setValue(responseText);
-
+      const responseText = _callGemini(`${textoAnalisis}, de la siguiente base de datos ${concatenatedText}`);
+      cellB4.setValue(responseText || 'No se obtuvo respuesta.');
     } catch (error) {
       const errorMessage = `Error al obtener el análisis: ${error}`;
       cellB4.setValue(errorMessage);
@@ -731,41 +710,12 @@ function geminiAPI5(concatenatedText) {
 function describirImagen(imageUrl) {
   //Para poder analizar la imagen, necesito la URL directa de la imagen (que generalmente termina en .jpg, .jpeg, .png, .gif, etc.). No funcionará adecuadamente si le entregamos links de diferente formato al mencionado.
   //FUNCIONA, PERO NO ES USADA EN ESTA APLICACIÓN, PUES LOS LINKS QUE SE GENERAN NO TIENEN EL FORMATO DESEADO
-  const apiUrl = geminiUrl;
-  //const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=" + API_KEY;
-  const requestBody = {
-    contents: [
-      {
-        parts: [
-          {
-            inline_data: {
-              mime_type: "image/jpeg", // O el tipo de MIME adecuado para tu imagen
-              data: Utilities.base64Encode(UrlFetchApp.fetch(imageUrl).getBlob().getBytes())
-            }
-          },
-          {
-            text: "Describe la siguiente imagen en detalle. ¿Qué elementos ves? ¿Cuál crees que es el tema principal? Describe el entorno y cualquier otra característica relevante."
-          }
-        ]
-      }
-    ]
-  };
-
-  const options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(requestBody)
-  };
-
   try {
-    const response = UrlFetchApp.fetch(apiUrl, options);
-    const json = JSON.parse(response.getContentText());
-
-    if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts.length > 0) {
-      return json.candidates[0].content.parts[0].text;
-    } else {
-      return "No se pudo obtener una descripción de la imagen.";
-    }
+    const parts = [
+      { inlineData: { mimeType: 'image/jpeg', data: Utilities.base64Encode(UrlFetchApp.fetch(imageUrl).getBlob().getBytes()) } },
+      { text: "Describe la siguiente imagen en detalle. ¿Qué elementos ves? ¿Cuál crees que es el tema principal? Describe el entorno y cualquier otra característica relevante." }
+    ];
+    return _callGemini(null, null, parts) || "No se pudo obtener una descripción de la imagen.";
   } catch (error) {
     Logger.log("Error al analizar la imagen: " + error);
     return "Hubo un error al intentar analizar la imagen.";
@@ -777,40 +727,12 @@ function describirImagen(imageUrl) {
 function describirImagenBase64(base64Image, mimeType) {
   //FUNCIÓN ACTUALMENTE USADA
   //RECIBE UNA IMAGEN CODIFICADA EN BASE64 Y LA DESCRIBE (ENTREGA UN TEXTO COMO SALIDA)
-  const apiUrl = geminiUrl;
-  const requestBody = {
-    contents: [
-      {
-        parts: [
-          {
-            inline_data: {
-              mime_type: mimeType,
-              data: base64Image
-            }
-          },
-          {
-            text: "Analiza las zonas marcadas con anotaciones visuales (flechas, círculos, rectángulos o trazos de colores) en esta imagen. Si no hay anotaciones, analiza toda la imagen. Describe en máximo 200 caracteres las condiciones inseguras observables y sus posibles consecuencias como incidentes, accidentes o impacto ambiental. Sé específico y directo. Sin introducciones."
-          }
-        ]
-      }
-    ]
-  };
-
-  const options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(requestBody)
-  };
-
   try {
-    const response = UrlFetchApp.fetch(geminiUrl, options);
-    const json = JSON.parse(response.getContentText());
-
-    if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts.length > 0) {
-      return json.candidates[0].content.parts[0].text;
-    } else {
-      return "No se pudo obtener una descripción de la imagen.";
-    }
+    const parts = [
+      { inlineData: { mimeType: mimeType, data: base64Image } },
+      { text: "Analiza las zonas marcadas con anotaciones visuales (flechas, círculos, rectángulos o trazos de colores) en esta imagen. Si no hay anotaciones, analiza toda la imagen. Describe en máximo 200 caracteres las condiciones inseguras observables y sus posibles consecuencias como incidentes, accidentes o impacto ambiental. Sé específico y directo. Sin introducciones." }
+    ];
+    return _callGemini(null, null, parts) || "No se pudo obtener una descripción de la imagen.";
   } catch (error) {
     Logger.log("Error al analizar la imagen (base64): " + error);
     return "Hubo un error al intentar analizar la imagen.";

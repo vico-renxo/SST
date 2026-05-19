@@ -6,10 +6,9 @@
 // URL de tu Cloudflare Worker (ACTUALIZAR con tu dominio real)
 const PUSH_WORKER_URL = 'https://viczul.com';
 
-// Token secreto para autenticar llamadas GAS → Worker
-// IMPORTANTE: Configurar el mismo valor como variable de entorno
-// PUSH_AUTH_TOKEN en tu Cloudflare Worker
-const PUSH_AUTH_TOKEN = 'adecco_push_2026_secret_token_xyz123';
+// Token secreto para autenticar llamadas GAS → Worker.
+// Configura PUSH_AUTH_TOKEN en Script Properties. El fallback es temporal.
+const PUSH_AUTH_TOKEN = PropertiesService.getScriptProperties().getProperty('PUSH_AUTH_TOKEN') || 'adecco_push_2026_secret_token_xyz123';
 
 /**
  * Enviar push a UN trabajador por DNI
@@ -248,8 +247,7 @@ function testPushConnection() {
   // Test 2: Enviar push de prueba (POST con auth)
   Logger.log('=== TEST 2: Enviar push con auth ===');
   Logger.log('URL: ' + PUSH_WORKER_URL + '/api/push/send');
-  Logger.log('Token que envío (longitud): ' + PUSH_AUTH_TOKEN.length);
-  Logger.log('Token que envío (primeros 10): ' + PUSH_AUTH_TOKEN.substring(0, 10));
+  Logger.log('Token configurado: ' + (PUSH_AUTH_TOKEN ? 'sí (' + PUSH_AUTH_TOKEN.length + ' chars)' : 'NO'));
   try {
     var payload = {
       token: PUSH_AUTH_TOKEN,

@@ -1680,35 +1680,8 @@ Comentarios:
 Registrado por:
 `;
 
-  const payload = {
-    contents: [{
-      parts: [
-        { text: prompt },
-        {
-          inlineData: {
-            mimeType: mimeType,
-            data: base64
-          }
-        }
-      ]
-    }]
-  };
-
-  const options = {
-    method: 'post',
-    contentType: 'application/json',
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  };
-
-  const response = UrlFetchApp.fetch(geminiUrl, options);
-  const json = JSON.parse(response.getContentText());
-
-  if (json.candidates && json.candidates[0]?.content?.parts?.[0]?.text) {
-    return json.candidates[0].content.parts[0].text;
-  } else {
-    return `⚠️ Error en respuesta de Gemini:\n${JSON.stringify(json)}`;
-  }
+  const parts = [{ text: prompt }, { inlineData: { mimeType: mimeType, data: base64 } }];
+  return _callGemini(null, null, parts) || `⚠️ No se obtuvo respuesta de Gemini.`;
 }
 /**
  * 🔹 Usa Gemini 2.5 Flash para generar preguntas con o sin archivo, con o sin texto adicional.
@@ -1769,19 +1742,7 @@ Devuelve **solo el JSON**, sin explicaciones ni texto fuera del arreglo.
     parts.push({ inlineData: { mimeType, data: base64 } });
   }
 
-  const payload = { contents: [{ parts }] };
-  const options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  };
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-
-  // 🔹 Llamada a Gemini
-  const response = UrlFetchApp.fetch(url, options);
-  const data = JSON.parse(response.getContentText());
-  const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const texto = _callGemini(null, null, parts);
 
   const inicio = texto.indexOf("[");
   const fin = texto.lastIndexOf("]");
