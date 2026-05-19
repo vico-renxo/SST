@@ -31,9 +31,11 @@ eventos/accidentes e IPERC.
 
 ### 1.1 Spreadsheets (IDs reales del código)
 
-| Alias | Descripción | ID |
+Todos los IDs están centralizados en `SPREADSHEET_IDS` de `Code.js` (clave camelCase). Usar siempre esa constante, no hardcodear.
+
+| Alias / clave SPREADSHEET_IDS | Descripción | ID |
 |---|---|---|
-| PERSONAL | Gestión personal / login | 1NDDHlTfWxmObgm8JZu5WAnCECB3gU6e_k7o_sFcMrkw |
+| `personal` | Gestión personal / login | 1NDDHlTfWxmObgm8JZu5WAnCECB3gU6e_k7o_sFcMrkw |
 | CHECK | Inspecciones checklist (main) | 12KkPwl_gfQCkqS9ZHsp4hS2fFkebgNbszvTDtZELObU |
 | CHECK_V2 | Inspecciones checklist (test) | 1NR4VtBUqO6DkM_rSjNqC8m19-QPjrd_IW1aEmmsUD6U |
 | DESVIOS | Desvíos y observaciones | 1eIJfA7dAlkQ1rXcRGC2qSFnvZ-jYIPn8cA_TbUZcWZE |
@@ -134,6 +136,24 @@ eventos/accidentes e IPERC.
     ├── cloudflare-worker.js  # Worker push notifications
     └── worker.js
 ```
+---
+
+## 1.4 Script Properties requeridas (GAS → Configuración → Propiedades de script)
+
+| Clave | Usado por | Descripción |
+|---|---|---|
+| `GEMINI_KEY` | Code.js `API_KEY` | API Key de Google AI Studio |
+| `TELEGRAM_BOT_TOKEN` | Telegram.js `TELEGRAM_CONFIG.botToken` | Token del bot de Telegram |
+| `TELEGRAM_CHAT_ID` | Telegram.js `TELEGRAM_CONFIG.chatId` | ID del chat/grupo de Telegram |
+| `PUSH_AUTH_TOKEN` | NotificacionesCode.js `PUSH_AUTH_TOKEN` | Token de autenticación Cloudflare Worker |
+| `ADMIN_EMAIL` | AlertasCode.js | Email del administrador (sin fallback — ver L8) |
+| `IPERC_SS_ID` | IpercCode.js | Spreadsheet IPERC (override del default) |
+| `IPERC_CONFIG_EMPRESA` | IpercCode.js | Config empresa IPERC |
+| `IPERC_GEMINI_MODELO` | IpercCode.js | Modelo Gemini para análisis IPERC |
+| `DB_FILE_ID_V4` | RolCode.js | Cache del fileId del JSON de turnos en Drive |
+
+**IMPORTANTE:** Mientras las Script Properties no estén configuradas, el sistema usa los valores hardcodeados como fallback. Una vez configuradas las propiedades, los valores hardcodeados se vuelven letra muerta pero no rompen nada.
+
 ---
 
 ## 2. ARQUITECTURA Y MÓDULOS
@@ -571,7 +591,7 @@ google.script.run
   .withFailureHandler(function(err) { console.error('Error:', err.message); })
   .miFuncionBackend(param1, param2);
 ```
-Actualmente 180+ llamadas sin withFailureHandler — agregar siempre al crear nuevas.
+Actualmente todas las 208 cadenas `google.script.run` tienen `withFailureHandler` ✅ — verificado con parser de balance de llaves. Siempre incluir al crear nuevas.
 
 ### 4.2 Caché en backend GAS
 ```javascript
@@ -590,18 +610,25 @@ NO usar: cache manual con timestamp — usar TTL de CacheService.
 
 ### 4.3 Llamada a Gemini API
 ```javascript
-// FUNCIÓN CENTRALIZADA en Code.js
-function _callGemini(prompt, modelOverride) {
-  var model = modelOverride || 'gemini-2.5-flash';
-  var API_KEY = PropertiesService.getScriptProperties().getProperty('GEMINI_KEY') || API_KEY_DEFAULT;
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + API_KEY;
-  var payload = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
-  var resp = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: payload, muteHttpExceptions: true });
-  var data = JSON.parse(resp.getContentText());
-  return data.candidates[0].content.parts[0].text;
-}
+// FUNCIÓN CENTRALIZADA en Code.js — firma actual:
+// prompt:          texto del prompt (null si se usa partsOverride)
+// generationConfig: objeto opcional { temperature, maxOutputTokens, responseMimeType }
+// partsOverride:   array de parts para enviar imágenes/archivos junto con texto
+// modelOverride:   nombre del modelo (por defecto 'gemini-2.5-flash')
+function _callGemini(prompt, generationConfig, partsOverride, modelOverride) { ... }
+
+// Solo texto:
+_callGemini(prompt)
+// Texto + config:
+_callGemini(prompt, { temperature: 0.1, maxOutputTokens: 2048 })
+// Con imagen (inlineData):
+const parts = [{ text: prompt }, { inlineData: { mimeType, data: base64 } }];
+_callGemini(null, null, parts)
+// Modelo custom:
+_callGemini(prompt, null, null, 'gemini-pro')
 ```
 Todos los módulos deben usar _callGemini() — NO reimplementar la llamada HTTP.
+API_KEY se lee desde ScriptProperties clave `GEMINI_KEY` con fallback al valor hardcodeado.
 
 ### 4.4 Envío de correo
 ```javascript
@@ -825,18 +852,23 @@ body.neo-brutalism .mi-nuevo-componente {
 
 ## 10. ANTI-PATRONES DETECTADOS (no reproducir)
 
-| Anti-patrón | Dónde aparece | Correcto |
+| Anti-patrón | Dónde aparece | Estado |
 |---|---|---|
-| `getDropDownarray_v2()` — duplicar con sufijo _v2 | CheckCode.js | Modificar función original |
-| `console.log` en backend GAS | DesvioscCode.js (11 instancias) | Usar Logger.log() |
-| `GmailApp.sendEmail()` mezclado con MailApp | DesvioscCode.js | Usar MailApp |
-| 3 patrones distintos de llamada a Gemini | Varios archivos | Usar _callGemini() |
-| Variables globales como cache | Varios archivos | Usar CacheService |
-| IDs hardcodeados en múltiples archivos | 9 archivos .js | Solo en Code.js |
-| `appendRow()` en loop | ~~CapaciCode.js guardarPreguntasMultiples — CORREGIDO~~ | Batch setValues() |
-| `google.script.run` sin withFailureHandler | 40 archivos HTML | Siempre incluir |
-| Redefine _norm() local | NotificacionesCode.js, CodeMapa.js | Usar global de Code.js |
-| Mezcla Bootstrap 4/5.1/5.3 | Varios HTML | Usar solo 5.3.x |
+| `getDropDownarray_v2()` — duplicar con sufijo _v2 | CheckCode.js | Pendiente |
+| `console.log` en backend GAS | DesvioscCode.js | Pendiente |
+| `GmailApp.sendEmail()` mezclado con MailApp | DesvioscCode.js | Pendiente |
+| Llamadas directas a Gemini API | ~~DesvioscCode, CheckCode, CapaciCode — CORREGIDO~~ | ✅ Resuelto |
+| `enviarTelegram()` duplicada en Code.js | ~~Code.js — ELIMINADA~~ | ✅ Resuelto |
+| Variables globales como cache | Varios archivos | Pendiente |
+| IDs hardcodeados en múltiples archivos | ~~Code.js, RolCode.js, CodeMapa.js — CORREGIDO~~ | ✅ Parcial (ver nota) |
+| `setValue()` individual en loop (`agregarUsuario`, `actualizarUsuario`) | ~~Code.js — CORREGIDO~~ | ✅ Resuelto |
+| `appendRow()` en loop | ~~CapaciCode.js guardarPreguntasMultiples — CORREGIDO~~ | ✅ Resuelto |
+| `google.script.run` sin withFailureHandler | ~~40 archivos~~ — 208 cadenas, TODAS con handler ✅ | ✅ Resuelto |
+| Redefine _norm() local | NotificacionesCode.js, CodeMapa.js | Pendiente |
+| Mezcla Bootstrap 4/5.1/5.3 | Varios HTML | Pendiente |
+| Credenciales hardcodeadas (Gemini, Telegram, Push) | ~~Code.js, Telegram.js, NotificacionesCode.js — CORREGIDO~~ | ✅ Parcial (fallback temporal) |
+
+**Nota IDs parcial:** AlertasCode.js aún tiene `ROL_SS_ID_ALERTAS` hardcodeado; DesvioscCode.js tiene folder IDs de imágenes/PDFs. Migrar cuando se toque esos módulos.
 
 ---
 
@@ -1069,6 +1101,42 @@ const esAdmin = (adminEmail !== '' && correoActual === adminEmail) || !dniLogin;
 
 **Regla:** En cualquier función que use `esAdmin` para decidir si filtrar por DNI,
 NUNCA hacer fallback del email admin al correo de la sesión activa.
+
+---
+
+### L9 · `grep` para withFailureHandler da falsos positivos — usar parser con balance de llaves
+
+**Problema:** El comando estándar de validación:
+```bash
+grep -rn 'google.script.run' /home/user/SST/*.html | grep -v 'withFailureHandler'
+```
+reportó ~180 instancias "sin withFailureHandler". Al investigar con un parser de balance de llaves, se encontró que **todas las 208 cadenas ya tenían el handler**.
+
+**Causa raíz:** El grep detectaba `google.script.run` dentro de un `withSuccessHandler` anidado de otra cadena. El handler de la cadena exterior ya existía pero quedaba fuera del fragmento que grep capturaba, haciendo parecer que faltaba.
+
+**Regla:** Para auditar cobertura de `withFailureHandler`, NO usar grep simple. Usar el parser de balance de llaves o revisar manualmente cadena por cadena. El comando de validación en Sección 11 puede dar falsos positivos con handlers anidados.
+
+**Estado actual (mayo 2026):** 208 cadenas `google.script.run` en 39 archivos HTML — todas con `withFailureHandler` ✅.
+
+---
+
+### L10 · Auditoría de seguridad — cambios implementados (mayo 2026)
+
+**Credenciales movidas a PropertiesService (con fallback temporal):**
+- `Code.js`: `API_KEY` → clave `GEMINI_KEY`
+- `Telegram.js`: `botToken` → `TELEGRAM_BOT_TOKEN`, `chatId` → `TELEGRAM_CHAT_ID`
+- `NotificacionesCode.js`: `PUSH_AUTH_TOKEN` → clave `PUSH_AUTH_TOKEN`
+
+**Pendiente de resolver (decisión de arquitectura):**
+- Contraseñas en texto plano en col N de PERSONAL — migración requiere plan de hashing sin romper logins
+- CORS wildcard `*` en cloudflare-worker.js — cambiar al dominio real de la app
+- Funciones `_asst_*` del asistente de voz — router llama 14 funciones que no existen en ningún archivo
+
+**Deuda técnica conocida no bloqueante:**
+- `AlertasCode.js`: `ROL_SS_ID_ALERTAS` aún hardcodeado
+- `DesvioscCode.js`: folder IDs de imágenes/PDFs aún hardcodeados
+- `_norm()`: aún redefinida en NotificacionesCode.js y CodeMapa.js
+- Caché: módulos EPP, CHECK, Graficos usan variables en memoria en vez de CacheService
 
 ---
 
