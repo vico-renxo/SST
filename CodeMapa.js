@@ -2,11 +2,11 @@
 let cachedMapaRiesgos = null;
 function getSpreadsheetMapaRiesgos() {
   if (!cachedMapaRiesgos) {
-    cachedMapaRiesgos = SpreadsheetApp.openById("1EfQvY59m1l1SB_GD__CzL-qJQFdbtYzM9Y2q1u2L3cI"); // HOJA DE CALCULO MAPA DE RIESGOS
+    cachedMapaRiesgos = SpreadsheetApp.openById(SPREADSHEET_IDS.mapaRiesgos);
   }
   return cachedMapaRiesgos;
 }
- const carpetaIdMapa = '1dwtsWDNfgsYKkSc7wCAILROVQg5uTMwJ'; // CARPETA ICONOS
+const carpetaIdMapa = '1dwtsWDNfgsYKkSc7wCAILROVQg5uTMwJ'; // CARPETA ICONOS
 /***********************
  * CONFIG
  ***********************/
