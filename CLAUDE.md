@@ -182,6 +182,7 @@ Todos los IDs están centralizados en `SPREADSHEET_IDS` de `Code.js` (clave came
 - `getRecordsList()` / `saveRecordsList(records)` — hoja LISTAS
 - `getColor()` / `saveColor(color)` — color personalizado usuario (celda J1 RESUMEN)
 - `enviarTelegram(mensaje)` — envía mensaje a Telegram
+- `invalidarTodasLasCaches()` — invalida caché backend completa: CacheService keys `listas_globales_v5`, `TEMAS_CACHE`, `lista_temas` + llama `_invalidateDesviosCache()`, `_invalidateStockCache_()`, `limpiarCache()`. Retorna `JSON.stringify({ok,ts})`. Llamada desde `forzarRefrescoListas()` (index.html) para sincronizar junto con la limpieza de localStorage frontend.
 - `getIncompatibilidadData(...)` — incompatibilidades paginadas
 - `agregarIncompatibilidad(data)` / `actualizarIncompatibilidad(id, data)` / `eliminarIncompatibilidad(id)`
 

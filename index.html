@@ -1566,26 +1566,51 @@ function cargarListasGlobales() {
 function forzarRefrescoListas() {
   Swal.fire({
     title: '¿Actualizar listas?',
-    text: 'Se recargará la información de trabajadores, áreas y equipos desde el servidor.',
+    text: 'Se limpiará toda la caché (servidor y navegador) y se recargarán trabajadores, áreas, equipos y dropdowns de todos los módulos.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#0d6efd',
     cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Sí, actualizar',
+    confirmButtonText: 'Sí, actualizar todo',
     cancelButtonText: 'Cancelar'
   }).then(function(result) {
-    if (result.isConfirmed) {
-      localStorage.removeItem('listas_estaticas_v1');
-      localStorage.removeItem('listas_dinamicas_v1');
-      cargarListasGlobales();
-      Swal.fire({
-        icon: 'success',
-        title: 'Actualizando...',
-        text: 'Las listas se están recargando desde el servidor.',
-        timer: 2000,
-        showConfirmButton: false
-      });
-    }
+    if (!result.isConfirmed) return;
+    // Limpiar caché frontend — todos los módulos
+    ['listas_estaticas_v1', 'listas_dinamicas_v1', 'stockCache',
+     'iperc_e3', 'iperc_m5', '_cursosOcupados', 'lista_temas_local',
+     'charlaVista', 'prefilledRegistroCurso']
+      .forEach(function(k) { localStorage.removeItem(k); });
+    Swal.fire({
+      icon: 'info',
+      title: 'Limpiando caché...',
+      text: 'Invalidando caché del servidor.',
+      allowOutsideClick: false,
+      showConfirmButton: false
+    });
+    // Invalidar caché backend (GAS CacheService) antes de recargar
+    google.script.run
+      .withSuccessHandler(function() {
+        cargarListasGlobales();
+        Swal.fire({
+          icon: 'success',
+          title: '¡Listo!',
+          text: 'Todas las listas han sido actualizadas desde el servidor.',
+          timer: 2200,
+          showConfirmButton: false
+        });
+      })
+      .withFailureHandler(function(err) {
+        // Aún así recargamos el frontend
+        cargarListasGlobales();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Actualización parcial',
+          text: 'Las listas del navegador fueron limpiadas, pero la caché del servidor no pudo ser invalidada. Reintenta en 5 min.',
+          timer: 3500,
+          showConfirmButton: false
+        });
+      })
+      .invalidarTodasLasCaches();
   });
 }
 

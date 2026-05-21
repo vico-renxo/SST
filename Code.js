@@ -571,6 +571,17 @@ function buscarDatosPorNumero(numero) {
   return listas;
 }
 
+function invalidarTodasLasCaches() {
+  try {
+    const cache = CacheService.getScriptCache();
+    cache.removeAll(['listas_globales_v5', 'TEMAS_CACHE', 'lista_temas']);
+  } catch(e) { Logger.log('invalidarTodasLasCaches — CacheService: ' + e.message); }
+  try { _invalidateDesviosCache(); } catch(e) {}
+  try { _invalidateStockCache_(); } catch(e) {}
+  try { limpiarCache(); } catch(e) {}
+  Logger.log('invalidarTodasLasCaches — completado: ' + new Date().toISOString());
+  return JSON.stringify({ ok: true, ts: Date.now() });
+}
 
 // enviarTelegram() centralizado en Telegram.js — no duplicar aquí
 
