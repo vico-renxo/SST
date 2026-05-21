@@ -337,7 +337,7 @@ Todos los IDs están centralizados en `SPREADSHEET_IDS` de `Code.js` (clave came
 
 ### RolCode.js — Rol de Turnos
 **Responsabilidad:** Gestión de turnos (JSON en Drive), empleados, MOF.
-**Spreadsheets:** ROL_EMPLEADOS (1SrkbAD8aoLGCCr8oMh0yRp3iiRl0Du4WEpUU88zOCOc), ROL_ALERTAS (12h2yVs0NlD3h3zMYl_93o7ohOKzurxcPZXifoTyVigE)
+**Spreadsheets:** `SPREADSHEET_IDS.rolEmpleados` (ROL_EMPLEADOS), `SPREADSHEET_IDS.rolAlertas` (ROL_ALERTAS) — leídos desde Code.js, ya no hardcodeados localmente.
 **Drive:** FOLDER_DB_ID (17tKcRGZtUjE0HwosxlGrycFWIJ20aaS8) — archivos rol_turnos.json, department_config.json
 **PropertiesService:** DB_FILE_ID_V4 — caché del fileId del JSON en Drive
 **Funciones públicas:**
@@ -372,7 +372,7 @@ Todos los IDs están centralizados en `SPREADSHEET_IDS` de `Code.js` (clave came
 **Funciones públicas:**
 - `enviarPushNotification(dni, title, body, tag)` — push a un trabajador
 - `enviarPushBulk(dnis, title, body, tag)` — push a varios
-- `notificarEntregaEPP(...)` / `notificarConfirmacionEPP(...)` / `notificarCapacitacion(...)`
+- `notificarEntregaEPP(...)` / `notificarConfirmacionEPP(...)` / `notificarCapacitacionPush(dnis, tema, fecha)`
 - `notificarATodos(titulo, mensaje)` — push broadcast
 - `verificarYEnviarAlertasInspeccion()` — trigger cada 4h (inspecciones vencidas)
 - `simularAlertasInspeccion()` — diagnóstico sin enviar
@@ -388,6 +388,7 @@ Todos los IDs están centralizados en `SPREADSHEET_IDS` de `Code.js` (clave came
 - `notificarNuevoUsuario(datos)` / `notificarUsuarioActualizado(datos)` / `notificarUsuarioEliminado(usuario)`
 - `notificarDesvio(datos)` / `notificarChecklistCompletado(datos)` / `notificarEvento(datos)`
 - `notificarEPP(datos)` / `notificarLogin(nombre)` / `notificarMapaRiesgos(datos)`
+- `notificarCapacitacionTelegram(datos)` — capacitación programada (renombrada desde `notificarCapacitacion` para evitar colisión con la versión Push de NotificacionesCode.js)
 - `enviarResumenDiario()` — trigger automático 8 AM
 - `testTelegram()` — test de conexión
 
@@ -860,12 +861,18 @@ body.neo-brutalism .mi-nuevo-componente {
 | Llamadas directas a Gemini API | ~~DesvioscCode, CheckCode, CapaciCode — CORREGIDO~~ | ✅ Resuelto |
 | `enviarTelegram()` duplicada en Code.js | ~~Code.js — ELIMINADA~~ | ✅ Resuelto |
 | Variables globales como cache | Varios archivos | Pendiente |
-| IDs hardcodeados en múltiples archivos | ~~Code.js, RolCode.js, CodeMapa.js — CORREGIDO~~ | ✅ Parcial (ver nota) |
+| IDs hardcodeados en múltiples archivos | ~~Code.js, RolCode.js (TODOS), CodeMapa.js — CORREGIDO~~ | ✅ Parcial (ver nota) |
 | `setValue()` individual en loop (`agregarUsuario`, `actualizarUsuario`) | ~~Code.js — CORREGIDO~~ | ✅ Resuelto |
 | `appendRow()` en loop | ~~CapaciCode.js guardarPreguntasMultiples — CORREGIDO~~ | ✅ Resuelto |
 | `google.script.run` sin withFailureHandler | ~~40 archivos~~ — 208 cadenas, TODAS con handler ✅ | ✅ Resuelto |
 | Redefine _norm() local | NotificacionesCode.js, CodeMapa.js | Pendiente |
-| Mezcla Bootstrap 4/5.1/5.3 | Varios HTML | Pendiente |
+| `include()` redefinida en RolCode.js | ~~RolCode.js — ELIMINADA~~ | ✅ Resuelto |
+| Mezcla Bootstrap 4/5.1/5.3 | Bootstrap 5.3.3 consistente en todo el repo | ✅ Resuelto |
+| Mezcla Chart.js 3.9.1 + 4.4.0 + 4.4.4 | ~~Graficosindex, Test — CORREGIDO~~ | ✅ Resuelto (todos en 4.4.4) |
+| Mezcla Font Awesome 6.4.0 vs 6.5.0 | ~~index, Examen, TestCheck — CORREGIDO~~ | ✅ Resuelto (todos en 6.5.0) |
+| SweetAlert2 `@11` flotante sin versión fija | ~~index.html, Examen.html — CORREGIDO~~ | ✅ Resuelto (`@11.14.0` fijo) |
+| `notificarCapacitacion` duplicada con firmas distintas en Telegram.js y NotificacionesCode.js | ~~RENOMBRADAS: `notificarCapacitacionTelegram` y `notificarCapacitacionPush`~~ | ✅ Resuelto |
+| `describirImagen()` muerta (comentario explícito "NO ES USADA") | ~~DesvioscCode.js — ELIMINADA~~ | ✅ Resuelto |
 | Credenciales hardcodeadas (Gemini, Telegram, Push) | ~~Code.js, Telegram.js, NotificacionesCode.js — CORREGIDO~~ | ✅ Parcial (fallback temporal) |
 
 **Nota IDs parcial:** AlertasCode.js aún tiene `ROL_SS_ID_ALERTAS` hardcodeado; DesvioscCode.js tiene folder IDs de imágenes/PDFs. Migrar cuando se toque esos módulos.
@@ -883,8 +890,8 @@ grep -rn 'google.script.run' /home/user/SST/*.html | grep -v 'withFailureHandler
 # 2. No hay console.log en archivos .js backend
 grep -rn 'console\.log' /home/user/SST/*.js
 
-# 3. No hay IDs de Sheets hardcodeados fuera de Code.js
-grep -rn '"1[A-Za-z0-9_-]\{40,\}"' /home/user/SST/*.js | grep -v Code.js | grep -v RolCode.js
+# 3. No hay IDs de Sheets hardcodeados fuera de Code.js (excepción documentada: AlertasCode.ROL_SS_ID_ALERTAS, DesvioscCode folder IDs)
+grep -rn '"1[A-Za-z0-9_-]\{40,\}"' /home/user/SST/*.js | grep -v Code.js
 
 # 4. No hay appendRow en loop
 grep -B5 'appendRow' /home/user/SST/*.js | grep -E 'for|forEach|map|while'
@@ -1137,6 +1144,35 @@ reportó ~180 instancias "sin withFailureHandler". Al investigar con un parser d
 - `DesvioscCode.js`: folder IDs de imágenes/PDFs aún hardcodeados
 - `_norm()`: aún redefinida en NotificacionesCode.js y CodeMapa.js
 - Caché: módulos EPP, CHECK, Graficos usan variables en memoria en vez de CacheService
+
+---
+
+### L11 · Auditoría de consistencia frontend + dead code (mayo 2026)
+
+**Versiones de librerías CDN estandarizadas:**
+- Chart.js: 3.9.1 (Graficosindex) y 4.4.0 (Test) → **4.4.4 unificado**. Verificado sin breaking changes (sin `xAxes`/`yAxes` plural, sin `tooltips:` deprecado).
+- Font Awesome: 6.4.0 (index, Examen, TestCheck) → **6.5.0 unificado** (alineado con Asignaciones).
+- SweetAlert2: `@11` flotante → **`@11.14.0` fijo** (evita updates breaking silenciosos).
+- Bootstrap: 5.3.3 ya consistente en todo el repo ✅.
+
+**Dead code eliminado:**
+- `describirImagen()` en DesvioscCode.js — comentario explícito "FUNCIONA, PERO NO ES USADA EN ESTA APLICACIÓN" + cero callers.
+- `include()` redundante en RolCode.js — ya estaba definida globalmente en Code.js.
+
+**Colisión silenciosa resuelta:**
+- `notificarCapacitacion(datos)` (Telegram.js) y `notificarCapacitacion(dnis, tema, fecha)` (NotificacionesCode.js) tenían el mismo nombre con firmas distintas — en GAS la última definición cargada gana, generando bug latente.
+- Renombradas a `notificarCapacitacionTelegram` y `notificarCapacitacionPush` para que el caller elija explícitamente.
+
+**IDs centralizados completos:**
+- RolCode.js eliminó `EMPLOYEES_SS_ID` y `SPREADSHEET_ID` locales — ahora usa `SPREADSHEET_IDS.rolEmpleados` y `SPREADSHEET_IDS.rolAlertas`.
+
+**Falsos positivos detectados en la auditoría (no requieren acción):**
+- TestCode.js balance de llaves: el conteo crudo da 261/260 pero un parser que excluye strings/comentarios da 208/208 ✅.
+- IpercCode.js: agente reportó "extra braces"; parser real confirma balanceado 92/92 ✅.
+- HTML "huérfanos" (Check.html, EditCheck.html, Evaluacion.html, etc.): no se cargan vía `include()` pero SÍ están referenciados desde el router SPA de index.html (34 referencias para Check.html). Carga dinámica, no son huérfanos.
+- Funciones `_asst_*`: las 14 mencionadas como "no existen" en L10 SÍ existen — están en CapaciCode.js líneas 2735-3213.
+
+**Regla:** los `grep` simples para detectar braces, callers o funciones huérfanas dan muchos falsos positivos. Siempre verificar con parser que excluya strings/comments antes de actuar.
 
 ---
 

@@ -706,24 +706,7 @@ function geminiAPI5(concatenatedText) {
 }
 
 
-// FUNCIÓN 2 -  CAPAZ DE USAR GEMINI PARA ANALIZAR IMÁGENES 
-function describirImagen(imageUrl) {
-  //Para poder analizar la imagen, necesito la URL directa de la imagen (que generalmente termina en .jpg, .jpeg, .png, .gif, etc.). No funcionará adecuadamente si le entregamos links de diferente formato al mencionado.
-  //FUNCIONA, PERO NO ES USADA EN ESTA APLICACIÓN, PUES LOS LINKS QUE SE GENERAN NO TIENEN EL FORMATO DESEADO
-  try {
-    const parts = [
-      { inlineData: { mimeType: 'image/jpeg', data: Utilities.base64Encode(UrlFetchApp.fetch(imageUrl).getBlob().getBytes()) } },
-      { text: "Describe la siguiente imagen en detalle. ¿Qué elementos ves? ¿Cuál crees que es el tema principal? Describe el entorno y cualquier otra característica relevante." }
-    ];
-    return _callGemini(null, null, parts) || "No se pudo obtener una descripción de la imagen.";
-  } catch (error) {
-    Logger.log("Error al analizar la imagen: " + error);
-    return "Hubo un error al intentar analizar la imagen.";
-  }
-}
-
-
-//FUNCIÓN 3 - Analiza una imagen a partir de su contenido en base64 utilizando la API de Gemini y devuelve una descripción.
+// Analiza una imagen a partir de su contenido en base64 utilizando la API de Gemini y devuelve una descripción.
 function describirImagenBase64(base64Image, mimeType) {
   //FUNCIÓN ACTUALMENTE USADA
   //RECIBE UNA IMAGEN CODIFICADA EN BASE64 Y LA DESCRIBE (ENTREGA UN TEXTO COMO SALIDA)

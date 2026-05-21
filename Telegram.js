@@ -233,9 +233,11 @@ ${datos.descripcion ? '📝 <b>Descripción:</b>\n' + datos.descripcion : ''}
 }
 
 /**
- * Notificar capacitación programada
+ * Notificar capacitación programada vía Telegram.
+ * Renombrada desde notificarCapacitacion() para evitar colisión con
+ * NotificacionesCode.js que define una versión Push con firma distinta.
  */
-function notificarCapacitacion(datos) {
+function notificarCapacitacionTelegram(datos) {
   const mensaje = `
 📚 <b>Capacitación Programada</b>
 
@@ -247,7 +249,7 @@ function notificarCapacitacion(datos) {
 
 <i>Sistema BIOX-SIG - Capacitaciones</i>
   `.trim();
-  
+
   return enviarTelegram(mensaje);
 }
 

@@ -1,9 +1,5 @@
 
-// --- CONSTANTES (IDs centralizados en Code.js SPREADSHEET_IDS) ---
-const EMPLOYEES_SS_ID = "1SrkbAD8aoLGCCr8oMh0yRp3iiRl0Du4WEpUU88zOCOc"; // ROL_EMPLEADOS
-const SPREADSHEET_ID  = "12h2yVs0NlD3h3zMYl_93o7ohOKzurxcPZXifoTyVigE"; // ROL_ALERTAS
-
-// Carpeta Drive para archivos JSON de turnos
+// --- CONSTANTES (IDs leídos desde SPREADSHEET_IDS en Code.js) ---
 const FOLDER_DB_ID = "17tKcRGZtUjE0HwosxlGrycFWIJ20aaS8";
 const DB_FILENAME = "rol_turnos.json";
 const DEPT_CONFIG_FILENAME = "department_config.json";
@@ -12,21 +8,18 @@ const DEPT_CONFIG_FILENAME = "department_config.json";
 let cachedEmployeesSheet = null;
 let cachedMainSheet = null;
 
-
-function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
+// `include()` está definida globalmente en Code.js — no redefinir aquí.
 
 function getEmployeesSheet() {
   if (!cachedEmployeesSheet) {
-    cachedEmployeesSheet = SpreadsheetApp.openById(EMPLOYEES_SS_ID);
+    cachedEmployeesSheet = SpreadsheetApp.openById(SPREADSHEET_IDS.rolEmpleados);
   }
   return cachedEmployeesSheet;
 }
 
 function getMainSheet() {
   if (!cachedMainSheet) {
-    cachedMainSheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    cachedMainSheet = SpreadsheetApp.openById(SPREADSHEET_IDS.rolAlertas);
   }
   return cachedMainSheet;
 }
@@ -189,7 +182,7 @@ function saveFullReport(payload) {
 
 function testSpreadsheetAccess() {
   try {
-    var ss = SpreadsheetApp.openById(EMPLOYEES_SS_ID);
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.rolEmpleados);
     Logger.log("✅ Conexión exitosa con: " + ss.getName());
   } catch (e) {
     Logger.log("❌ ERROR de conexión: " + e.toString());
@@ -200,7 +193,7 @@ function testSpreadsheetAccess() {
 function getMOFConfigData() {
   try {
     // Usamos el mismo ID que usas para empleados
-    var ss = SpreadsheetApp.openById(EMPLOYEES_SS_ID); 
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.rolEmpleados); 
     var sheet = ss.getSheetByName("MOF");
     
     if (!sheet) {

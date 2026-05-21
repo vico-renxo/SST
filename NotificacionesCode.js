@@ -96,7 +96,9 @@ function notificarConfirmacionEPP(dniSupervisor, trabajadorNombre, producto, acc
   return enviarPushNotification(dniSupervisor, titulo, cuerpo, 'epp-confirmacion');
 }
 
-function notificarCapacitacion(dnis, tema, fecha) {
+// Renombrada desde notificarCapacitacion() — la versión Telegram (firma (datos))
+// vive en Telegram.js como notificarCapacitacionTelegram. Evita colisión silenciosa.
+function notificarCapacitacionPush(dnis, tema, fecha) {
   const body = fecha
     ? 'Capacitación: ' + tema + ' programada para ' + fecha + '. Revisa tu app.'
     : 'Tienes una capacitación asignada: ' + tema + '. Revisa tu app.';
